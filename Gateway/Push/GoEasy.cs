@@ -19,7 +19,7 @@ namespace SP.StudioCore.Gateway.Push
         /// Common key 既可以发送消息或也可以订阅channel来接收消息
         /// </summary>
         [Description("commonkey")]
-        public string commonkey { get; set; } ;
+        public string commonkey { get; set; }
 
         /// <summary>
         /// 推送地址

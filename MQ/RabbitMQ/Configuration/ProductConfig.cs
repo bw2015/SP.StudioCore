@@ -1,0 +1,25 @@
+using SP.StudioCore.Model;
+
+namespace SP.StudioCore.MQ.RabbitMQ.Configuration
+{
+    public class ProductConfig : ISetting
+    {
+        public ProductConfig(string config) : base(config)
+        {
+        }
+        
+        public static implicit operator ProductConfig(string config)
+        {
+            return config == null ? null : new ProductConfig(config);
+        }
+
+        /// <summary> 交换器名称 </summary>
+        public string ExchangeName { get; set; }
+
+        /// <summary> 路由Key </summary>
+        public string RoutingKey { get; set; }
+
+        /// <summary> 使用确认模式（默认关闭） </summary>
+        public bool UseConfirmModel { get; set; }
+    }
+}

@@ -1,0 +1,208 @@
+﻿using Microsoft.EntityFrameworkCore.Internal;
+using SP.StudioCore.Model;
+using SP.StudioCore.Types;
+using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Linq;
+using System.Text;
+using System.Web;
+
+namespace SP.StudioCore.Array
+{
+    /// <summary>
+    /// 数据扩展
+    /// </summary>
+    public static class ArrayExtendssion
+    {
+        /// <summary>
+        /// 获取参数名
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="args"></param>
+        /// <param name="argName"></param>
+        /// <returns></returns>
+        public static T Get<T>(this string[] args, string argName, T defaultValue)
+        {
+            int index = args.IndexOf(argName);
+            if (index == -1 || args.Length < index + 1) return defaultValue;
+            string value = args[index + 1];
+            return value.GetValue<T>();
+        }
+
+        public static string Get(this string[] args, string argName)
+        {
+            return args.Get(argName, string.Empty);
+        }
+
+        /// <summary>
+        /// 字典转字符串
+        /// </summary>
+        /// <typeparam name="TKey"></typeparam>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public static string ToQueryString<TKey, TValue>(this IEnumerable<KeyValuePair<TKey, TValue>> data)
+        {
+            return string.Join("&", data.Select(t => $"{t.Key}={t.Value}"));
+        }
+
+        /// <summary>
+        /// 字符串转字典
+        /// </summary>
+        public static Dictionary<TKey, TValue> ToDictionary<TKey, TValue>(this string queryString)
+        {
+            NameValueCollection request = HttpUtility.ParseQueryString(queryString ?? string.Empty);
+            Dictionary<TKey, TValue> data = new Dictionary<TKey, TValue>();
+            foreach (string key in request.AllKeys)
+            {
+                TKey tKey = key.GetValue<TKey>();
+                string value = request[key];
+                if (!data.ContainsKey(tKey)) data.Add(tKey, value.GetValue<TValue>());
+            }
+            return data;
+        }
+
+        public static Dictionary<string, string> ToDictionary(this string queryString)
+        {
+            return queryString.ToDictionary<string, string>();
+        }
+
+        /// <summary>
+        /// 把队列转化成为字典（自动覆盖同名Key）
+        /// </summary>
+        /// <typeparam name="TSource"></typeparam>
+        /// <typeparam name="TKey"></typeparam>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="list"></param>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static Dictionary<TKey, TValue> ToDistinctDictionary<TSource, TKey, TValue>(this IEnumerable<TSource> list, Func<TSource, TKey> funKey, Func<TSource, TValue> funValue) where TKey : struct
+        {
+            Dictionary<TKey, TValue> dic = new Dictionary<TKey, TValue>();
+            foreach (TSource item in list)
+            {
+                TKey key = funKey.Invoke(item);
+                TValue value = funValue.Invoke(item);
+                if (dic.ContainsKey(key))
+                {
+                    dic[key] = value;
+                }
+                else
+                {
+                    dic.Add(key, value);
+                }
+            }
+            return dic;
+        }
+
+        public static IEnumerable<KeyValue<TKey, TValue>> ToList<TKey, TValue>(this string queryString)
+        {
+            return queryString.ToDictionary<TKey, TValue>().Select(t => new KeyValue<TKey, TValue>(t.Key, t.Value));
+        }
+
+        public static IEnumerable<KeyValue<string, string>> ToList(this string queryString)
+        {
+            return queryString.ToList<string, string>();
+        }
+
+        /// <summary>
+        /// 获取字段对象的值
+        /// </summary>
+        public static TValue Get<TKey, TValue>(this IDictionary<TKey, TValue> data, TKey key, TValue defaultValue)
+        {
+            if (data.ContainsKey(key)) return data[key];
+            return defaultValue;
+        }
+
+        /// <summary>
+        /// 从字典中获取对象值，如果Key不存在则返回默认值
+        /// </summary>
+        /// <typeparam name="TKey"></typeparam>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="data"></param>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public static TValue Get<TKey, TValue>(this IDictionary<TKey, TValue> data, TKey key)
+        {
+            if (data.ContainsKey(key)) return data[key];
+            return default;
+        }
+
+        /// <summary>
+        /// 乘法积
+        /// </summary>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="list"></param>
+        /// <returns></returns>
+        public static decimal Multiplication(this IEnumerable<decimal> list)
+        {
+            decimal result = decimal.One;
+            foreach (decimal item in list)
+            {
+                result *= item;
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 合并后的输出
+        /// </summary>
+        /// <typeparam name="TKey"></typeparam>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="dic"></param>
+        /// <param name="datas"></param>
+        /// <returns></returns>
+        public static Dictionary<TKey, TValue> Extend<TKey, TValue>(this Dictionary<TKey, TValue> dic, params Dictionary<TKey, TValue>[] datas)
+        {
+            if (datas == null) return dic;
+            foreach (Dictionary<TKey, TValue> data in datas)
+            {
+                if (data == null) continue;
+                foreach (KeyValuePair<TKey, TValue> item in data)
+                {
+                    if (dic.ContainsKey(item.Key))
+                    {
+                        dic[item.Key] = item.Value;
+                    }
+                    else
+                    {
+                        dic.Add(item.Key, item.Value);
+                    }
+                }
+            }
+            return dic;
+        }
+
+        /// <summary>
+        /// 二维数组转一维数组
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="array"></param>
+        /// <returns></returns>
+        public static IEnumerable<T> AsArray<T>(this IEnumerable<T[]> array)
+        {
+            foreach (T[] item in array)
+            {
+                foreach (T t in item)
+                {
+                    yield return t;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 一维数组转二维数组
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="array"></param>
+        /// <param name="keySelector"></param>
+        /// <returns></returns>
+        public static IEnumerable<T[]> AsArray<T, TValue>(this IEnumerable<T> array, Func<T, TValue> keySelector)
+        {
+            return array.GroupBy(keySelector).Select(t => t.ToArray());
+        }
+    }
+}

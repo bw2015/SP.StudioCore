@@ -13,6 +13,6 @@ namespace SP.StudioCore.Mvc
     {
         public BindingSource BindingSource => BindingSource.Form;
 
-        public string Name { get; set; }
+        public string Name { get; set; } 
     }
 }

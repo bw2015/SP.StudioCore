@@ -95,7 +95,7 @@ namespace SP.StudioCore.MQ.RabbitMQ
             }
             catch (Exception e)
             {
-                IocCollection.GetService<ILoggerFactory>().CreateLogger<RabbitConsumer>().LogError(e.ToString(), e);
+                IocCollection.GetService<ILoggerFactory>().CreateLogger<RabbitProduct>().LogError(e.ToString(), e);
                 return false;
             }
             finally
@@ -135,7 +135,7 @@ namespace SP.StudioCore.MQ.RabbitMQ
             }
             catch (Exception e)
             {
-                IocCollection.GetService<ILoggerFactory>().CreateLogger<RabbitConsumer>().LogError(e.ToString(), e);
+                IocCollection.GetService<ILoggerFactory>().CreateLogger<RabbitProduct>().LogError(e.ToString(), e);
                 return false;
             }
             finally

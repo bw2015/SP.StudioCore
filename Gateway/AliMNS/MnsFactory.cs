@@ -11,15 +11,17 @@ namespace SP.StudioCore.Gateway.AliMNS
     /// </summary>
     public class MnsFactory
     {
+
         private string _accessKeyId;
+
         private string _secretAccessKey;
+
         private string _endpoint;
+
         private static IMNS client;
 
 
-        public MnsFactory(string accessKeyId = "LTAI4Fv8hnfMCJ1GzLJB61wn",
-            string secretAccessKey = "mhr2puLfvrWqU3aoMBM5XzlKiUlOLd",
-            string endpoint = "http://1502656352964375.mns.cn-hangzhou.aliyuncs.com/")
+        public MnsFactory(string accessKeyId, string secretAccessKey, string endpoint)
         {
             this._accessKeyId = accessKeyId;
             this._secretAccessKey = secretAccessKey;
@@ -38,7 +40,7 @@ namespace SP.StudioCore.Gateway.AliMNS
         }
 
         /// <summary>
-        /// 
+        /// 创建主题
         /// </summary>
         /// <param name="topicName"></param>
         /// <returns></returns>
@@ -49,6 +51,11 @@ namespace SP.StudioCore.Gateway.AliMNS
             return iMessageMns;
         }
 
+        /// <summary>
+        /// 创建队列
+        /// </summary>
+        /// <param name="topicName"></param>
+        /// <returns></returns>
         public IMessageMns CreateQueue(string topicName)
         {
 
@@ -57,6 +64,6 @@ namespace SP.StudioCore.Gateway.AliMNS
         }
     }
 
- 
+
 
 }

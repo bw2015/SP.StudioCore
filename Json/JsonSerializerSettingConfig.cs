@@ -51,7 +51,7 @@ namespace SP.StudioCore.Json
     {
         public override bool CanConvert(Type objectType)
         {
-            return objectType.IsEnum;
+            return objectType.IsEnum || (objectType.IsGenericType && objectType.GetGenericArguments()[0].IsEnum);
         }
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
@@ -61,6 +61,11 @@ namespace SP.StudioCore.Json
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
+            if (value == null)
+            {
+                writer.WriteRawValue("null");
+                return;
+            }
             bool isFlags = value.GetType().HasAttribute<FlagsAttribute>();
             if (!isFlags)
             {

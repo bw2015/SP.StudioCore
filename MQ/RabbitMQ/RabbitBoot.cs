@@ -7,9 +7,9 @@ namespace SP.StudioCore.MQ.RabbitMQ
     /// <summary>
     /// 模拟IOC的别名单例
     /// </summary>
-    public class RabbitBoot
+    public static class RabbitBoot
     {
-        private static Dictionary<string, IRabbitManager> Items = new();
+        private static readonly Dictionary<string, IRabbitManager> Items = new();
         private static readonly object objLock = new();
 
         /// <summary>
@@ -28,12 +28,14 @@ namespace SP.StudioCore.MQ.RabbitMQ
                 {
                     var configurationDefault = new ConfigurationDefault();
                     RabbitConnect rabbitConnect = configurationDefault["Rabbit:" + connectionConfigName];
-                    ProductConfig productConfig = configurationDefault["Rabbit:Product:" + productConfigName];
+                    string config = configurationDefault["Rabbit:Product:" + productConfigName] ??
+                        $"ExchangeName={productConfigName}&RoutingKey=&UseConfirmModel=true";
+
+                    ProductConfig productConfig = config;
 
                     Items.TryAdd(keyName, new RabbitManager(rabbitConnect, productConfig));
                 }
             }
-
             return Items[keyName];
         }
 

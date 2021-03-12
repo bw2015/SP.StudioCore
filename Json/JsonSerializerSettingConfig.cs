@@ -51,6 +51,7 @@ namespace SP.StudioCore.Json
     {
         public override bool CanConvert(Type objectType)
         {
+            if (objectType == null) return false;
             return objectType.IsEnum || (objectType.IsGenericType && objectType.GetGenericTypeDefinition() == typeof(Nullable<>) && objectType.GetGenericArguments()[0].IsEnum);
         }
 

@@ -20,7 +20,7 @@ namespace SP.StudioCore.MQ
 
             // 打印日志
             IServiceProvider serviceProvider = services.BuildServiceProvider();
-            var logger = serviceProvider.GetService<ILoggerFactory>().CreateLogger<ConsumerStartup>();
+            ILogger<ConsumerStartup> logger = serviceProvider.GetService<ILoggerFactory>().CreateLogger<ConsumerStartup>();
             logger.LogInformation("完成初始化");
 
             var lst = Assembly.GetCallingAssembly().GetTypes()
@@ -30,8 +30,7 @@ namespace SP.StudioCore.MQ
             {
                 foreach (var consumer in lst)
                 {
-                    logger.LogInformation($"正在启动：{consumer.Name}");
-                    RunConsumer(consumer);
+                    RunConsumer(consumer, logger);
                 }
 
                 logger.LogInformation("全部消费启动完成!");
@@ -46,7 +45,7 @@ namespace SP.StudioCore.MQ
         /// 启动消费程序
         /// </summary>
         /// <param name="consumer"></param>
-        private static void RunConsumer(Type consumer)
+        private static void RunConsumer(Type consumer,ILogger<ConsumerStartup> logger)
         {
             // 没有使用consumerAttribute特性的，不启用
             var consumerAttribute = consumer.GetCustomAttribute<ConsumerAttribute>();
@@ -63,6 +62,7 @@ namespace SP.StudioCore.MQ
                     consumerAttribute.RoutingKey);
             }
 
+            logger.LogInformation($"正在启动：{consumer.Name}");
             consumerInstance.Consumer.Start((IListenerMessage) Activator.CreateInstance(consumer));
         }
     }

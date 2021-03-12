@@ -28,14 +28,14 @@ namespace SP.StudioCore.MQ.RabbitMQ
                 {
                     var configurationDefault = new ConfigurationDefault();
                     RabbitConnect rabbitConnect = configurationDefault["Rabbit:" + connectionConfigName];
-                    string config = configurationDefault["Rabbit:Product:" + productConfigName] ??
-                        $"ExchangeName={productConfigName}&RoutingKey=&UseConfirmModel=true";
-
+                    string config = configurationDefault["Rabbit:Product:" + productConfigName];
+                    if (string.IsNullOrWhiteSpace(config)) config = $"ExchangeName={productConfigName}&RoutingKey=&UseConfirmModel=true";
                     ProductConfig productConfig = config;
 
                     Items.TryAdd(keyName, new RabbitManager(rabbitConnect, productConfig));
                 }
             }
+
             return Items[keyName];
         }
 

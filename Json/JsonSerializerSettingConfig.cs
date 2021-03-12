@@ -51,7 +51,7 @@ namespace SP.StudioCore.Json
     {
         public override bool CanConvert(Type objectType)
         {
-            return objectType.IsEnum || (objectType.IsGenericType && objectType.GetGenericArguments()[0].IsEnum);
+            return objectType.IsEnum || (objectType.IsGenericType && objectType.GetGenericTypeDefinition() == typeof(Nullable<>) && objectType.GetGenericArguments()[0].IsEnum);
         }
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)

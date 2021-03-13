@@ -10,7 +10,6 @@ namespace SP.StudioCore.ElasticSearch
     public abstract class EsBase<TAgent, TModel> where TModel : class where TAgent : class
     {
         private readonly string _prefixIndexName;
-        private readonly string _aliasName;
         private readonly int _replicasCount;
         private readonly int _shardsCount;
         private readonly string _splitIndexDateFormat;
@@ -18,6 +17,7 @@ namespace SP.StudioCore.ElasticSearch
         protected readonly ILogger<TAgent> Logger = IocCollection.GetService<ILoggerFactory>().CreateLogger<TAgent>();
         private static readonly Dictionary<string, bool> IndexCache = new();
         protected string IndexName => $"{_prefixIndexName}_{DateTime.Now.ToString(_splitIndexDateFormat)}";
+        protected readonly string AliasName;
 
         /// <summary>
         /// ES基类
@@ -30,7 +30,7 @@ namespace SP.StudioCore.ElasticSearch
         public EsBase(string prefixIndexName, string aliasName, int replicasCount = 0, int shardsCount = 3, string splitIndexDateFormat = "yyyy_MM")
         {
             _prefixIndexName = prefixIndexName;
-            _aliasName = aliasName;
+            AliasName = aliasName;
             _replicasCount = replicasCount;
             _shardsCount = shardsCount;
             _splitIndexDateFormat = splitIndexDateFormat;
@@ -71,7 +71,7 @@ namespace SP.StudioCore.ElasticSearch
         {
             var rsp = Client.Indices.Create(IndexName, c => c
                 .Map<TModel>(m => m.AutoMap())
-                .Aliases(des => des.Alias(_aliasName)).Settings(s => s.NumberOfReplicas(_replicasCount).NumberOfShards(_shardsCount))
+                .Aliases(des => des.Alias(AliasName)).Settings(s => s.NumberOfReplicas(_replicasCount).NumberOfShards(_shardsCount))
             );
             return rsp.IsValid;
         }

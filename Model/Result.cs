@@ -317,6 +317,14 @@ namespace SP.StudioCore.Model
                             task = context.Response.Body.WriteAsync(gzipData, 0, gzipData.Length);
                             context.Response.Body.Close();
                             break;
+                        case ContentType.Redirect:
+                            context.Response.StatusCode = 301;
+                            string url = (string)this.Info;
+                            if (!string.IsNullOrEmpty(url))
+                            {
+                                context.Response.Redirect(url);
+                            }
+                            break;
                     }
                 }
             }
@@ -379,6 +387,11 @@ namespace SP.StudioCore.Model
         /// PDF文档
         /// </summary>
         [Description("application/pdf")]
-        PDF = 113
+        PDF = 113,
+        /// <summary>
+        /// 301跳转
+        /// </summary>
+        [Description("Redirect")]
+        Redirect = 114
     }
 }

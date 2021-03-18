@@ -14,12 +14,17 @@ namespace SP.StudioCore.API.Wallets.Responses
         /// <summary>
         /// 是否成功
         /// </summary>
-        private readonly bool? Success;
+        public readonly bool? Success;
 
         /// <summary>
         /// 附带信息
         /// </summary>
-        public string Message { get; private set; }
+        public string Message { get; }
+        
+        /// <summary>
+        /// http响应报文
+        /// </summary>
+        public string ResponseBody { get; }
 
         /// <summary>
         /// 发生异常导致失败
@@ -35,6 +40,7 @@ namespace SP.StudioCore.API.Wallets.Responses
         /// <param name="json"></param>
         public WalletResponseBase(string json)
         {
+            this.ResponseBody = json;
             JObject info = JObject.Parse(json);
             this.Success = info.Get<int>("success") == 1;
             this.Message = info.Get<string>("msg");

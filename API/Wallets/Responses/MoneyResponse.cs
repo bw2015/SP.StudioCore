@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using SP.StudioCore.API.Wallets.Requests;
 
 namespace SP.StudioCore.API.Wallets.Responses
 {
@@ -10,18 +11,23 @@ namespace SP.StudioCore.API.Wallets.Responses
     /// </summary>
     public class MoneyResponse : WalletResponseBase
     {
-        public MoneyResponse() : base()
+        public MoneyResponse(MoneyRequest request, long duration, Exception ex) : base(duration, ex)
         {
-
+            Request = request;
         }
 
-        public MoneyResponse(string json) : base(json)
+        public MoneyResponse(MoneyRequest request, string json, long duration) : base(json, duration)
         {
+            Request = request;
         }
+
+        /// <summary>
+        /// 请求报文
+        /// </summary>
+        public MoneyRequest Request { get; }
 
         protected override void Construction(JObject info)
         {
-            
         }
     }
 }

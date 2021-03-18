@@ -7,11 +7,10 @@ namespace SP.StudioCore.API.Wallets.Requests
     /// <summary>
     /// 请求加减款接口
     /// </summary>
-    public class MoneyRequest : WalletRequestlBase
+    public class MoneyRequest : WalletRequestBase
     {
-        public MoneyRequest(string secretKey) : base(secretKey)
+        public MoneyRequest(string secretKey, string url) : base(secretKey, url)
         {
-
         }
 
         public override string Action => "Money";

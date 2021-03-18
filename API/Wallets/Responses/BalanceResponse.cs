@@ -4,6 +4,7 @@ using SP.StudioCore.Json;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using SP.StudioCore.API.Wallets.Requests;
 
 namespace SP.StudioCore.API.Wallets.Responses
 {
@@ -14,13 +15,21 @@ namespace SP.StudioCore.API.Wallets.Responses
         /// </summary>
         public decimal? Balance { get; private set; }
 
-        public BalanceResponse(string json) : base(json)
+        public BalanceResponse(BalanceRequest request, long duration, Exception ex) : base(duration, ex)
         {
+            Request = request;
+        }
+        
+        public BalanceResponse(BalanceRequest request, string json, long duration) : base(json, duration)
+        {
+            Request = request;
         }
 
-        public BalanceResponse() : base()
-        {
-        }
+
+        /// <summary>
+        /// 请求报文
+        /// </summary>
+        public BalanceRequest Request { get; }
 
         protected override void Construction(JObject info)
         {

@@ -16,17 +16,23 @@ namespace SP.StudioCore.API.Wallets.Requests
     /// <summary>
     /// 收到查询请求的实现类
     /// </summary>
-    public abstract class WalletRequestlBase
+    public abstract class WalletRequestBase
     {
+        public WalletRequestBase(string secretKey, string url)
+        {
+            this.SecretKey = secretKey;
+            Url            = url;
+        }
+
+        /// <summary>
+        /// 请求地址
+        /// </summary>
+        public string Url { get; }
+
         /// <summary>
         /// 密钥
         /// </summary>
-        public readonly string SecretKey;
-
-        public WalletRequestlBase(string secretKey)
-        {
-            this.SecretKey = secretKey;
-        }
+        public string SecretKey { get; }
 
         /// <summary>
         /// 动作名称
@@ -34,22 +40,25 @@ namespace SP.StudioCore.API.Wallets.Requests
         public abstract string Action { get; }
 
         /// <summary>
+        /// 请求参数
+        /// </summary>
+        public string PostData => this.ToString();
+
+        /// <summary>
         /// 时间戳（毫秒)
         /// </summary>
-        public virtual long Timestamp => WebAgent.GetTimestamps();
+        public long Timestamp => WebAgent.GetTimestamps();
 
         /// <summary>
         /// 当前通信所使用的语种
         /// </summary>
-        [Ignore]
-        public Language Language { get; set; }
+        [Ignore] public Language Language { get; set; }
 
         /// <summary>
         /// 扩展数据
         /// 目的1：记录日志的时候可以标记用户ID、商户ID等本实体类没有的信息
         /// </summary>
-        [Ignore]
-        public object ExtendData { get; set; }
+        [Ignore] public object ExtendData { get; set; }
 
         /// <summary>
         /// 查询提交的JSON内容
@@ -57,10 +66,10 @@ namespace SP.StudioCore.API.Wallets.Requests
         /// <returns></returns>
         public override string ToString()
         {
-            SortedDictionary<string, string> dic = new SortedDictionary<string, string>
+            var dic = new SortedDictionary<string, string>
             {
-                { "Action", this.Action },
-                { "Timestamp", this.Timestamp.ToString() }
+                {"Action", this.Action},
+                {"Timestamp", this.Timestamp.ToString()}
             };
             foreach (PropertyInfo property in this.GetType().GetProperties().Where(t => !t.HasAttribute<IgnoreAttribute>()))
             {
@@ -69,6 +78,7 @@ namespace SP.StudioCore.API.Wallets.Requests
                     dic.Add(property.Name, property.GetValue(this).ToString());
                 }
             }
+
             string signStr = dic.ToQueryString() + this.SecretKey;
             dic.Add("Sign", Encryption.toMD5(signStr));
             return dic.ToJson();

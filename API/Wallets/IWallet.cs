@@ -14,29 +14,25 @@ namespace SP.StudioCore.API.Wallets
     /// </summary>
     public interface IWallet
     {
-
         /// <summary>
         /// 获取余额
         /// </summary>
-        /// <param name="url">请求地址</param>
         /// <param name="request">请求内容</param>
         /// <returns>返回null表示网络请求失败或者程序异常</returns>
-        BalanceResponse GetBalance(string url, BalanceRequest request);
+        BalanceResponse GetBalance(BalanceRequest request);
 
         /// <summary>
         /// 操作资金
         /// </summary>
-        /// <param name="url">请求地址</param>
         /// <param name="request">请求内容</param>
         /// <returns>是否操作成功，返回null表示异常</returns>
-        MoneyResponse ExecuteMoney(string url, MoneyRequest request);
+        MoneyResponse ExecuteMoney(MoneyRequest request);
 
         /// <summary>
         /// 查询资金记录
         /// </summary>
-        /// <param name="url"></param>
         /// <param name="request"></param>
         /// <returns></returns>
-        QueryResponse Query(string url, QueryRequest request);
+        QueryResponse Query(QueryRequest request);
     }
 }

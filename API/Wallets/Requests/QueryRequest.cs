@@ -7,9 +7,9 @@ namespace SP.StudioCore.API.Wallets.Requests
     /// <summary>
     /// 查询资金是否操作成功
     /// </summary>
-    public class QueryRequest : WalletRequestlBase
+    public class QueryRequest : WalletRequestBase
     {
-        public QueryRequest(string secretKey) : base(secretKey)
+        public QueryRequest(string secretKey, string url) : base(secretKey, url)
         {
         }
 

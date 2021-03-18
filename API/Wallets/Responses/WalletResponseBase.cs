@@ -14,7 +14,7 @@ namespace SP.StudioCore.API.Wallets.Responses
         /// <summary>
         /// 是否成功
         /// </summary>
-        public readonly bool? Success;
+        public bool? Success;
 
         /// <summary>
         /// 附带信息

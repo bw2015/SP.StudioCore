@@ -16,11 +16,15 @@ namespace SP.StudioCore.Security
         /// <param name="str"></param>
         /// <param name="encoding">默认UTF-8</param>
         /// <returns>默认大写</returns>
-        public static string toMD5(string input, Encoding encoding = null)
+        public static string toMD5(string input, Encoding encoding = null, int length = 32)
         {
             if (encoding == null) encoding = Encoding.UTF8;
-            return toMD5(encoding.GetBytes(input ?? string.Empty));
+            string md5 = toMD5(encoding.GetBytes(input ?? string.Empty));
+            if (length == 32) return md5;
+            return md5.Substring(0, length);
         }
+
+
 
         /// <summary>
         /// 获取一个二进制流的MD5值（大寫）

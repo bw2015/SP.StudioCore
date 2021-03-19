@@ -19,6 +19,7 @@ using SP.StudioCore.API.Translates;
 using Nest;
 using Result = SP.StudioCore.Model.Result;
 using Language = SP.StudioCore.Enums.Language;
+using System.Linq.Expressions;
 
 namespace SP.StudioCore.Mvc
 {
@@ -455,15 +456,13 @@ namespace SP.StudioCore.Mvc
                     json = query.Select(converter).ToJson();
                 }
             }
-            _ = sb.Append("{")
-              .AppendFormat("\"RecordCount\":{0},", list.Count())
-              .AppendFormat("\"PageIndex\":{0},", pageindex)
-              .AppendFormat("\"PageSize\":{0},", pagesize)
-              .AppendFormat("\"data\":{0}", data == null ? "null" : data.ToJson())
-              .AppendFormat(",\"list\":{0}", json)
-              .Append("}");
-
-            return GetResultContent(sb.ToString());
+            return this.GetResultContent(string.Concat("{",
+                $"\"RecordCount\":{ list.Count() },",
+                $"\"PageIndex\":{this.PageIndex},",
+                $"\"PageSize\":{this.PageSize},",
+                $"\"data\":{ (data == null ? "null" : data.ToJson()) },",
+                $"\"list\":{json}",
+                "}"));
         }
 
         /// <summary>
@@ -480,9 +479,9 @@ namespace SP.StudioCore.Mvc
         protected virtual string GetResultContent<T, TOutput>(IOrderedQueryable<T> list, Func<T, TOutput> converter = null, object data = null, Action<IEnumerable<T>> action = null) where TOutput : class
         {
             if (converter == null) converter = t => t as TOutput;
-            StringBuilder sb = new StringBuilder();
-            string json = null;
+            string json = string.Empty;
             IEnumerable<T> query;
+            int recordCount = list.Count();
             if (this.PageIndex == 1)
             {
                 query = list.Take(this.PageSize).ToArray();
@@ -507,15 +506,13 @@ namespace SP.StudioCore.Mvc
                     json = query.Select(converter).ToJson();
                 }
             }
-            _ = sb.Append("{")
-                .AppendFormat("\"RecordCount\":{0},", list.Count())
-                .AppendFormat("\"PageIndex\":{0},", this.PageIndex)
-                .AppendFormat("\"PageSize\":{0},", this.PageSize)
-                .AppendFormat("\"data\":{0}", data == null ? "null" : data.ToJson())
-                .AppendFormat(",\"list\":{0}", json)
-                .Append("}");
-
-            return sb.ToString();
+            return string.Concat("{",
+                $"\"RecordCount\":{ recordCount },",
+                $"\"PageIndex\":{this.PageIndex},",
+                $"\"PageSize\":{this.PageSize},",
+                $"\"data\":{ (data == null ? "null" : data.ToJson()) },",
+                $"\"list\":{json}",
+                "}");
         }
 
         /// <summary>
@@ -528,6 +525,40 @@ namespace SP.StudioCore.Mvc
         {
             string resultData = this.GetResultContent(list, converter, data, action);
             return this.GetResultContent(resultData);
+        }
+
+
+        /// <summary>
+        /// 数据库内找出主键，然后去缓存内找出实体类的方法
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="TKey"></typeparam>
+        /// <typeparam name="TOutput"></typeparam>
+        /// <param name="list"></param>
+        /// <param name="field"></param>
+        /// <param name="convert">批量查找的缓存方法</param>
+        /// <returns></returns>
+        protected virtual Result GetResultList<T, TKey, TOutput>(IOrderedQueryable<T> list, Expression<Func<T, TKey>> selector, Func<IEnumerable<TKey>, IEnumerable<TOutput>> convert)
+        {
+            int recordCount = list.Count();
+            IQueryable<TKey> query;
+            if (this.PageIndex == 1)
+            {
+                query = list.Take(this.PageSize).Select(selector);
+            }
+            else
+            {
+                query = list.Skip((this.PageIndex - 1) * this.PageSize).Take(this.PageSize).Select(selector);
+            }
+
+            string json = convert(query).ToJson();
+
+            return GetResultContent(string.Concat("{",
+               $"\"RecordCount\":{ recordCount },",
+               $"\"PageIndex\":{this.PageIndex},",
+               $"\"PageSize\":{this.PageSize},",
+               $"\"list\":{json}",
+               "}"));
         }
 
         /// <summary>

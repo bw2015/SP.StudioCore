@@ -1,8 +1,6 @@
 ﻿using SP.StudioCore.API.Wallets.Requests;
 using SP.StudioCore.API.Wallets.Responses;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace SP.StudioCore.API.Wallets
 {
@@ -15,19 +13,10 @@ namespace SP.StudioCore.API.Wallets
         {
         }
 
-        public MoneyResponse ExecuteMoney(string url, MoneyRequest request)
-        {
-            throw new NotImplementedException();
-        }
+        public BalanceResponse GetBalance(BalanceRequest request) => throw new NotImplementedException();
 
-        public BalanceResponse GetBalance(string url, BalanceRequest request)
-        {
-            throw new NotImplementedException();
-        }
+        public MoneyResponse ExecuteMoney(MoneyRequest request) => throw new NotImplementedException();
 
-        public QueryResponse Query(string url, QueryRequest request)
-        {
-            throw new NotImplementedException();
-        }
+        public QueryResponse Query(QueryRequest request) => throw new NotImplementedException();
     }
 }

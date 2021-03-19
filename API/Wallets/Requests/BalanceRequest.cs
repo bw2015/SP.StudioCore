@@ -7,9 +7,9 @@ namespace SP.StudioCore.API.Wallets.Requests
     /// <summary>
     /// 请求余额查询
     /// </summary>
-    public class BalanceRequest : WalletRequestlBase
+    public class BalanceRequest : WalletRequestBase
     {
-        public BalanceRequest(string secretKey) : base(secretKey)
+        public BalanceRequest(string secretKey, string url) : base(secretKey,url)
         {
         }
 

@@ -5,11 +5,8 @@ using SP.StudioCore.Net;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Microsoft.Extensions.DependencyInjection;
-using SP.StudioCore.API.Wallets.Logs;
 using System.Diagnostics;
 using SP.StudioCore.Web;
-using SP.StudioCore.Json;
 
 namespace SP.StudioCore.API.Wallets
 {
@@ -28,120 +25,69 @@ namespace SP.StudioCore.API.Wallets
         /// </summary>
         private IWalletQuery WalletQuery => IocCollection.GetService<IWalletQuery>();
 
-        protected virtual string GetPostData(MoneyRequest request)
-        {
-            return request.ToString();
-        }
-
-        protected virtual string GetPostData(BalanceRequest request)
-        {
-            return request.ToString();
-        }
-
         /// <summary>
         /// 执行资金操作
         /// </summary>
-        /// <param name="url"></param>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        public virtual MoneyResponse ExecuteMoney(string url, MoneyRequest request)
+        public virtual MoneyResponse ExecuteMoney(MoneyRequest request)
         {
-            WalletLog log = default;
-            string postData = this.GetPostData(request);
-            string result = string.Empty;
-            Stopwatch sw = new Stopwatch();
+            var sw = new Stopwatch();
             sw.Start();
-            // 是否发生了异常
-            bool isException = false;
             try
             {
-                result = NetAgent.UploadData(url, postData, Encoding.UTF8, null, new Dictionary<string, string>()
+                var result = NetAgent.UploadData(request.Url, request.PostData, Encoding.UTF8, null, new Dictionary<string, string>()
                 {
-                    {"Content-Type","application/json" },
-                    {"Content-Language",request.Language.ToString() },
-                    {"X-Forwarded-IP",IPAgent.IP }
+                    {"Content-Type", "application/json"},
+                    {"Content-Language", request.Language.ToString()},
+                    {"X-Forwarded-IP", IPAgent.IP}
                 });
-                MoneyResponse response = new MoneyResponse(result);
-                log = new WalletLog(request.Action, response, url, postData, result, sw.ElapsedMilliseconds, request.ExtendData);
-                isException = (bool?)response == null;
-                return response;
+
+                return new MoneyResponse(request, result, sw.ElapsedMilliseconds);
             }
             catch (Exception ex)
             {
-                log = new WalletLog(request.Action, null, url, postData, new { ex.Message, Result = result }.ToJson(), sw.ElapsedMilliseconds, request.ExtendData);
-                isException = true;
-                return new MoneyResponse();
-            }
-            finally
-            {
-                if (this.WalletLog != null)
-                {
-                    this.WalletLog.SaveLog(log);
-                }
-                if (isException && this.WalletQuery != null)
-                {
-                    this.WalletQuery.SaveException(url, request);
-                }
+                return new MoneyResponse(request, sw.ElapsedMilliseconds, ex);
             }
         }
 
-        public virtual BalanceResponse GetBalance(string url, BalanceRequest request)
+        public virtual BalanceResponse GetBalance(BalanceRequest request)
         {
-            WalletLog log = default;
-            string postData = this.GetPostData(request);
-            string result = string.Empty;
-            Stopwatch sw = new Stopwatch();
+            var sw = new Stopwatch();
             sw.Start();
             try
             {
-                result = NetAgent.UploadData(url, postData, Encoding.UTF8, null, new Dictionary<string, string>()
+                var result = NetAgent.UploadData(request.Url, request.PostData, Encoding.UTF8, null, new Dictionary<string, string>()
                 {
-                    {"Content-Type","application/json" },
-                    {"Content-Language",request.Language.ToString() },
-                    {"X-Forwarded-IP",IPAgent.IP }
+                    {"Content-Type", "application/json"},
+                    {"Content-Language", request.Language.ToString()},
+                    {"X-Forwarded-IP", IPAgent.IP}
                 });
-                BalanceResponse response = new BalanceResponse(result);
-                log = new WalletLog(request.Action, response, url, postData, result, sw.ElapsedMilliseconds, request.ExtendData);
-                return response;
+
+                return new BalanceResponse(request, result, sw.ElapsedMilliseconds);
             }
             catch (Exception ex)
             {
-                log = new WalletLog(request.Action, false, url, postData, ex.Message + "\n" + result, sw.ElapsedMilliseconds, request.ExtendData);
-                return new BalanceResponse();
-            }
-            finally
-            {
-                if (WalletLog != null) WalletLog.SaveLog(log);
+                return new BalanceResponse(request, sw.ElapsedMilliseconds, ex);
             }
         }
 
-        public virtual QueryResponse Query(string url, QueryRequest request)
+        public virtual QueryResponse Query(QueryRequest request)
         {
-            WalletLog log = default;
-            string postData = request.ToString();
-            string result = string.Empty;
-            Stopwatch sw = new Stopwatch();
+            var sw = new Stopwatch();
             sw.Start();
 
             try
             {
-                result = NetAgent.UploadData(url, request.ToString(), Encoding.UTF8, null, new Dictionary<string, string>()
+                var result = NetAgent.UploadData(request.Url, request.PostData, Encoding.UTF8, null, new Dictionary<string, string>()
                 {
-                    {"Content-Type","application/json" },
-                    {"Content-Language",request.Language.ToString() }
+                    {"Content-Type", "application/json"},
+                    {"Content-Language", request.Language.ToString()}
                 });
-                QueryResponse response = new QueryResponse(result);
-                log = new WalletLog(request.Action, response, url, postData, result, sw.ElapsedMilliseconds, request.ExtendData);
-                return response;
+
+                return new QueryResponse(request, result, sw.ElapsedMilliseconds);
             }
             catch (Exception ex)
             {
-                log = new WalletLog(request.Action, false, url, postData, ex.Message + "\n" + result, sw.ElapsedMilliseconds, request.ExtendData);
-                return new QueryResponse();
-            }
-            finally
-            {
-                if (WalletLog != null) WalletLog.SaveLog(log);
+                return new QueryResponse(request, sw.ElapsedMilliseconds, ex);
             }
         }
     }

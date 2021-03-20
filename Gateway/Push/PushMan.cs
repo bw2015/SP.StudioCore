@@ -28,18 +28,30 @@ namespace SP.StudioCore.Gateway.Push
         {
         }
 
+        private Pusher pusher;
+
         /// <summary>
         /// 发送至单个频道
         /// </summary>
         public override bool Send(object message, params string[] channels)
         {
             if (message == null || channels.Length == 0) return false;
-            PusherOptions options = new PusherOptions
+            PusherOptions options = new()
             {
                 Cluster = this.cluster,
                 Encrypted = true
             };
-            Pusher pusher = new Pusher(this.app_id, this.key, this.secret, options);
+            if (pusher == null)
+            {
+                pusher = new Pusher(this.app_id, this.key, this.secret, options);
+            }
+            if (message.GetType() == typeof(string))
+            {
+                message = new
+                {
+                    message = (string)message
+                };
+            }
             string eventname = "*";
             bool success = true;
             Task<ITriggerResult> result = pusher.TriggerAsync(channels, eventname, message);

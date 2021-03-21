@@ -18,7 +18,7 @@ namespace SP.StudioCore.API.Wallets.Requests
     /// </summary>
     public abstract class WalletRequestBase
     {
-        public WalletRequestBase(string secretKey, string url)
+        protected WalletRequestBase(string secretKey, string url)
         {
             this.SecretKey = secretKey;
             Url            = url;
@@ -49,6 +49,11 @@ namespace SP.StudioCore.API.Wallets.Requests
         /// </summary>
         public long Timestamp => WebAgent.GetTimestamps();
 
+        /// <summary>
+        /// 请求时间
+        /// </summary>
+        public DateTime RequestAt { get; set; }
+        
         /// <summary>
         /// 当前通信所使用的语种
         /// </summary>

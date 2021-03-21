@@ -12,12 +12,12 @@ namespace SP.StudioCore.API.Wallets.Responses
     /// </summary>
     public class QueryResponse : WalletResponseBase
     {
-        public QueryResponse(QueryRequest request, long duration, Exception ex) : base(duration, ex)
+        public QueryResponse(QueryRequest request, int duration, Exception ex) : base(duration, ex)
         {
             Request = request;
         }
 
-        public QueryResponse(QueryRequest request, string json, long duration) : base(json,duration)
+        public QueryResponse(QueryRequest request, string json, int duration) : base(json,duration)
         {
             Request = request;
         }

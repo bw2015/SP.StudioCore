@@ -11,12 +11,12 @@ namespace SP.StudioCore.API.Wallets.Responses
     /// </summary>
     public class MoneyResponse : WalletResponseBase
     {
-        public MoneyResponse(MoneyRequest request, long duration, Exception ex) : base(duration, ex)
+        public MoneyResponse(MoneyRequest request, int duration, Exception ex) : base(duration, ex)
         {
             Request = request;
         }
 
-        public MoneyResponse(MoneyRequest request, string json, long duration) : base(json, duration)
+        public MoneyResponse(MoneyRequest request, string json, int duration) : base(json, duration)
         {
             Request = request;
         }

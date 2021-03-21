@@ -1,10 +1,7 @@
 ﻿using Newtonsoft.Json.Linq;
 using SP.StudioCore.Json;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using Nest;
-using SP.StudioCore.API.Wallets.Requests;
 
 namespace SP.StudioCore.API.Wallets.Responses
 {
@@ -16,12 +13,12 @@ namespace SP.StudioCore.API.Wallets.Responses
         /// <summary>
         /// 是否成功
         /// </summary>
-        public bool? Success;
+        public bool Success;
 
         /// <summary>
         /// 异常信息
         /// </summary>
-        public Exception Ex;
+        public Exception Ex { get; }
 
         /// <summary>
         /// 附带信息
@@ -36,7 +33,7 @@ namespace SP.StudioCore.API.Wallets.Responses
         /// <summary>
         /// 执行耗时
         /// </summary>
-        public long Duration { get; }
+        public int Duration { get; }
 
         /// <summary>
         /// 扩展数据
@@ -47,28 +44,26 @@ namespace SP.StudioCore.API.Wallets.Responses
         /// <summary>
         /// 发生异常导致失败
         /// </summary>
-        public WalletResponseBase(long duration, Exception ex)
+        protected WalletResponseBase(int duration, Exception ex)
         {
-            this.Success  = null;
+            this.Success  = false;
             this.Ex       = ex;
             this.Duration = duration;
-            Message       = ex.Message;
+            this.Message       = ex.Message;
         }
 
         /// <summary>
         /// 返回内容的Json赋值
         /// </summary>
-        /// <param name="json"></param>
-        /// <param name="duration"> </param>
-        public WalletResponseBase(string json, long duration)
+        protected WalletResponseBase(string json, int duration)
         {
             this.Duration     = duration;
             this.ResponseBody = json;
-
+            this.Ex           = null;
             JObject info = JObject.Parse(json);
             this.Success = info.Get<int>("success") == 1;
             this.Message = info.Get<string>("msg");
-            if (this.Success.GetValueOrDefault() && info["info"] != null && info["info"].HasValues && info["info"].Type == JTokenType.Object)
+            if (this.Success && info["info"] != null && info["info"].HasValues && info["info"].Type == JTokenType.Object)
             {
                 this.Construction((JObject) info["info"]);
             }
@@ -77,7 +72,6 @@ namespace SP.StudioCore.API.Wallets.Responses
         /// <summary>
         /// info返回内容的赋值操作构造
         /// </summary>
-        /// <param name="info"></param>
         protected abstract void Construction(JObject info);
 
         public static implicit operator bool?(WalletResponseBase response)

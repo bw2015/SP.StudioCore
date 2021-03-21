@@ -1,6 +1,5 @@
 ﻿using SP.StudioCore.API.Wallets.Requests;
 using SP.StudioCore.API.Wallets.Responses;
-using SP.StudioCore.Ioc;
 using SP.StudioCore.Net;
 using System;
 using System.Collections.Generic;
@@ -16,16 +15,6 @@ namespace SP.StudioCore.API.Wallets
     public class HttpWallet : IWallet
     {
         /// <summary>
-        /// 日志操作对象
-        /// </summary>
-        private IWalletLog WalletLog => IocCollection.GetService<IWalletLog>();
-
-        /// <summary>
-        /// 异常处理
-        /// </summary>
-        private IWalletQuery WalletQuery => IocCollection.GetService<IWalletQuery>();
-
-        /// <summary>
         /// 执行资金操作
         /// </summary>
         public virtual MoneyResponse ExecuteMoney(MoneyRequest request)
@@ -34,6 +23,7 @@ namespace SP.StudioCore.API.Wallets
             sw.Start();
             try
             {
+                request.RequestAt = DateTime.Now;
                 var result = NetAgent.UploadData(request.Url, request.PostData, Encoding.UTF8, null, new Dictionary<string, string>()
                 {
                     {"Content-Type", "application/json"},
@@ -41,11 +31,11 @@ namespace SP.StudioCore.API.Wallets
                     {"X-Forwarded-IP", IPAgent.IP}
                 });
 
-                return new MoneyResponse(request, result, sw.ElapsedMilliseconds);
+                return new MoneyResponse(request, result, (int)sw.ElapsedMilliseconds);
             }
             catch (Exception ex)
             {
-                return new MoneyResponse(request, sw.ElapsedMilliseconds, ex);
+                return new MoneyResponse(request, (int)sw.ElapsedMilliseconds, ex);
             }
         }
 
@@ -55,6 +45,7 @@ namespace SP.StudioCore.API.Wallets
             sw.Start();
             try
             {
+                request.RequestAt = DateTime.Now;
                 var result = NetAgent.UploadData(request.Url, request.PostData, Encoding.UTF8, null, new Dictionary<string, string>()
                 {
                     {"Content-Type", "application/json"},
@@ -62,11 +53,11 @@ namespace SP.StudioCore.API.Wallets
                     {"X-Forwarded-IP", IPAgent.IP}
                 });
 
-                return new BalanceResponse(request, result, sw.ElapsedMilliseconds);
+                return new BalanceResponse(request, result, (int)sw.ElapsedMilliseconds);
             }
             catch (Exception ex)
             {
-                return new BalanceResponse(request, sw.ElapsedMilliseconds, ex);
+                return new BalanceResponse(request, (int)sw.ElapsedMilliseconds, ex);
             }
         }
 
@@ -77,17 +68,18 @@ namespace SP.StudioCore.API.Wallets
 
             try
             {
+                request.RequestAt = DateTime.Now;
                 var result = NetAgent.UploadData(request.Url, request.PostData, Encoding.UTF8, null, new Dictionary<string, string>()
                 {
                     {"Content-Type", "application/json"},
                     {"Content-Language", request.Language.ToString()}
                 });
 
-                return new QueryResponse(request, result, sw.ElapsedMilliseconds);
+                return new QueryResponse(request, result, (int)sw.ElapsedMilliseconds);
             }
             catch (Exception ex)
             {
-                return new QueryResponse(request, sw.ElapsedMilliseconds, ex);
+                return new QueryResponse(request, (int)sw.ElapsedMilliseconds, ex);
             }
         }
     }

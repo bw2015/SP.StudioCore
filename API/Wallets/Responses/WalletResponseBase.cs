@@ -23,7 +23,7 @@ namespace SP.StudioCore.API.Wallets.Responses
         /// <summary>
         /// 附带信息
         /// </summary>
-        public string Message { get; }
+        public string Message { get; set; }
 
         /// <summary>
         /// http响应报文

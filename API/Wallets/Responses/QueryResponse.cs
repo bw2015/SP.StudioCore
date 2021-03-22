@@ -12,12 +12,7 @@ namespace SP.StudioCore.API.Wallets.Responses
     /// </summary>
     public class QueryResponse : WalletResponseBase
     {
-        public QueryResponse(QueryRequest request, int duration, Exception ex) : base(duration, ex)
-        {
-            Request = request;
-        }
-
-        public QueryResponse(QueryRequest request, string json, int duration) : base(json,duration)
+        public QueryResponse(QueryRequest request, string json, int duration, bool isException = false) : base(json, duration, isException)
         {
             Request = request;
         }
@@ -30,12 +25,31 @@ namespace SP.StudioCore.API.Wallets.Responses
         /// <summary>
         /// 是否存在该笔资金记录
         /// </summary>
-        public bool? Exists { get; private set; }
+        public bool Exists { get; private set; }
+
+        /// <summary>
+        /// 商户是有实现了该API
+        /// </summary>
+        public bool SiteHaveApi { get; private set; }
 
         protected override void Construction(JObject info)
         {
             if (info == null) return;
-            this.Exists = info.Get<int>("Exists") == 1;
+
+            var exists = info.Get<string>("Exists") ?? "";
+            switch (exists)
+            {
+                case "0":
+                    SiteHaveApi = true;
+                    Exists      = false;
+                    break;
+                case "1":
+                    SiteHaveApi = true;
+                    Exists      = true;
+                    break;
+            }
+
+            //this.Exists = info.Get<int>("Exists") == 1;
         }
     }
 }

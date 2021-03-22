@@ -15,12 +15,7 @@ namespace SP.StudioCore.API.Wallets.Responses
         /// </summary>
         public decimal? Balance { get; private set; }
 
-        public BalanceResponse(BalanceRequest request, int duration, Exception ex) : base(duration, ex)
-        {
-            Request = request;
-        }
-        
-        public BalanceResponse(BalanceRequest request, string json, int duration) : base(json, duration)
+        public BalanceResponse(BalanceRequest request, string json, int duration, bool isException = false) : base(json, duration, isException)
         {
             Request = request;
         }

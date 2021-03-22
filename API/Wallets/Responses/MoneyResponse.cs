@@ -11,12 +11,7 @@ namespace SP.StudioCore.API.Wallets.Responses
     /// </summary>
     public class MoneyResponse : WalletResponseBase
     {
-        public MoneyResponse(MoneyRequest request, int duration, Exception ex) : base(duration, ex)
-        {
-            Request = request;
-        }
-
-        public MoneyResponse(MoneyRequest request, string json, int duration) : base(json, duration)
+        public MoneyResponse(MoneyRequest request, string json, int duration, bool isException = false) : base(json, duration, isException)
         {
             Request = request;
         }
@@ -25,6 +20,11 @@ namespace SP.StudioCore.API.Wallets.Responses
         /// 请求报文
         /// </summary>
         public MoneyRequest Request { get; }
+        
+        /// <summary>
+        /// 是否允许重试
+        /// </summary>
+        public bool CanRetry { get; set; }
 
         protected override void Construction(JObject info)
         {

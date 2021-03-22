@@ -31,11 +31,11 @@ namespace SP.StudioCore.API.Wallets
                     {"X-Forwarded-IP", IPAgent.IP}
                 });
 
-                return new MoneyResponse(request, result, (int)sw.ElapsedMilliseconds);
+                return new MoneyResponse(request, result, (int) sw.ElapsedMilliseconds);
             }
             catch (Exception ex)
             {
-                return new MoneyResponse(request, (int)sw.ElapsedMilliseconds, ex);
+                return new MoneyResponse(request, ex.Message, (int) sw.ElapsedMilliseconds, true);
             }
         }
 
@@ -53,11 +53,11 @@ namespace SP.StudioCore.API.Wallets
                     {"X-Forwarded-IP", IPAgent.IP}
                 });
 
-                return new BalanceResponse(request, result, (int)sw.ElapsedMilliseconds);
+                return new BalanceResponse(request, result, (int) sw.ElapsedMilliseconds);
             }
             catch (Exception ex)
             {
-                return new BalanceResponse(request, (int)sw.ElapsedMilliseconds, ex);
+                return new BalanceResponse(request, ex.Message, (int) sw.ElapsedMilliseconds, true);
             }
         }
 
@@ -75,11 +75,11 @@ namespace SP.StudioCore.API.Wallets
                     {"Content-Language", request.Language.ToString()}
                 });
 
-                return new QueryResponse(request, result, (int)sw.ElapsedMilliseconds);
+                return new QueryResponse(request, result, (int) sw.ElapsedMilliseconds);
             }
             catch (Exception ex)
             {
-                return new QueryResponse(request, (int)sw.ElapsedMilliseconds, ex);
+                return new QueryResponse(request, ex.Message, (int) sw.ElapsedMilliseconds, true);
             }
         }
     }

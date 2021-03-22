@@ -322,8 +322,9 @@ namespace SP.StudioCore.Model
                             string url = (string)this.Info;
                             if (!string.IsNullOrEmpty(url))
                             {
-                                context.Response.Redirect(url);
+                                context.Response.Headers.Add("Location", url);
                             }
+                            return context.Response.WriteAsync(string.Empty);
                             break;
                     }
                 }

@@ -41,7 +41,7 @@ namespace SP.StudioCore.Gateway.Push
             if (channel.Length == 0) channel = this.Channel.Split(',');
             foreach (string id in channel)
             {
-                string data = string.Format("chat_id={0}&text={1}", id, HttpUtility.UrlEncode(message.ToString()));
+                string data = string.Format("chat_id={0}&text={1}&parse_mode=HTML", id, HttpUtility.UrlEncode(message.ToString()));
                 NetAgent.UploadData(url, data, Encoding.UTF8);
             }
             return true;

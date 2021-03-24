@@ -20,12 +20,12 @@ namespace SP.StudioCore.API
         /// <summary>
         /// 图片上传路径
         /// </summary>
-        private static string uploadUrl;
+        private static string uploadUrl { get; set; }
 
         /// <summary>
         /// 图片服务器
         /// </summary>
-        public readonly static string imgServer;
+        public static string imgServer { get; private set; }
 
         static APIAgent()
         {
@@ -36,6 +36,16 @@ namespace SP.StudioCore.API
 
             uploadUrl = config["studio:uploadUrl"];
             imgServer = config["studio:imgServer"];
+        }
+
+        /// <summary>
+        /// 从外部设定
+        /// </summary>
+        public static void Set(string _imgServer, string _uploadUrl)
+        {
+            if (!string.IsNullOrEmpty(_imgServer)) imgServer = _imgServer;
+            if (!string.IsNullOrEmpty(_uploadUrl)) uploadUrl = _uploadUrl;
+
         }
 
         /// <summary>
@@ -68,8 +78,8 @@ namespace SP.StudioCore.API
             if (string.IsNullOrEmpty(uploadUrl)) return new Result(false, "未配置上传路径");
             if (!System.Uri.IsWellFormedUriString(url, UriKind.Absolute)) return new Result(false, "资源路径非法");
             byte[] data = NetAgent.DownloadFile(url);
-            if(data == null) return new Result(false, "下载文件失败");
-            
+            if (data == null) return new Result(false, "下载文件失败");
+
             Dictionary<string, string> header = new Dictionary<string, string>();
             if (!string.IsNullOrEmpty(type)) header.Add("x-type", type);
             string result = NetAgent.UploadData(uploadUrl, data, Encoding.UTF8, null, header);

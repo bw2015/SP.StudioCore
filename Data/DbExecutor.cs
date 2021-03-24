@@ -46,20 +46,12 @@ namespace SP.StudioCore.Data
         /// <returns></returns>
         private IDbConnection CreateDbConnection(string connectionString)
         {
-            IDbConnection conn = null;
-            switch (this.DBType)
+            return this.DBType switch
             {
-                case DatabaseType.SqlServer:
-                    conn = new SqlConnection(connectionString);
-                    break;
-                case DatabaseType.MySql:
-                    conn = new MySqlConnection(connectionString);
-                    break;
-                case DatabaseType.SQLite:
-
-                    break;
-            }
-            return conn;
+                DatabaseType.SqlServer => new SqlConnection(connectionString),
+                DatabaseType.MySql => new MySqlConnection(connectionString),
+                _ => throw new NotSupportedException($"暂不支持数据库类型 { this.DBType }")
+            };
         }
 
         /// <summary>

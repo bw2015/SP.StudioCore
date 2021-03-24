@@ -139,6 +139,36 @@ namespace SP.StudioCore.Web
         }
 
         /// <summary>
+        /// IP转化成为int32格式
+        /// </summary>
+        /// <param name="ip"></param>
+        /// <returns></returns>
+        public static int IPToInt(this string ipv4)
+        {
+            string[] ipSlices = ipv4.Split('.');
+            int result = 0;
+            for (int i = 0; i < ipSlices.Length; i++)
+            {
+                // 将 ip 的每一段解析为 int，并根据位置左移 8 位
+                int intSlice = int.Parse(ipSlices[i]) << 8 * i;
+                // 求或
+                result |= intSlice;
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// int32转化成为IPV4格式
+        /// </summary>
+        /// <param name="ipv4"></param>
+        /// <returns></returns>
+        public static string IntToIPv4(this int ipv4)
+        {
+            byte[] bs = BitConverter.GetBytes(ipv4);
+            return $"{ bs[3] }.{ bs[2] }.{ bs[1] }.{ bs[0] }";
+        }
+
+        /// <summary>
         /// 判断IP是否在网段范围内
         /// </summary>
         /// <param name="ip"></param>

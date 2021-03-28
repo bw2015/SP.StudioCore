@@ -83,10 +83,13 @@ namespace SP.StudioCore.Web
             return ip;
         }
 
+
+
         /// <summary>
         /// 本地缓存库
         /// </summary>
-        private static Dictionary<string, CityInfo> addressCache = new Dictionary<string, CityInfo>();
+        private static readonly Dictionary<string, CityInfo> addressCache = new Dictionary<string, CityInfo>();
+
         public static CityInfo GetAddress(string ip)
         {
             if (!regex.IsMatch(ip) || ip == NO_IP) return ip ?? string.Empty;
@@ -94,11 +97,25 @@ namespace SP.StudioCore.Web
             lock (addressCache)
             {
                 if (!File.Exists(IPDATA_PATH)) return new CityInfo(); ;
-                City db = new City(IPDATA_PATH);
+                City db = new(IPDATA_PATH);
                 CityInfo info = db.findInfo(ip, "CN");
                 if (!addressCache.ContainsKey(ip)) addressCache.Add(ip, info);
                 return info;
             }
+        }
+
+        /// <summary>
+        /// 批量查询IP地址
+        /// </summary>
+        /// <param name="iplist"></param>
+        public static Dictionary<string, string> GetAddress(string[] iplist)
+        {
+            Dictionary<string, string> data = new Dictionary<string, string>();
+            foreach (string ip in iplist.Distinct())
+            {
+                data.Add(ip, GetAddress(ip));
+            }
+            return data;
         }
 
         /// <summary>

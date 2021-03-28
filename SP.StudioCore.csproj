@@ -21,6 +21,9 @@
     <EmbeddedResource Remove="Tools\**" />
     <None Remove="Ipdb\**" />
     <None Remove="Tools\**" />
+    <None Update="ipipfree.ipdb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Properties\domain.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

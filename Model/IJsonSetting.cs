@@ -18,12 +18,16 @@ namespace SP.StudioCore.Model
 
         public IJsonSetting(string jsonString)
         {
-            if (!string.IsNullOrEmpty(jsonString))
+            if (!string.IsNullOrEmpty(jsonString) && jsonString.StartsWith("{"))
             {
                 JsonConvert.PopulateObject(jsonString, this);
             }
         }
 
+        /// <summary>
+        /// 转化成为JSON格式字符串
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
             return JsonConvert.SerializeObject(this);

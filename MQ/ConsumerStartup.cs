@@ -21,7 +21,6 @@ namespace SP.StudioCore.MQ
             // 打印日志
             IServiceProvider serviceProvider = services.BuildServiceProvider();
             ILogger<ConsumerStartup> logger = serviceProvider.GetService<ILoggerFactory>().CreateLogger<ConsumerStartup>();
-            logger.LogInformation("完成初始化");
 
             var lst = Assembly.GetCallingAssembly().GetTypes()
                 .Where(o => o.IsClass && o.GetInterfaces().Contains(typeof(IListenerMessage)));
@@ -54,6 +53,7 @@ namespace SP.StudioCore.MQ
             var consumerInstance = RabbitBoot.GetConsumerInstance(consumerAttribute.Name, consumerAttribute.QueueName,
                 consumerAttribute.ConsumeThreadNums, consumerAttribute.LastAckTimeoutRestart);
             
+            logger.LogInformation($"正在初始化：{consumer.Name}");
             // 启用启动绑定时，要创建交换器、队列，并绑定
             if (consumerAttribute.AutoCreateAndBind)
             {

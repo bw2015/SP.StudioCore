@@ -23,14 +23,8 @@ namespace SP.StudioCore.Enums
         Android = 16,
         [Description("APP")]
         APP = 32,
-        /// <summary>
-        /// Windows设备
-        /// </summary>
         [Description("Windows")]
         Windows = 64,
-        /// <summary>
-        /// 苹果电脑
-        /// </summary>
         [Description("MAC设备")]
         MAC = 128
     }

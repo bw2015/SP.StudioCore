@@ -121,6 +121,11 @@ namespace SP.StudioCore.Mvc
             }
         }
 
+        /// <summary>
+        /// 获取语种（仅支持获取简体中文、繁体中文、英文：其他语种默认英文）
+        /// </summary>
+        protected virtual PlatformType Platform => this.context.GetPlatform();
+
         #region ========  公共Result输出 （Task输出）  ========
 
         /// <summary>

@@ -57,10 +57,12 @@ namespace SP.StudioCore.ElasticSearch
         /// </summary>
         protected void WhenNotExistsAddIndex()
         {
-            if (!IndexCache.ContainsKey(IndexName))
+            if (!IndexCache.ContainsKey(IndexName) || !IndexCache[IndexName] )
             {
-                if (!Client.Indices.Exists(IndexName).Exists) CreateIndex();
-                IndexCache[IndexName] = true;
+                if (!Client.Indices.Exists(IndexName).Exists)
+                {
+                    IndexCache[IndexName] =  CreateIndex();
+                }
             }
         }
 

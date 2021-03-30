@@ -73,7 +73,7 @@ namespace SP.StudioCore.Utils
         public static decimal Exchange(this decimal value, Dictionary<Currency, decimal> rate, Currency source, Currency target, int decimals = 2)
         {
             if (value == 0M || source == target) return value;
-            if (rate == null) throw new Exception("未设定汇率");
+            if (rate == null) throw new NotSupportedException();
             if (!rate.ContainsKey(source))
             {
                 rate.Add(source, source.GetAttribute<CurrencyExchangeAttribute>().Exchange);

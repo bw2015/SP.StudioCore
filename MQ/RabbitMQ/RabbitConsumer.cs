@@ -61,6 +61,7 @@ namespace SP.StudioCore.MQ.RabbitMQ
 
             if (_lastAckTimeoutRestart == 0) _lastAckTimeoutRestart = 5 * 60;
             if (_consumeThreadNums == 0) _consumeThreadNums = 8;
+            _lastAckAt = DateTime.Now;
         }
 
         /// <summary>
@@ -156,6 +157,7 @@ namespace SP.StudioCore.MQ.RabbitMQ
         {
             if (_connect.Connection == null || !_connect.Connection.IsOpen) _connect.Open();
             if (_channel == null || _channel.IsClosed) _channel = _connect.Connection.CreateModel();
+            _lastAckAt = DateTime.Now;
         }
 
         /// <summary>

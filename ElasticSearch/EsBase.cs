@@ -42,7 +42,6 @@ namespace SP.StudioCore.ElasticSearch
         public virtual bool Insert(TModel model)
         {
             WhenNotExistsAddIndex();
-
             var result = Client.Index(new IndexRequest<TModel>(model, IndexName));
             if (!result.IsValid)
             {

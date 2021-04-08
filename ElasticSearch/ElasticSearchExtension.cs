@@ -16,6 +16,35 @@ namespace SP.StudioCore.ElasticSearch
     public static class ElasticSearchExtension
     {
         /// <summary>
+        /// 生成更新脚本
+        /// </summary>
+        /// <param name="desc">ES对象</param>
+        /// <param name="entity">要更新的对象</param>
+        /// <param name="firstCharToLower">是否首字母小写（默认小写）</param>
+        public static UpdateByQueryDescriptor<TEntity> Script<TEntity>(this UpdateByQueryDescriptor<TEntity> desc, object entity, bool firstCharToLower = true) where TEntity : class
+        {
+            var lstScript = new List<string>();
+            var dicValue = new Dictionary<string, object>();
+
+            foreach (PropertyInfo property in entity.GetType().GetProperties())
+            {
+                string field = property.GetFieldName();
+                // 首字母小写
+                if (firstCharToLower)
+                {
+                    var firstChar = field.Substring(0, 1).ToLower();
+                    if (field.Length > 1) field = firstChar + field.Substring(1);
+                    else field = firstChar;
+                }
+
+                lstScript.Add($"ctx._source.{field}=params.{field}");
+                dicValue.Add(field, property.GetValue(entity));
+            }
+            
+            return desc.Script(s=>s.Source(string.Join(';', lstScript)).Params(dicValue));
+        }
+        
+        /// <summary>
         /// 新增
         /// </summary>
         /// <typeparam name="TDocument"></typeparam>
@@ -32,6 +61,7 @@ namespace SP.StudioCore.ElasticSearch
             Id id = new Id(entity.ID);
             return client.Index(entity, c => c.Index(indexname).Id(id).Refresh(Refresh.False)).IsValid;
         }
+        
         /// <summary>
         /// 根据ID修改所有字段
         /// </summary>

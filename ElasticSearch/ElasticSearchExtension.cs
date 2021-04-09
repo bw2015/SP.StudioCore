@@ -307,7 +307,22 @@ namespace SP.StudioCore.ElasticSearch
             query.Term(field, value);
             return query;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="TDocument"></typeparam>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="query"></param>
+        /// <param name="value"></param>
+        /// <param name="script">脚本（查询数组中的字段）</param>
+        /// <returns></returns>
+        public static QueryContainerDescriptor<TDocument> Where<TDocument, TValue>(this QueryContainerDescriptor<TDocument> query, object value, string script) where TDocument : class
+        {
+            if (value == null) return query;
+            if (query == null) throw new NullReferenceException();
+            query.Term(script, value);
+            return query;
+        }
 
         /// <summary>
         /// 匹配一个或者多个值，同OR

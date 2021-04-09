@@ -31,6 +31,7 @@ namespace SP.StudioCore.API.Wallets
                     {"X-Forwarded-IP", IPAgent.IP}
                 });
 
+                if (result.StartsWith("Error:")) throw new Exception(result);
                 return new MoneyResponse(request, result, (int) sw.ElapsedMilliseconds);
             }
             catch (Exception ex)
@@ -53,6 +54,7 @@ namespace SP.StudioCore.API.Wallets
                     {"X-Forwarded-IP", IPAgent.IP}
                 });
 
+                if (result.StartsWith("Error:")) throw new Exception(result);
                 return new BalanceResponse(request, result, (int) sw.ElapsedMilliseconds);
             }
             catch (Exception ex)
@@ -75,6 +77,7 @@ namespace SP.StudioCore.API.Wallets
                     {"Content-Language", request.Language.ToString()}
                 });
 
+                if (result.StartsWith("Error:")) throw new Exception(result);
                 return new QueryResponse(request, result, (int) sw.ElapsedMilliseconds);
             }
             catch (Exception ex)

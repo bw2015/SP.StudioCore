@@ -27,12 +27,12 @@ namespace SP.StudioCore.API.Wallets.Requests
         /// <summary>
         /// 请求地址
         /// </summary>
-        public string Url { get; }
+        [Ignore]public string Url { get; }
 
         /// <summary>
         /// 密钥
         /// </summary>
-        public string SecretKey { get; }
+        [Ignore]public string SecretKey { get; }
 
         /// <summary>
         /// 动作名称
@@ -42,7 +42,7 @@ namespace SP.StudioCore.API.Wallets.Requests
         /// <summary>
         /// 请求参数
         /// </summary>
-        public string PostData => this.ToString();
+        [Ignore]public string PostData => this.ToString();
 
         /// <summary>
         /// 时间戳（毫秒)

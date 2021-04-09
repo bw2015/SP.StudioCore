@@ -205,7 +205,8 @@ namespace SP.StudioCore.ElasticSearch
             if (client == null) throw new NullReferenceException();
             if (value == null) throw new NullReferenceException();
             if (field == null) throw new NullReferenceException();
-            return client.Search<TDocument>(c => c.Query(q => q.Term(field, value)).Size(1)).Documents?.FirstOrDefault();
+            string indexname = typeof(TDocument).GetIndexName();
+            return client.Search<TDocument>(c => c.Index(indexname).Query(q => q.Term(field, value)).Size(1)).Documents?.FirstOrDefault();
         }
         /// <summary>
         /// 获取第一条数据
@@ -219,7 +220,8 @@ namespace SP.StudioCore.ElasticSearch
         public static TDocument FirstOrDefault<TDocument, TValue>(this IElasticClient client, params Func<QueryContainerDescriptor<TDocument>, QueryContainer>[] queries) where TDocument : class
         {
             if (client == null) throw new NullReferenceException();
-            return client.Search<TDocument>(s => s.Query(q => q.Bool(b => b.Must(queries))).Size(1)).Documents?.FirstOrDefault();
+            string indexname = typeof(TDocument).GetIndexName();
+            return client.Search<TDocument>(s => s.Index(indexname).Query(q => q.Bool(b => b.Must(queries))).Size(1)).Documents?.FirstOrDefault();
         }
         /// <summary>
         /// 查询条件（仅拼接查询条件，非真实查询）
@@ -588,7 +590,6 @@ namespace SP.StudioCore.ElasticSearch
             return (s) =>
             {
                 s.Size(0);
-
                 foreach (var field in fields)
                 {
                     PropertyInfo property = field.ToPropertyInfo();
@@ -689,6 +690,7 @@ namespace SP.StudioCore.ElasticSearch
             }
             return document;
         }
+
         /// <summary>
         /// 获取索引名称
         /// </summary>

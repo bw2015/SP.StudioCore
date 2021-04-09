@@ -75,6 +75,7 @@ namespace SP.StudioCore.Http
                 if (Regex.IsMatch(userAgent, "Windows", RegexOptions.IgnoreCase)) platform |= PlatformType.Windows;
                 if (Regex.IsMatch(userAgent, "Macintosh", RegexOptions.IgnoreCase)) platform |= PlatformType.MAC;
             }
+
             return platform;
         }
 
@@ -88,6 +89,7 @@ namespace SP.StudioCore.Http
             {
                 return context.Request.Form[key];
             }
+
             return null;
         }
 
@@ -102,6 +104,7 @@ namespace SP.StudioCore.Http
         {
             return context.Request.Query[key];
         }
+
         public static T QS<T>(this HttpContext context, string key, T t)
         {
             string value = context.QS(key);
@@ -152,7 +155,7 @@ namespace SP.StudioCore.Http
         public static T GetItem<T>(this HttpContext context)
         {
             if (context == null || !context.Items.ContainsKey(typeof(T))) return default;
-            return (T)context.Items[typeof(T)];
+            return (T) context.Items[typeof(T)];
         }
 
         public static void SetItem<T>(this HttpContext context, T value)
@@ -187,7 +190,7 @@ namespace SP.StudioCore.Http
         public static T GetItem<T>(this HttpContext context, string name)
         {
             if (!context.Items.ContainsKey(name)) return default;
-            return (T)context.Items[name];
+            return (T) context.Items[name];
         }
 
 
@@ -210,6 +213,7 @@ namespace SP.StudioCore.Http
             {
                 data.Add("Data", context.GetString());
             }
+
             return data.ToJson();
         }
 
@@ -221,12 +225,13 @@ namespace SP.StudioCore.Http
             if (data != null) return data;
             try
             {
-                using (MemoryStream ms = new MemoryStream((int)context.Request.ContentLength))
+                using (MemoryStream ms = new MemoryStream((int) context.Request.ContentLength))
                 {
                     context.Request.Body.CopyToAsync(ms).Wait();
                     ms.Position = 0;
                     data = ms.ToArray();
                 }
+
                 return data;
             }
             finally
@@ -287,6 +292,7 @@ namespace SP.StudioCore.Http
                     if (!name.StartsWith(prefix)) continue;
                     name = name.Substring(prefix.Length);
                 }
+
                 PropertyInfo property = obj.GetType().GetProperty(name);
                 if (property == null) continue;
                 string value = form[key];
@@ -301,8 +307,10 @@ namespace SP.StudioCore.Http
                         objValue = value.GetValue(property.PropertyType);
                         break;
                 }
+
                 property.SetValue(obj, objValue);
             }
+
             return obj;
         }
 
@@ -318,18 +326,22 @@ namespace SP.StudioCore.Http
             Regex url = new Regex(@"^(http|https)://(?<Domain>.+?)/", RegexOptions.IgnoreCase);
             try
             {
-                foreach (string key in new[] { "X-Forwarded-Host", "Ali-Swift-LOG-Host", "Referer", "Host" })
+                foreach (string key in new[] {"X-Forwarded-Host", "Ali-Swift-LOG-Host", "Referer", "Host"})
                 {
+                    Console.WriteLine($"X-Forwarded-Host:{key}");
                     string value = context.Request.Headers[key];
                     if (string.IsNullOrEmpty(value)) continue;
                     if (url.IsMatch(value))
                     {
                         domain = url.Match(value).Groups["Domain"].Value;
+                        Console.WriteLine($"1:{domain}");
                     }
                     else
                     {
                         domain = value;
+                        Console.WriteLine($"2:{domain}");
                     }
+
                     break;
                 }
             }
@@ -337,6 +349,7 @@ namespace SP.StudioCore.Http
             {
                 domain = context.Request.Host.ToString();
             }
+
             return domain;
         }
 
@@ -351,6 +364,7 @@ namespace SP.StudioCore.Http
             {
                 return context.Head(Const.LANGUAGE).ToEnum<Language>();
             }
+
             return Language.CHN;
         }
 
@@ -378,6 +392,7 @@ namespace SP.StudioCore.Http
                 username = basic.Match(content).Groups["uid"].Value;
                 password = basic.Match(content).Groups["pwd"].Value;
             }
+
             return true;
         }
 
@@ -391,14 +406,13 @@ namespace SP.StudioCore.Http
             return $"Basic {Convert.ToBase64String(Encoding.UTF8.GetBytes(content))}";
         }
 
-
         #endregion
 
         #region =========== 错误页面提示  ===============
 
         public static Result ShowError(this HttpContext context, HttpStatusCode statusCode, string error = null)
         {
-            context.Response.StatusCode = (int)statusCode;
+            context.Response.StatusCode = (int) statusCode;
             context.Response.ContentType = "text/html";
             return statusCode.ShowError(error);
         }
@@ -411,17 +425,15 @@ namespace SP.StudioCore.Http
         /// <returns></returns>
         public static string ShowError(this HttpStatusCode statusCode, string error = null)
         {
-            string status = Regex.Replace(statusCode.ToString(), "[A-Z]", t =>
-            {
-                return " " + t.Value;
-            });
+            string status = Regex.Replace(statusCode.ToString(), "[A-Z]", t => { return " " + t.Value; });
             status = statusCode.ToString();
             if (string.IsNullOrEmpty(error))
             {
                 error = status;
             }
+
             StringBuilder sb = new StringBuilder();
-            sb.AppendFormat("<html><head><title>{0} {1}</title><meta name=\"description\" content=\"{2}\" /><body><h1><center>{0} {1}</center></h1>", (int)statusCode, status, error);
+            sb.AppendFormat("<html><head><title>{0} {1}</title><meta name=\"description\" content=\"{2}\" /><body><h1><center>{0} {1}</center></h1>", (int) statusCode, status, error);
             sb.Append("<hr />");
             sb.AppendFormat("<center>{0}/{1}</center>", typeof(ContextExtensions).Assembly.GetName().Name, typeof(ContextExtensions).Assembly.GetName().Version);
             sb.Append("</body></html>");
@@ -435,11 +447,11 @@ namespace SP.StudioCore.Http
             {
                 output = new Dictionary<string, object>();
             }
+
             output.Add("ErrorType", type);
 
             return new Result(false, error, output);
         }
-
 
         #endregion
 

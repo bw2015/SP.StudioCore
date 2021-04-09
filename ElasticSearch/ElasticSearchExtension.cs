@@ -300,7 +300,7 @@ namespace SP.StudioCore.ElasticSearch
         /// <param name="value"></param>
         /// <param name="field"></param>
         /// <returns></returns>
-        public static QueryContainerDescriptor<TDocument> Where<TDocument, TValue>(this QueryContainerDescriptor<TDocument> query, object value, Expression<Func<TDocument, TValue>> field) where TDocument : class
+        public static QueryContainerDescriptor<TDocument> Where<TDocument, TValue>(this QueryContainerDescriptor<TDocument> query, TValue? value, Expression<Func<TDocument, TValue>> field) where TDocument : class
         {
             if (value == null) return query;
             if (query == null) throw new NullReferenceException();
@@ -316,7 +316,7 @@ namespace SP.StudioCore.ElasticSearch
         /// <param name="value"></param>
         /// <param name="script">脚本（查询数组中的字段）</param>
         /// <returns></returns>
-        public static QueryContainerDescriptor<TDocument> Where<TDocument, TValue>(this QueryContainerDescriptor<TDocument> query, object value, string script) where TDocument : class
+        public static QueryContainerDescriptor<TDocument> Where<TDocument, TValue>(this QueryContainerDescriptor<TDocument> query, TValue? value, string script) where TDocument : class
         {
             if (value == null) return query;
             if (query == null) throw new NullReferenceException();
@@ -339,6 +339,14 @@ namespace SP.StudioCore.ElasticSearch
             if (query == null) throw new NullReferenceException();
             if (field == null) return query;
             query.Terms(t => t.Field(field).Terms(value));
+            return query;
+        }
+        public static QueryContainerDescriptor<TDocument> Where<TDocument, TValue>(this QueryContainerDescriptor<TDocument> query, TValue[] value, string script) where TDocument : class
+        {
+            if (value == null) return query;
+            if (query == null) throw new NullReferenceException();
+            if (script == null) return query;
+            query.Terms(t => t.Field(script).Terms(value));
             return query;
         }
         /// <summary>
@@ -412,6 +420,73 @@ namespace SP.StudioCore.ElasticSearch
                     else
                     {
                         query.Range(r => r.LessThanOrEquals((double)v).Field(field));
+                    }
+                    break;
+            }
+            return query;
+        }
+        public static QueryContainerDescriptor<TDocument> Where<TDocument, TValue>(this QueryContainerDescriptor<TDocument> query, TValue? value, string script, ExpressionType type) where TDocument : class where TValue : struct
+        {
+            if (value == null) return query;
+            if (query == null) throw new NullReferenceException();
+            if (script == null) return query;
+            object v = value.Value;
+            switch (type)
+            {
+                case ExpressionType.GreaterThan:
+                    if (value.Value is DateTime)
+                    {
+                        query.DateRange(dr => dr.GreaterThan((DateTime)v).Field(script));
+                    }
+                    else if (value.Value is Int64)
+                    {
+                        query.Range(r => r.GreaterThanOrEquals((long)v).Field(script));
+                    }
+                    else
+                    {
+                        query.Range(r => r.GreaterThan((double)v).Field(script));
+                    }
+                    break;
+                case ExpressionType.GreaterThanOrEqual:
+                    if (value.Value is DateTime)
+                    {
+                        query.DateRange(dr => dr.GreaterThanOrEquals((DateTime)v).Field(script));
+                    }
+                    else if (value.Value is Int64)
+                    {
+                        query.Range(r => r.GreaterThanOrEquals((long)v).Field(script));
+                    }
+                    else
+                    {
+                        query.Range(r => r.GreaterThanOrEquals((double)v).Field(script));
+                    }
+                    break;
+                case ExpressionType.LessThan:
+                    if (value.Value is DateTime)
+                    {
+                        query.DateRange(dr => dr.LessThan((DateTime)v).Field(script));
+                    }
+                    else if (value.Value is Int64)
+                    {
+                        query.Range(r => r.GreaterThanOrEquals((long)v).Field(script));
+                    }
+                    else
+                    {
+                        query.Range(r => r.LessThan((double)v).Field(script));
+                    }
+                    break;
+                case ExpressionType.LessThanOrEqual:
+                    if (value.Value is DateTime)
+                    {
+                        query.DateRange(dr => dr.LessThanOrEquals((DateTime)v).Field(script));
+                    }
+                    else if (value.Value is Int64)
+                    {
+                        query.Range(r => r.GreaterThanOrEquals((long)v).Field(script));
+                    }
+                    else
+                    {
+                        query.Range(r => r.LessThanOrEquals((double)v).Field(script));
                     }
                     break;
             }

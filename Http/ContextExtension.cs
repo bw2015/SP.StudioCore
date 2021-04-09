@@ -316,7 +316,7 @@ namespace SP.StudioCore.Http
 
         /// <summary>
         /// 获取当前的域名（支持反代过来的域名）
-        /// 顺序："X-Forwarded-Host", "Ali-Swift-LOG-Host", "Referer", "Host"
+        /// 顺序："X-Forwarded-Site", "Ali-Swift-LOG-Host", "Referer", "Host"
         /// </summary>
         /// <returns></returns>
         public static string GetDomain(this HttpContext context)
@@ -326,22 +326,18 @@ namespace SP.StudioCore.Http
             Regex url = new Regex(@"^(http|https)://(?<Domain>.+?)/", RegexOptions.IgnoreCase);
             try
             {
-                foreach (string key in new[] {"X-Forwarded-Host", "Ali-Swift-LOG-Host", "Referer", "Host"})
+                foreach (string key in new[] {"X-Forwarded-Site", "Ali-Swift-LOG-Host", "Referer", "Host"})
                 {
-                    Console.WriteLine($"X-Forwarded-Host:{key}");
                     string value = context.Request.Headers[key];
                     if (string.IsNullOrEmpty(value)) continue;
                     if (url.IsMatch(value))
                     {
                         domain = url.Match(value).Groups["Domain"].Value;
-                        Console.WriteLine($"1:{domain}");
                     }
                     else
                     {
                         domain = value;
-                        Console.WriteLine($"2:{domain}");
                     }
-
                     break;
                 }
             }

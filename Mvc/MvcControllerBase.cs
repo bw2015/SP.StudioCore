@@ -20,6 +20,7 @@ using Nest;
 using Result = SP.StudioCore.Model.Result;
 using Language = SP.StudioCore.Enums.Language;
 using System.Linq.Expressions;
+using SP.StudioCore.ElasticSearch;
 
 namespace SP.StudioCore.Mvc
 {
@@ -396,12 +397,17 @@ namespace SP.StudioCore.Mvc
         /// <param name="data"></param>
         /// <param name="action"></param>
         /// <returns></returns>
-        protected virtual Result GetResultList<T, TOutput>(ISearchResponse<T> response, Func<T, TOutput> convert = null, object data = null, Action<ISearchResponse<T>> action = null) where T : class where TOutput : class
+        protected virtual Result GetResultList<T, TOutput>(Func<SearchDescriptor<T>, ISearchRequest> search, Func<T, TOutput> convert = null, object data = null) where T : class where TOutput : class
         {
             if (convert == null) convert = t => t as TOutput;
             StringBuilder sb = new StringBuilder();
             string json = null;
-            action?.Invoke(response);
+            Func<SearchDescriptor<T>, ISearchRequest> action = (s) =>
+            {
+                return search.Invoke(s.Paged(this.PageIndex, this.PageSize));
+            };
+
+            ISearchResponse<T> response = ESDB.Search(action);
             if (convert == null)
             {
                 json = response.Documents.ToJson();

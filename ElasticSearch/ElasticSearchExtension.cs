@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Http;
 using Nest;
 using SP.StudioCore.Http;
 using SP.StudioCore.Types;
-using SP.StudioCore.Web;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -137,63 +136,100 @@ namespace SP.StudioCore.ElasticSearch
         /// <typeparam name="TValue"></typeparam>
         /// <param name="client"></param>
         /// <param name="value"></param>
-        /// <param name="expression"></param>
+        /// <param name="field"></param>
         /// <returns></returns>
-        public static TDocument FirstOrDefault<TDocument, TValue>(this IElasticClient client, TValue value, Expression<Func<TDocument, TValue>> expression) where TDocument : class
+        public static TDocument FirstOrDefault<TDocument, TValue>(this IElasticClient client, TValue value, Expression<Func<TDocument, TValue>> field) where TDocument : class
         {
-            return client.Query<TDocument>(c => c.Where(value, expression).Size(1)).Documents.FirstOrDefault();
+            if (value == null) throw new NullReferenceException();
+            if (field == null) throw new NullReferenceException();
+            return client.Search<TDocument>(c => c.Query(q => q.Term(field, value)).Size(1)).Documents.FirstOrDefault();
         }
-
-        public static ISearchResponse<TDocument> Query<TDocument>(this IElasticClient client, Func<SearchDescriptor<TDocument>, ISearchRequest> selector = null) where TDocument : class
-        {
-            string indexname = typeof(TDocument).GetIndexName();
-            Func<SearchDescriptor<TDocument>, ISearchRequest> action = null;
-            if (selector == null)
-            {
-                action = (s) =>
-                {
-                    return s.Index(indexname).TrackTotalHits(true);
-                };
-            }
-            else
-            {
-                action = (s) =>
-                {
-                    return selector.Invoke(s.Index(indexname).TrackTotalHits(true));
-                };
-
-            }
-            return client.Search(action);
-        }
-
         /// <summary>
-        /// 拼接where 条件
+        /// 查询条件（仅拼接查询条件，非真实查询）
         /// </summary>
         /// <typeparam name="TDocument"></typeparam>
         /// <param name="client"></param>
-        /// <param name="search"></param>
+        /// <param name="queries"></param>
         /// <returns></returns>
-        public static Func<SearchDescriptor<TDocument>, ISearchRequest> Where<TDocument>(this IElasticClient client, Func<SearchDescriptor<TDocument>, ISearchRequest> search) where TDocument : class
+        public static Func<SearchDescriptor<TDocument>, ISearchRequest> Query<TDocument>(this IElasticClient client, params Func<QueryContainerDescriptor<TDocument>, QueryContainer>[] queries) where TDocument : class
         {
-            return search;
+            string indexname = typeof(TDocument).GetIndexName();
+            ISearchRequest query(SearchDescriptor<TDocument> q)
+            {
+                return q.Index(indexname).TrackTotalHits(true).Query(q => q.Bool(b => b.Must(queries)));
+            }
+            return query;
         }
-        public static SearchDescriptor<TDocument> Where<TDocument, TValue>(this SearchDescriptor<TDocument> query, object value, Expression<Func<TDocument, TValue>> field) where TDocument : class
+        /// <summary>
+        /// 查询（真实查询）
+        /// </summary>
+        /// <typeparam name="TDocument"></typeparam>
+        /// <param name="client"></param>
+        /// <param name="selector">检索条件</param>
+        /// <returns></returns>
+        public static List<TDocument> Search<TDocument>(this IElasticClient client, Func<QueryContainerDescriptor<TDocument>, QueryContainer> selector, params Expression<Func<TDocument, object>>[] fields) where TDocument : class
         {
-            if (value == null) return query;
+            string indexname = typeof(TDocument).GetIndexName();
+            Func<SearchDescriptor<TDocument>, ISearchRequest> query = (q) =>
+            {
+                return q.Index(indexname).Query(q => q.Bool(b => b.Must(selector))).Select(fields);
+            };
+            return client.Search(query).Documents.ToList();
+        }
+        /// <summary>
+        /// 查询（真实查询）
+        /// </summary>
+        /// <typeparam name="TDocument"></typeparam>
+        /// <param name="client"></param>
+        /// <param name="selector">检索条件</param>
+        /// <returns></returns>
+        public static List<TDocument> Search<TDocument>(this IElasticClient client, params Expression<Func<TDocument, object>>[] fields) where TDocument : class
+        {
+            string indexname = typeof(TDocument).GetIndexName();
+            ISearchRequest query(SearchDescriptor<TDocument> q)
+            {
+                return q.Index(indexname).Select(fields);
+            }
+            return client.Search((Func<SearchDescriptor<TDocument>, ISearchRequest>)query).Documents.ToList();
+        }
+
+        /// <summary>
+        /// 匹配一个值，同AND
+        /// </summary>
+        /// <typeparam name="TDocument"></typeparam>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="query"></param>
+        /// <param name="value"></param>
+        /// <param name="field"></param>
+        /// <returns></returns>
+        public static IEnumerable<QueryContainerDescriptor<TDocument>> Where<TDocument, TValue>(this IEnumerable<QueryContainerDescriptor<TDocument>> query, object value, Expression<Func<TDocument, TValue>> field) where TDocument : class
+        {
+            if (value == null) yield break;
             if (query == null) throw new NullReferenceException();
-            switch (value.GetType().Name)
+            Type type = value.GetType();
+            QueryContainerDescriptor<TDocument> search = new QueryContainerDescriptor<TDocument>();
+            switch (type.Name)
             {
                 case "Guid":
                 case "String":
-                    query = query.Query(q => q.Term(c => c.Field(field.GetFieldName() + ".keyword").Value(value)));
+                    search.Term(c => c.Field(field.GetFieldName() + ".keyword").Value(value));
+                    yield return search;
                     break;
+                case "Int16":
                 case "Int32":
                 case "Int64":
                 case "Byte":
-                    query = query.Query(q => q.Term(t => t.Field(field).Value(value)));
+                    search.Term(field, value);
+                    yield return search;
+                    break;
+                default:
+                    if (type.IsEnum)
+                    {
+                        search.Term(field, value);
+                        yield return search;
+                    }
                     break;
             }
-            return query;
         }
         /// <summary>
         /// 匹配一个或者多个值，同OR
@@ -204,93 +240,153 @@ namespace SP.StudioCore.ElasticSearch
         /// <param name="value"></param>
         /// <param name="field"></param>
         /// <returns></returns>
-        public static SearchDescriptor<TDocument> Where<TDocument, TValue>(this SearchDescriptor<TDocument> query, TValue[] value, Expression<Func<TDocument, TValue>> field) where TDocument : class
+        //public static IEnumerable<QueryContainerDescriptor<TDocument>> Where<TDocument, TValue>(this IElasticClient client, TValue? value, Expression<Func<TDocument, TValue>> field) where TDocument : class
+        //{
+        //    if (value == null) yield break;
+        //    QueryContainerDescriptor<TDocument> search = new QueryContainerDescriptor<TDocument>();
+        //    Type type = value.GetType();
+        //    switch (type.Name)
+        //    {
+        //        case "Guid":
+        //        case "String":
+        //            search.Term(c => c.Field(field.GetFieldName() + ".keyword").Value(value));
+        //            yield return search;
+        //            break;
+        //        case "Int16":
+        //        case "Int32":
+        //        case "Int64":
+        //        case "Byte":
+        //            search.Term(field, value);
+        //            yield return search;
+        //            break;
+        //        default:
+        //            if (type.IsEnum)
+        //            {
+        //                search.Term(field, value);
+        //                yield return search;
+        //            }
+        //            break;
+        //    }
+        //}
+
+        public static QueryContainerDescriptor<TDocument> Where<TDocument, TValue>(this QueryContainerDescriptor<TDocument> query, object value, Expression<Func<TDocument, TValue>> field) where TDocument : class
         {
             if (value == null) return query;
             if (query == null) throw new NullReferenceException();
-            if (field == null) return query;
-            return query = query.Query(q => q.Bool(b => b.Should(sd => sd.Terms(t => t.Field(field).Terms(value))))); ;
-        }
-
-        public static SearchDescriptor<TDocument> Where<TDocument, TValue>(this SearchDescriptor<TDocument> query, object value, Expression<Func<TDocument, TValue>> field, ExpressionType type) where TDocument : class
-        {
-            if (value == null) return query;
-            switch (value.GetType().Name)
+            Type type = value.GetType();
+            switch (type.Name)
             {
+                case "Guid":
                 case "String":
+                    query.Term(c => c.Field(field.GetFieldName() + ".keyword").Value(value));
                     break;
+                case "Int16":
                 case "Int32":
-                    query = query.Where((int)value, field, type);
-                    break;
                 case "Int64":
-                    query = query.Where((long)value, field, type);
+                case "Byte":
+                    query.Term(field, value);
+                    break;
+                default:
+                    if (type.IsEnum)
+                    {
+                        query.Term(field, value);
+                    }
                     break;
             }
             return query;
         }
-        public static SearchDescriptor<TDocument> Where<TDocument, TValue>(this SearchDescriptor<TDocument> query, TValue? value, Expression<Func<TDocument, TValue>> field, ExpressionType type) where TDocument : class where TValue : struct
+
+
+        /// <summary>
+        /// 匹配一个或者多个值，同OR
+        /// </summary>
+        /// <typeparam name="TDocument"></typeparam>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="query"></param>
+        /// <param name="value"></param>
+        /// <param name="field"></param>
+        /// <returns></returns>
+        public static QueryContainerDescriptor<TDocument> Where<TDocument, TValue>(this QueryContainerDescriptor<TDocument> query, TValue[] value, Expression<Func<TDocument, TValue>> field) where TDocument : class
         {
             if (value == null) return query;
+            if (query == null) throw new NullReferenceException();
+            if (field == null) return query;
+            query.Terms(t => t.Field(field).Terms(value));
+            return query;
+        }
+        /// <summary>
+        /// 范围查询
+        /// </summary>
+        /// <typeparam name="TDocument"></typeparam>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="query"></param>
+        /// <param name="value"></param>
+        /// <param name="field"></param>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public static QueryContainerDescriptor<TDocument> Where<TDocument, TValue>(this QueryContainerDescriptor<TDocument> query, TValue? value, Expression<Func<TDocument, TValue>> field, ExpressionType type) where TDocument : class where TValue : struct
+        {
+            if (value == null) return query;
+            if (query == null) throw new NullReferenceException();
             object v = value.Value;
             switch (type)
             {
                 case ExpressionType.GreaterThan:
                     if (value.Value is DateTime)
                     {
-                        query = query.Query(q => q.DateRange(dr => dr.GreaterThan((DateTime)v).Field(field)));
+                        query.DateRange(dr => dr.GreaterThan((DateTime)v).Field(field));
                     }
                     else if (value.Value is Int64)
                     {
-                        query = query.Query(q => q.Range(r => r.GreaterThanOrEquals((long)v).Field(field)));
+                        query.Range(r => r.GreaterThanOrEquals((long)v).Field(field));
                     }
                     else
                     {
-                        query = query.Query(q => q.Range(r => r.GreaterThan((double)v).Field(field)));
+                        query.Range(r => r.GreaterThan((double)v).Field(field));
                     }
                     break;
                 case ExpressionType.GreaterThanOrEqual:
                     if (value.Value is DateTime)
                     {
-                        query = query.Query(q => q.DateRange(dr => dr.GreaterThanOrEquals((DateTime)v).Field(field)));
+                        query.DateRange(dr => dr.GreaterThanOrEquals((DateTime)v).Field(field));
                     }
                     else if (value.Value is Int64)
                     {
-                        query = query.Query(q => q.Range(r => r.GreaterThanOrEquals((long)v).Field(field)));
+                        query.Range(r => r.GreaterThanOrEquals((long)v).Field(field));
                     }
                     else
                     {
-                        query = query.Query(q => q.Range(r => r.GreaterThanOrEquals((double)v).Field(field)));
+                        query.Range(r => r.GreaterThanOrEquals((double)v).Field(field));
                     }
                     break;
                 case ExpressionType.LessThan:
                     if (value.Value is DateTime)
                     {
-                        query = query.Query(q => q.DateRange(dr => dr.LessThan((DateTime)v).Field(field)));
+                        query.DateRange(dr => dr.LessThan((DateTime)v).Field(field));
                     }
                     else if (value.Value is Int64)
                     {
-                        query = query.Query(q => q.Range(r => r.GreaterThanOrEquals((long)v).Field(field)));
+                        query.Range(r => r.GreaterThanOrEquals((long)v).Field(field));
                     }
                     else
                     {
-                        query = query.Query(q => q.Range(r => r.LessThan((double)v).Field(field)));
+                        query.Range(r => r.LessThan((double)v).Field(field));
                     }
                     break;
                 case ExpressionType.LessThanOrEqual:
                     if (value.Value is DateTime)
                     {
-                        query = query.Query(q => q.DateRange(dr => dr.LessThanOrEquals((DateTime)v).Field(field)));
+                        query.DateRange(dr => dr.LessThanOrEquals((DateTime)v).Field(field));
                     }
                     else if (value.Value is Int64)
                     {
-                        query = query.Query(q => q.Range(r => r.GreaterThanOrEquals((long)v).Field(field)));
+                        query.Range(r => r.GreaterThanOrEquals((long)v).Field(field));
                     }
                     else
                     {
-                        query = query.Query(q => q.Range(r => r.LessThanOrEquals((double)v).Field(field)));
+                        query.Range(r => r.LessThanOrEquals((double)v).Field(field));
                     }
                     break;
-
             }
             return query;
         }
@@ -373,6 +469,13 @@ namespace SP.StudioCore.ElasticSearch
             if (query == null) throw new NullReferenceException();
             return query.Sort(c => c.Descending(field));
         }
+        public static Func<SearchDescriptor<TDocument>, ISearchRequest> OrderByDescending<TDocument, TValue>(this Func<SearchDescriptor<TDocument>, ISearchRequest> search, Expression<Func<TDocument, TValue>> field) where TDocument : class
+        {
+            return (s) =>
+            {
+                return search.Invoke(s.OrderByDescending(field));
+            };
+        }
         /// <summary>
         /// 升序
         /// </summary>
@@ -388,18 +491,21 @@ namespace SP.StudioCore.ElasticSearch
             if (query == null) throw new NullReferenceException();
             return query.Sort(c => c.Ascending(field));
         }
-        public static SearchDescriptor<TDocument> Paged<TDocument>(this SearchDescriptor<TDocument> query) where TDocument : class
+        public static Func<SearchDescriptor<TDocument>, ISearchRequest> OrderBy<TDocument, TValue>(this Func<SearchDescriptor<TDocument>, ISearchRequest> search, Expression<Func<TDocument, TValue>> field) where TDocument : class
         {
-            HttpContext context = Web.Context.Current;
-            int page = 1;
-            int limit = 20;
-            if (context != null)
+            return (s) =>
             {
-                page = context.QF("PageIndex", 1);
-                limit = context.QF("PageSize", 20);
-            }
-            return query.Paged(page, limit);
+                return search.Invoke(s.OrderBy(field));
+            };
         }
+        /// <summary>
+        /// 分页
+        /// </summary>
+        /// <typeparam name="TDocument"></typeparam>
+        /// <param name="query"></param>
+        /// <param name="page"></param>
+        /// <param name="limit"></param>
+        /// <returns></returns>
         public static SearchDescriptor<TDocument> Paged<TDocument>(this SearchDescriptor<TDocument> query, int page, int limit) where TDocument : class
         {
             if (query == null) throw new NullReferenceException();
@@ -413,27 +519,6 @@ namespace SP.StudioCore.ElasticSearch
             }
         }
         /// <summary>
-        /// 分页，默认httpcontext参数
-        /// </summary>
-        /// <typeparam name="TDocument"></typeparam>
-        /// <param name="search"></param>
-        /// <returns></returns>
-        public static Func<SearchDescriptor<TDocument>, ISearchRequest> Paged<TDocument>(this Func<SearchDescriptor<TDocument>, ISearchRequest> search) where TDocument : class
-        {
-            HttpContext context = Web.Context.Current;
-            int page = 1;
-            int limit = 20;
-            if (context != null)
-            {
-                page = context.QF("PageIndex", 1);
-                limit = context.QF("PageSize", 20);
-            }
-            return (s) =>
-              {
-                  return search.Invoke(s.Paged(page, limit));
-              };
-        }
-        /// <summary>
         /// 分页，传入分页参数
         /// </summary>
         /// <typeparam name="TDocument"></typeparam>
@@ -443,95 +528,56 @@ namespace SP.StudioCore.ElasticSearch
         /// <returns></returns>
         public static Func<SearchDescriptor<TDocument>, ISearchRequest> Paged<TDocument>(this Func<SearchDescriptor<TDocument>, ISearchRequest> search, int page, int limit) where TDocument : class
         {
-
             return (s) =>
             {
                 return search.Invoke(s.Paged(page, limit));
             };
         }
 
-
         /// <summary>
-        /// 聚合
+        /// 聚合（聚合指定特性Aggregate）
         /// </summary>
         /// <typeparam name="TDocument"></typeparam>
-        /// <typeparam name="TKey"></typeparam>
         /// <param name="search"></param>
-        /// <param name="field"></param>
         /// <returns></returns>
-        public static Func<SearchDescriptor<TDocument>, ISearchRequest> Aggregate<TDocument, TKey>(this Func<SearchDescriptor<TDocument>, ISearchRequest> search, Expression<Func<TDocument, TKey>> field) where TDocument : class
+        public static Func<SearchDescriptor<TDocument>, ISearchRequest> GroupBy<TDocument>(this Func<SearchDescriptor<TDocument>, ISearchRequest> search, params Expression<Func<TDocument, object>>[] fields) where TDocument : class
         {
-            string fieldname = field.GetFieldName();
-            PropertyInfo property = field.ToPropertyInfo();
-            AggregateAttribute aggregate = property.GetAttribute<AggregateAttribute>();
             return (s) =>
             {
-                s = s.Size(0);
-                if (aggregate == null)
+                s.Size(0);
+                foreach (var field in fields)
                 {
-                    return search.Invoke(s);
+                    PropertyInfo property = field.ToPropertyInfo();
+                    AggregateAttribute aggregate = property.GetAttribute<AggregateAttribute>();
+                    string fieldname = property.GetFieldName();
+                    if (aggregate == null)
+                    {
+                        search.Invoke(s);
+                    }
+                    else if (aggregate.Type == AggregateType.Sum)
+                    {
+                        search.Invoke(s.Aggregations(aggs => aggs.Sum(aggregate.Name ?? fieldname, c => c.Field(field))));
+                    }
+                    else if (aggregate.Type == AggregateType.Average)
+                    {
+                        search.Invoke(s.Aggregations(aggs => aggs.Average(aggregate.Name ?? fieldname, c => c.Field(field))));
+                    }
+                    else if (aggregate.Type == AggregateType.Count)
+                    {
+                        search.Invoke(s.Aggregations(aggs => aggs.ValueCount(aggregate.Name ?? fieldname, c => c.Field(field))));
+                    }
+                    else if (aggregate.Type == AggregateType.Max)
+                    {
+                        search.Invoke(s.Aggregations(aggs => aggs.Max(aggregate.Name ?? fieldname, c => c.Field(field))));
+                    }
+                    else if (aggregate.Type == AggregateType.Min)
+                    {
+                        search.Invoke(s.Aggregations(aggs => aggs.Min(aggregate.Name ?? fieldname, c => c.Field(field))));
+                    }
                 }
-                else if (aggregate.Type == AggregateType.Sum)
-                {
-                    return search.Invoke(s.Aggregations(aggs => aggs.Sum(aggregate.Name ?? fieldname, c => c.Field(field))));
-                }
-                else if (aggregate.Type == AggregateType.Average)
-                {
-                    return search.Invoke(s.Aggregations(aggs => aggs.Average(aggregate.Name ?? fieldname, c => c.Field(field))));
-                }
-                else if (aggregate.Type == AggregateType.Count)
-                {
-                    return search.Invoke(s.Aggregations(aggs => aggs.ValueCount(aggregate.Name ?? fieldname, c => c.Field(field))));
-                }
-                else if (aggregate.Type == AggregateType.Max)
-                {
-                    return search.Invoke(s.Aggregations(aggs => aggs.Max(aggregate.Name ?? fieldname, c => c.Field(field))));
-                }
-                else if (aggregate.Type == AggregateType.Min)
-                {
-                    return search.Invoke(s.Aggregations(aggs => aggs.Min(aggregate.Name ?? fieldname, c => c.Field(field))));
-                }
-                else
-                {
-                    return search.Invoke(s.Size(20));
-                }
+                return s;
             };
         }
-        public static SearchDescriptor<TDocument> Aggregate<TDocument, TKey>(this SearchDescriptor<TDocument> search, Expression<Func<TDocument, TKey>> field) where TDocument : class
-        {
-            string fieldname = field.GetFieldName();
-            PropertyInfo property = field.ToPropertyInfo();
-            AggregateAttribute aggregate = property.GetAttribute<AggregateAttribute>();
-            if (aggregate == null)
-            {
-                return search;
-            }
-            else if (aggregate.Type == AggregateType.Sum)
-            {
-                return search.Aggregations(aggs => aggs.Sum(aggregate.Name ?? fieldname, c => c.Field(field)));
-            }
-            else if (aggregate.Type == AggregateType.Average)
-            {
-                return search.Aggregations(aggs => aggs.Average(aggregate.Name ?? fieldname, c => c.Field(field)));
-            }
-            else if (aggregate.Type == AggregateType.Count)
-            {
-                return search.Aggregations(aggs => aggs.ValueCount(aggregate.Name ?? fieldname, c => c.Field(field)));
-            }
-            else if (aggregate.Type == AggregateType.Max)
-            {
-                return search.Aggregations(aggs => aggs.Max(aggregate.Name ?? fieldname, c => c.Field(field)));
-            }
-            else if (aggregate.Type == AggregateType.Min)
-            {
-                return search.Aggregations(aggs => aggs.Min(aggregate.Name ?? fieldname, c => c.Field(field)));
-            }
-            else
-            {
-                return search;
-            }
-        }
-
         /// <summary>
         /// 查询指定字段
         /// </summary>
@@ -541,7 +587,23 @@ namespace SP.StudioCore.ElasticSearch
         /// <returns></returns>
         public static SearchDescriptor<TDocument> Select<TDocument>(this SearchDescriptor<TDocument> query, params Expression<Func<TDocument, object>>[] fields) where TDocument : class
         {
+            if (query == null) throw new NullReferenceException();
             return query.Source(sc => sc.Includes(ic => ic.Fields(fields)));
+        }
+        /// <summary>
+        /// 查询指定字段
+        /// </summary>
+        /// <typeparam name="TDocument"></typeparam>
+        /// <param name="query"></param>
+        /// <param name="fields"></param>
+        /// <returns></returns>
+        public static Func<SearchDescriptor<TDocument>, ISearchRequest> Select<TDocument>(this Func<SearchDescriptor<TDocument>, ISearchRequest> query, params Expression<Func<TDocument, object>>[] fields) where TDocument : class
+        {
+            if (query == null) throw new NullReferenceException();
+            return (s) =>
+            {
+                return s.Select(fields);
+            };
         }
         /// <summary>
         /// 转换聚合值
@@ -549,10 +611,10 @@ namespace SP.StudioCore.ElasticSearch
         /// <typeparam name="TDocument"></typeparam>
         /// <param name="response"></param>
         /// <returns></returns>
-        public static TDocument ToAggregate<TDocument>(this ISearchResponse<TDocument> response, params Expression<Func<TDocument, object>>[] fields) where TDocument : class
+        public static TDocument ToAggregate<TDocument>(this ISearchResponse<TDocument> response) where TDocument : class
         {
             TDocument document = Activator.CreateInstance<TDocument>();
-            PropertyInfo[] properties = fields.Select(c => c.ToPropertyInfo()).ToArray();
+            IEnumerable<PropertyInfo> properties = typeof(TDocument).GetProperties().Where(c => c.HasAttribute<AggregateAttribute>());
             foreach (PropertyInfo property in properties)
             {
                 AggregateAttribute aggregate = property.GetAttribute<AggregateAttribute>();

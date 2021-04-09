@@ -39,10 +39,10 @@ namespace SP.StudioCore.ElasticSearch
                 lstScript.Add($"ctx._source.{field}=params.{field}");
                 dicValue.Add(field, property.GetValue(entity));
             }
-            
-            return desc.Script(s=>s.Source(string.Join(';', lstScript)).Params(dicValue));
+
+            return desc.Script(s => s.Source(string.Join(';', lstScript)).Params(dicValue));
         }
-        
+
         /// <summary>
         /// 新增
         /// </summary>
@@ -60,7 +60,7 @@ namespace SP.StudioCore.ElasticSearch
             Id id = new Id(entity.ID);
             return client.Index(entity, c => c.Index(indexname).Id(id).Refresh(Refresh.False)).IsValid;
         }
-        
+
         /// <summary>
         /// 根据ID修改所有字段
         /// </summary>
@@ -132,32 +132,64 @@ namespace SP.StudioCore.ElasticSearch
             return client.DeleteByQuery(action).IsValid;
         }
 
-
+        /// <summary>
+        /// 获取表总记录数
+        /// </summary>
+        /// <typeparam name="TDocument"></typeparam>
+        /// <param name="client"></param>
+        /// <returns></returns>
         public static long Count<TDocument>(this IElasticClient client) where TDocument : class
         {
             string indexname = typeof(TDocument).GetIndexName();
             return client.Count<TDocument>(c => c.Index(indexname)).Count;
         }
+        /// <summary>
+        /// 根据条件获取表总记录数
+        /// </summary>
+        /// <typeparam name="TDocument"></typeparam>
+        /// <param name="client"></param>
+        /// <returns></returns>
+        public static long Count<TDocument, TValue>(this IElasticClient client, TValue value, Expression<Func<TDocument, TValue>> field) where TDocument : class
+        {
+            if (client == null) throw new NullReferenceException();
+            if (value == null) throw new NullReferenceException();
+            if (field == null) throw new NullReferenceException();
+            string indexname = typeof(TDocument).GetIndexName();
+            return client.Count<TDocument>(c => c.Index(indexname).Query(q => q.Term(field, value))).Count;
+        }
 
         /// <summary>
-        /// 通过主键ID查询是否存在
+        /// 查询表是否存在
         /// </summary>
         /// <typeparam name="TDocument"></typeparam>
         /// <param name="response"></param>
         /// <returns></returns>
-        public static bool Any<TDocument>(this IElasticClient client, int value) where TDocument : class, IDocument<int>
+        public static bool Any<TDocument>(this IElasticClient client) where TDocument : class
         {
-            return client.Any<TDocument, int>(value);
-        }
-        public static bool Any<TDocument, TKey>(this IElasticClient client, TKey value) where TDocument : class, IDocument<TKey> where TKey : struct
-        {
+            if (client == null) throw new NullReferenceException();
             string indexname = typeof(TDocument).GetIndexName();
-            string fieldname = typeof(TDocument).GetProperty("ID").GetFieldName();
+            return client.Search<TDocument>(s => s.Index(indexname)).IsValid;
+        }
+        /// <summary>
+        /// 条件查询表是否存在
+        /// </summary>
+        /// <typeparam name="TDocument"></typeparam>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="client"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static bool Any<TDocument, TValue>(this IElasticClient client, TValue value, Expression<Func<TDocument, TValue>> field) where TDocument : class
+        {
+            if (client == null) throw new NullReferenceException();
+            if (value == null) throw new NullReferenceException();
+            if (field == null) throw new NullReferenceException();
+            string indexname = typeof(TDocument).GetIndexName();
+            string fieldname = field.GetFieldName();
             if (value is Guid)
             {
-                fieldname = fieldname + ".keyword";
+                fieldname += ".keyword";
             }
-            return client.Search<TDocument>(q => q.Index(indexname).Query(q => q.Term(t => t.Field(fieldname).Value(value))).Select(c => c.ID).Size(1)).Documents.Count == 1;
+            return client.Search<TDocument>(q => q.Index(indexname).Query(q => q.Term(t => t.Field(fieldname).Value(value))).Size(1)).Documents.Count == 1;
         }
         /// <summary>
         /// 获取第一条数据
@@ -170,6 +202,7 @@ namespace SP.StudioCore.ElasticSearch
         /// <returns></returns>
         public static TDocument FirstOrDefault<TDocument, TValue>(this IElasticClient client, TValue value, Expression<Func<TDocument, TValue>> field) where TDocument : class
         {
+            if (client == null) throw new NullReferenceException();
             if (value == null) throw new NullReferenceException();
             if (field == null) throw new NullReferenceException();
             return client.Search<TDocument>(c => c.Query(q => q.Term(field, value)).Size(1)).Documents.FirstOrDefault();
@@ -199,22 +232,41 @@ namespace SP.StudioCore.ElasticSearch
         /// <returns></returns>
         public static List<TDocument> Search<TDocument>(this IElasticClient client, Func<QueryContainerDescriptor<TDocument>, QueryContainer> selector, params Expression<Func<TDocument, object>>[] fields) where TDocument : class
         {
+            if (client == null) throw new NullReferenceException();
             string indexname = typeof(TDocument).GetIndexName();
-            Func<SearchDescriptor<TDocument>, ISearchRequest> query = (q) =>
+            ISearchRequest query(SearchDescriptor<TDocument> q)
             {
                 return q.Index(indexname).Query(q => q.Bool(b => b.Must(selector))).Select(fields);
-            };
-            return client.Search(query).Documents.ToList();
+            }
+            return client.Search((Func<SearchDescriptor<TDocument>, ISearchRequest>)query).Documents.ToList();
         }
         /// <summary>
         /// 查询（真实查询）
         /// </summary>
         /// <typeparam name="TDocument"></typeparam>
         /// <param name="client"></param>
-        /// <param name="selector">检索条件</param>
+        /// <param name="queries">查询条件</param>
+        /// <returns></returns>
+        public static List<TDocument> Search<TDocument>(this IElasticClient client, params Func<QueryContainerDescriptor<TDocument>, QueryContainer>[] queries) where TDocument : class
+        {
+            if (client == null) throw new NullReferenceException();
+            string indexname = typeof(TDocument).GetIndexName();
+            ISearchRequest query(SearchDescriptor<TDocument> q)
+            {
+                return q.Index(indexname).Query(q => q.Bool(b => b.Must(queries)));
+            }
+            return client.Search((Func<SearchDescriptor<TDocument>, ISearchRequest>)query).Documents.ToList();
+        }
+        /// <summary>
+        /// 查询（真实查询）
+        /// </summary>
+        /// <typeparam name="TDocument"></typeparam>
+        /// <param name="client"></param>
+        /// <param name="fields">过滤字段</param>
         /// <returns></returns>
         public static List<TDocument> Search<TDocument>(this IElasticClient client, params Expression<Func<TDocument, object>>[] fields) where TDocument : class
         {
+            if (client == null) throw new NullReferenceException();
             string indexname = typeof(TDocument).GetIndexName();
             ISearchRequest query(SearchDescriptor<TDocument> q)
             {
@@ -224,7 +276,7 @@ namespace SP.StudioCore.ElasticSearch
         }
 
         /// <summary>
-        /// 匹配一个值，同AND
+        /// 匹配一个值，同AND（未实现）
         /// </summary>
         /// <typeparam name="TDocument"></typeparam>
         /// <typeparam name="TValue"></typeparam>
@@ -262,6 +314,43 @@ namespace SP.StudioCore.ElasticSearch
             }
         }
         /// <summary>
+        /// 匹配一个或者多个值，同OR(未实现)
+        /// </summary>
+        /// <typeparam name="TDocument"></typeparam>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="query"></param>
+        /// <param name="value"></param>
+        /// <param name="field"></param>
+        /// <returns></returns>
+        public static IEnumerable<QueryContainerDescriptor<TDocument>> Where<TDocument, TValue>(this IElasticClient client, TValue? value, Expression<Func<TDocument, TValue>> field) where TDocument : class
+        {
+            if (value == null) yield break;
+            QueryContainerDescriptor<TDocument> search = new QueryContainerDescriptor<TDocument>();
+            Type type = value.GetType();
+            switch (type.Name)
+            {
+                case "Guid":
+                case "String":
+                    search.Term(c => c.Field(field.GetFieldName() + ".keyword").Value(value));
+                    yield return search;
+                    break;
+                case "Int16":
+                case "Int32":
+                case "Int64":
+                case "Byte":
+                    search.Term(field, value);
+                    yield return search;
+                    break;
+                default:
+                    if (type.IsEnum)
+                    {
+                        search.Term(field, value);
+                        yield return search;
+                    }
+                    break;
+            }
+        }
+        /// <summary>
         /// 匹配一个或者多个值，同OR
         /// </summary>
         /// <typeparam name="TDocument"></typeparam>
@@ -270,35 +359,6 @@ namespace SP.StudioCore.ElasticSearch
         /// <param name="value"></param>
         /// <param name="field"></param>
         /// <returns></returns>
-        //public static IEnumerable<QueryContainerDescriptor<TDocument>> Where<TDocument, TValue>(this IElasticClient client, TValue? value, Expression<Func<TDocument, TValue>> field) where TDocument : class
-        //{
-        //    if (value == null) yield break;
-        //    QueryContainerDescriptor<TDocument> search = new QueryContainerDescriptor<TDocument>();
-        //    Type type = value.GetType();
-        //    switch (type.Name)
-        //    {
-        //        case "Guid":
-        //        case "String":
-        //            search.Term(c => c.Field(field.GetFieldName() + ".keyword").Value(value));
-        //            yield return search;
-        //            break;
-        //        case "Int16":
-        //        case "Int32":
-        //        case "Int64":
-        //        case "Byte":
-        //            search.Term(field, value);
-        //            yield return search;
-        //            break;
-        //        default:
-        //            if (type.IsEnum)
-        //            {
-        //                search.Term(field, value);
-        //                yield return search;
-        //            }
-        //            break;
-        //    }
-        //}
-
         public static QueryContainerDescriptor<TDocument> Where<TDocument, TValue>(this QueryContainerDescriptor<TDocument> query, object value, Expression<Func<TDocument, TValue>> field) where TDocument : class
         {
             if (value == null) return query;

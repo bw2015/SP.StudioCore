@@ -677,9 +677,8 @@ namespace SP.StudioCore.ElasticSearch
         /// <returns></returns>
         public static Func<SearchDescriptor<TDocument>, ISearchRequest> GroupBy<TDocument, TValue>(this Func<SearchDescriptor<TDocument>, ISearchRequest> search, params Expression<Func<TDocument, TValue>>[] fields) where TDocument : class
         {
-            return (s) =>
+            Func<AggregationContainerDescriptor<TDocument>, IAggregationContainer> group = (aggs) =>
             {
-                s.Size(0);
                 foreach (var field in fields)
                 {
                     PropertyInfo property = field.ToPropertyInfo();
@@ -688,25 +687,30 @@ namespace SP.StudioCore.ElasticSearch
                     if (aggregate == null) { continue; }
                     else if (aggregate.Type == AggregateType.Sum)
                     {
-                        s.Aggregations(aggs => aggs.Sum(aggregate.Name ?? fieldname, c => c.Field(field)));
+                        aggs.Sum(aggregate.Name ?? fieldname, c => c.Field(field));
                     }
                     else if (aggregate.Type == AggregateType.Average)
                     {
-                        s.Aggregations(aggs => aggs.Average(aggregate.Name ?? fieldname, c => c.Field(field)));
+                        aggs.Average(aggregate.Name ?? fieldname, c => c.Field(field));
                     }
                     else if (aggregate.Type == AggregateType.Count)
                     {
-                        s.Aggregations(aggs => aggs.ValueCount(aggregate.Name ?? fieldname, c => c.Field(field)));
+                        aggs.ValueCount(aggregate.Name ?? fieldname, c => c.Field(field));
                     }
                     else if (aggregate.Type == AggregateType.Max)
                     {
-                        s.Aggregations(aggs => aggs.Max(aggregate.Name ?? fieldname, c => c.Field(field)));
+                        aggs.Max(aggregate.Name ?? fieldname, c => c.Field(field));
                     }
                     else if (aggregate.Type == AggregateType.Min)
                     {
-                        s.Aggregations(aggs => aggs.Min(aggregate.Name ?? fieldname, c => c.Field(field)));
+                        aggs.Min(aggregate.Name ?? fieldname, c => c.Field(field));
                     }
                 }
+                return aggs;
+            };
+            return (s) =>
+            {
+                s.Size(0).Aggregations(group);
                 search.Invoke(s);
                 return s;
             };

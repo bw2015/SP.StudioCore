@@ -375,6 +375,10 @@ namespace SP.StudioCore.ElasticSearch
                     {
                         query.Range(r => r.GreaterThan((long)v).Field(field));
                     }
+                    else if (value.Value is Decimal)
+                    {
+                        query.Range(r => r.GreaterThan(Convert.ToDouble(v)).Field(field));
+                    }
                     else
                     {
                         query.Range(r => r.GreaterThan((double)v).Field(field));
@@ -388,6 +392,10 @@ namespace SP.StudioCore.ElasticSearch
                     else if (value.Value is Int64)
                     {
                         query.Range(r => r.GreaterThanOrEquals((long)v).Field(field));
+                    }
+                    else if (value.Value is Decimal)
+                    {
+                        query.Range(r => r.GreaterThanOrEquals(Convert.ToDouble(v)).Field(field));
                     }
                     else
                     {
@@ -403,6 +411,10 @@ namespace SP.StudioCore.ElasticSearch
                     {
                         query.Range(r => r.LessThan((long)v).Field(field));
                     }
+                    else if (value.Value is Decimal)
+                    {
+                        query.Range(r => r.LessThan(Convert.ToDouble(v)).Field(field));
+                    }
                     else
                     {
                         query.Range(r => r.LessThan((double)v).Field(field));
@@ -416,6 +428,10 @@ namespace SP.StudioCore.ElasticSearch
                     else if (value.Value is Int64)
                     {
                         query.Range(r => r.LessThanOrEquals((long)v).Field(field));
+                    }
+                    else if (value.Value is Decimal)
+                    {
+                        query.Range(r => r.LessThanOrEquals(Convert.ToDouble(v)).Field(field));
                     }
                     else
                     {
@@ -436,57 +452,73 @@ namespace SP.StudioCore.ElasticSearch
                 case ExpressionType.GreaterThan:
                     if (value.Value is DateTime)
                     {
-                        query.DateRange(dr => dr.GreaterThan((DateTime)v).Field(script));
+                        query.DateRange(dr => dr.GreaterThan((DateTime)v).Field(field));
                     }
                     else if (value.Value is Int64)
                     {
-                        query.Range(r => r.GreaterThan((long)v).Field(script));
+                        query.Range(r => r.GreaterThan((long)v).Field(field));
+                    }
+                    else if (value.Value is Decimal)
+                    {
+                        query.Range(r => r.GreaterThan(Convert.ToDouble(v)).Field(field));
                     }
                     else
                     {
-                        query.Range(r => r.GreaterThan((double)v).Field(script));
+                        query.Range(r => r.GreaterThan((double)v).Field(field));
                     }
                     break;
                 case ExpressionType.GreaterThanOrEqual:
                     if (value.Value is DateTime)
                     {
-                        query.DateRange(dr => dr.GreaterThanOrEquals((DateTime)v).Field(script));
+                        query.DateRange(dr => dr.GreaterThanOrEquals((DateTime)v).Field(field));
                     }
                     else if (value.Value is Int64)
                     {
-                        query.Range(r => r.GreaterThanOrEquals((long)v).Field(script));
+                        query.Range(r => r.GreaterThanOrEquals((long)v).Field(field));
+                    }
+                    else if (value.Value is Decimal)
+                    {
+                        query.Range(r => r.GreaterThanOrEquals(Convert.ToDouble(v)).Field(field));
                     }
                     else
                     {
-                        query.Range(r => r.GreaterThanOrEquals((double)v).Field(script));
+                        query.Range(r => r.GreaterThanOrEquals((double)v).Field(field));
                     }
                     break;
                 case ExpressionType.LessThan:
                     if (value.Value is DateTime)
                     {
-                        query.DateRange(dr => dr.LessThan((DateTime)v).Field(script));
+                        query.DateRange(dr => dr.LessThan((DateTime)v).Field(field));
                     }
                     else if (value.Value is Int64)
                     {
-                        query.Range(r => r.LessThan((long)v).Field(script));
+                        query.Range(r => r.LessThan((long)v).Field(field));
+                    }
+                    else if (value.Value is Decimal)
+                    {
+                        query.Range(r => r.LessThan(Convert.ToDouble(v)).Field(field));
                     }
                     else
                     {
-                        query.Range(r => r.LessThan((double)v).Field(script));
+                        query.Range(r => r.LessThan((double)v).Field(field));
                     }
                     break;
                 case ExpressionType.LessThanOrEqual:
                     if (value.Value is DateTime)
                     {
-                        query.DateRange(dr => dr.LessThanOrEquals((DateTime)v).Field(script));
+                        query.DateRange(dr => dr.LessThanOrEquals((DateTime)v).Field(field));
                     }
                     else if (value.Value is Int64)
                     {
-                        query.Range(r => r.LessThanOrEquals((long)v).Field(script));
+                        query.Range(r => r.LessThanOrEquals((long)v).Field(field));
+                    }
+                    else if (value.Value is Decimal)
+                    {
+                        query.Range(r => r.LessThanOrEquals(Convert.ToDouble(v)).Field(field));
                     }
                     else
                     {
-                        query.Range(r => r.LessThanOrEquals((double)v).Field(script));
+                        query.Range(r => r.LessThanOrEquals((double)v).Field(field));
                     }
                     break;
             }

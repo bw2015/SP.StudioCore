@@ -373,7 +373,7 @@ namespace SP.StudioCore.ElasticSearch
                     }
                     else if (value.Value is Int64)
                     {
-                        query.Range(r => r.GreaterThanOrEquals((long)v).Field(field));
+                        query.Range(r => r.GreaterThan((long)v).Field(field));
                     }
                     else
                     {
@@ -401,7 +401,7 @@ namespace SP.StudioCore.ElasticSearch
                     }
                     else if (value.Value is Int64)
                     {
-                        query.Range(r => r.GreaterThanOrEquals((long)v).Field(field));
+                        query.Range(r => r.LessThan((long)v).Field(field));
                     }
                     else
                     {
@@ -415,7 +415,7 @@ namespace SP.StudioCore.ElasticSearch
                     }
                     else if (value.Value is Int64)
                     {
-                        query.Range(r => r.GreaterThanOrEquals((long)v).Field(field));
+                        query.Range(r => r.LessThanOrEquals((long)v).Field(field));
                     }
                     else
                     {
@@ -440,7 +440,7 @@ namespace SP.StudioCore.ElasticSearch
                     }
                     else if (value.Value is Int64)
                     {
-                        query.Range(r => r.GreaterThanOrEquals((long)v).Field(script));
+                        query.Range(r => r.GreaterThan((long)v).Field(script));
                     }
                     else
                     {
@@ -468,7 +468,7 @@ namespace SP.StudioCore.ElasticSearch
                     }
                     else if (value.Value is Int64)
                     {
-                        query.Range(r => r.GreaterThanOrEquals((long)v).Field(script));
+                        query.Range(r => r.LessThan((long)v).Field(script));
                     }
                     else
                     {
@@ -482,7 +482,7 @@ namespace SP.StudioCore.ElasticSearch
                     }
                     else if (value.Value is Int64)
                     {
-                        query.Range(r => r.GreaterThanOrEquals((long)v).Field(script));
+                        query.Range(r => r.LessThanOrEquals((long)v).Field(script));
                     }
                     else
                     {

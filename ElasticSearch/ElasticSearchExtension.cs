@@ -452,73 +452,73 @@ namespace SP.StudioCore.ElasticSearch
                 case ExpressionType.GreaterThan:
                     if (value.Value is DateTime)
                     {
-                        query.DateRange(dr => dr.GreaterThan((DateTime)v).Field(field));
+                        query.DateRange(dr => dr.GreaterThan((DateTime)v).Field(script));
                     }
                     else if (value.Value is Int64)
                     {
-                        query.Range(r => r.GreaterThan((long)v).Field(field));
+                        query.Range(r => r.GreaterThan((long)v).Field(script));
                     }
                     else if (value.Value is Decimal)
                     {
-                        query.Range(r => r.GreaterThan(Convert.ToDouble(v)).Field(field));
+                        query.Range(r => r.GreaterThan(Convert.ToDouble(v)).Field(script));
                     }
                     else
                     {
-                        query.Range(r => r.GreaterThan((double)v).Field(field));
+                        query.Range(r => r.GreaterThan((double)v).Field(script));
                     }
                     break;
                 case ExpressionType.GreaterThanOrEqual:
                     if (value.Value is DateTime)
                     {
-                        query.DateRange(dr => dr.GreaterThanOrEquals((DateTime)v).Field(field));
+                        query.DateRange(dr => dr.GreaterThanOrEquals((DateTime)v).Field(script));
                     }
                     else if (value.Value is Int64)
                     {
-                        query.Range(r => r.GreaterThanOrEquals((long)v).Field(field));
+                        query.Range(r => r.GreaterThanOrEquals((long)v).Field(script));
                     }
                     else if (value.Value is Decimal)
                     {
-                        query.Range(r => r.GreaterThanOrEquals(Convert.ToDouble(v)).Field(field));
+                        query.Range(r => r.GreaterThanOrEquals(Convert.ToDouble(v)).Field(script));
                     }
                     else
                     {
-                        query.Range(r => r.GreaterThanOrEquals((double)v).Field(field));
+                        query.Range(r => r.GreaterThanOrEquals((double)v).Field(script));
                     }
                     break;
                 case ExpressionType.LessThan:
                     if (value.Value is DateTime)
                     {
-                        query.DateRange(dr => dr.LessThan((DateTime)v).Field(field));
+                        query.DateRange(dr => dr.LessThan((DateTime)v).Field(script));
                     }
                     else if (value.Value is Int64)
                     {
-                        query.Range(r => r.LessThan((long)v).Field(field));
+                        query.Range(r => r.LessThan((long)v).Field(script));
                     }
                     else if (value.Value is Decimal)
                     {
-                        query.Range(r => r.LessThan(Convert.ToDouble(v)).Field(field));
+                        query.Range(r => r.LessThan(Convert.ToDouble(v)).Field(script));
                     }
                     else
                     {
-                        query.Range(r => r.LessThan((double)v).Field(field));
+                        query.Range(r => r.LessThan((double)v).Field(script));
                     }
                     break;
                 case ExpressionType.LessThanOrEqual:
                     if (value.Value is DateTime)
                     {
-                        query.DateRange(dr => dr.LessThanOrEquals((DateTime)v).Field(field));
+                        query.DateRange(dr => dr.LessThanOrEquals((DateTime)v).Field(script));
                     }
                     else if (value.Value is Int64)
                     {
-                        query.Range(r => r.LessThanOrEquals((long)v).Field(field));
+                        query.Range(r => r.LessThanOrEquals((long)v).Field(script));
                     }
                     else if (value.Value is Decimal)
                     {
-                        query.Range(r => r.LessThanOrEquals(Convert.ToDouble(v)).Field(field));
+                        query.Range(r => r.LessThanOrEquals(Convert.ToDouble(v)).Field(script));
                     }
                     else
                     {
-                        query.Range(r => r.LessThanOrEquals((double)v).Field(field));
+                        query.Range(r => r.LessThanOrEquals((double)v).Field(script));
                     }
                     break;
             }
@@ -671,6 +671,7 @@ namespace SP.StudioCore.ElasticSearch
         {
             return (s) =>
             {
+                s.Size(0);
                 PropertyInfo property = field.ToPropertyInfo();
                 AggregateAttribute aggregate = property.GetAttribute<AggregateAttribute>();
                 string fieldname = property.GetFieldName();
@@ -701,6 +702,9 @@ namespace SP.StudioCore.ElasticSearch
                 return s;
             };
         }
+
+
+
         /// <summary>
         /// 聚合（聚合指定特性Aggregate）
         /// </summary>
@@ -747,7 +751,96 @@ namespace SP.StudioCore.ElasticSearch
                 return s;
             };
         }
-
+        public static Func<AggregationContainerDescriptor<T>, IAggregationContainer> GroupBy<T, TValue>(this Func<AggregationContainerDescriptor<T>, IAggregationContainer> selector, params Expression<Func<T, TValue>>[] fields)
+        {
+            return (s) =>
+            {
+                foreach (var field in fields)
+                {
+                    PropertyInfo property = field.ToPropertyInfo();
+                    AggregateAttribute aggregate = property.GetAttribute<AggregateAttribute>();
+                    string fieldname = property.GetFieldName();
+                    if (aggregate == null) { continue; }
+                    else if (aggregate.Type == AggregateType.Sum)
+                    {
+                        s.Sum(aggregate.Name ?? fieldname, c => c.Field(field));
+                    }
+                    else if (aggregate.Type == AggregateType.Average)
+                    {
+                        s.Average(aggregate.Name ?? fieldname, c => c.Field(field));
+                    }
+                    else if (aggregate.Type == AggregateType.Count)
+                    {
+                        s.ValueCount(aggregate.Name ?? fieldname, c => c.Field(field));
+                    }
+                    else if (aggregate.Type == AggregateType.Max)
+                    {
+                        s.Max(aggregate.Name ?? fieldname, c => c.Field(field));
+                    }
+                    else if (aggregate.Type == AggregateType.Min)
+                    {
+                        s.Min(aggregate.Name ?? fieldname, c => c.Field(field));
+                    }
+                }
+                return s;
+            };
+        }
+        /// <summary>
+        /// 时间聚合（需指定聚合类型）
+        /// </summary>
+        /// <typeparam name="TDocument"></typeparam>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="search">查询条件</param>
+        /// <param name="interval">聚合格式</param>
+        /// <param name="condition">聚合条件</param>
+        /// <param name="fields">聚合内容字段</param>
+        /// <returns></returns>
+        public static Func<SearchDescriptor<TDocument>, ISearchRequest> GroupByDate<TDocument, TValue>(this Func<SearchDescriptor<TDocument>, ISearchRequest> search, DateInterval interval, Expression<Func<TDocument, TValue>> condition, params Expression<Func<TDocument, TValue>>[] fields) where TDocument : class
+        {
+            string fieldName = condition.GetFieldName();
+            if (string.IsNullOrWhiteSpace(fieldName)) throw new NullReferenceException("group by field is null");
+            Func<AggregationContainerDescriptor<TDocument>, IAggregationContainer> groupfield = (aggs) =>
+            {
+                foreach (var field in fields)
+                {
+                    PropertyInfo property = field.ToPropertyInfo();
+                    AggregateAttribute aggregate = property.GetAttribute<AggregateAttribute>();
+                    string fieldname = property.GetFieldName();
+                    if (aggregate == null) { continue; }
+                    else if (aggregate.Type == AggregateType.Sum)
+                    {
+                        aggs.Sum(aggregate.Name ?? fieldname, c => c.Field(field));
+                    }
+                    else if (aggregate.Type == AggregateType.Average)
+                    {
+                        aggs.Average(aggregate.Name ?? fieldname, c => c.Field(field));
+                    }
+                    else if (aggregate.Type == AggregateType.Count)
+                    {
+                        aggs.ValueCount(aggregate.Name ?? fieldname, c => c.Field(field));
+                    }
+                    else if (aggregate.Type == AggregateType.Max)
+                    {
+                        aggs.Max(aggregate.Name ?? fieldname, c => c.Field(field));
+                    }
+                    else if (aggregate.Type == AggregateType.Min)
+                    {
+                        aggs.Min(aggregate.Name ?? fieldname, c => c.Field(field));
+                    }
+                }
+                return aggs;
+            };
+            Func<AggregationContainerDescriptor<TDocument>, IAggregationContainer> group = (aggs) =>
+            {
+                aggs.DateHistogram(fieldName, d => d.FixedInterval(interval).Aggregations(groupfield))
+            };
+            return (s) =>
+            {
+                s.Size(0).Aggregations(group);
+                search.Invoke(s);
+                return s;
+            };
+        }
         /// <summary>
         /// 查询指定字段
         /// </summary>
@@ -815,6 +908,24 @@ namespace SP.StudioCore.ElasticSearch
                 property.SetValue(document, Convert.ChangeType(value, property.PropertyType));
             }
             return document;
+        }
+        /// <summary>
+        /// 聚合转换
+        /// </summary>
+        /// <param name="response"></param>
+        /// <returns></returns>
+        public static IEnumerable<TDocument> ToList<TDocument>(this ISearchResponse<TDocument> response) where TDocument : class
+        {
+            TDocument document = Activator.CreateInstance<TDocument>();
+            IEnumerable<PropertyInfo> properties = typeof(TDocument).GetProperties().Where(c => c.HasAttribute<AggregateAttribute>());
+            foreach (PropertyInfo property in properties)
+            {
+                AggregateAttribute aggregate = property.GetAttribute<AggregateAttribute>();
+                if (aggregate == null) continue;
+                string fieldname = aggregate.Name ?? property.GetFieldName();
+                object value = null;
+             
+            }
         }
 
         /// <summary>

@@ -752,6 +752,7 @@ namespace SP.StudioCore.ElasticSearch
             };
         }
         public static Func<AggregationContainerDescriptor<T>, IAggregationContainer> GroupBy<T, TValue>(this Func<AggregationContainerDescriptor<T>, IAggregationContainer> selector, params Expression<Func<T, TValue>>[] fields)
+            where T : class
         {
             return (s) =>
             {
@@ -832,7 +833,7 @@ namespace SP.StudioCore.ElasticSearch
             };
             Func<AggregationContainerDescriptor<TDocument>, IAggregationContainer> group = (aggs) =>
             {
-                aggs.DateHistogram(fieldName, d => d.FixedInterval(interval).Aggregations(groupfield))
+                return aggs.DateHistogram(fieldName, d => d.FixedInterval(interval).Aggregations(groupfield));
             };
             return (s) =>
             {
@@ -924,8 +925,8 @@ namespace SP.StudioCore.ElasticSearch
                 if (aggregate == null) continue;
                 string fieldname = aggregate.Name ?? property.GetFieldName();
                 object value = null;
-             
             }
+            throw new NotImplementedException();
         }
 
         /// <summary>

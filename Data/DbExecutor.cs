@@ -90,7 +90,7 @@ namespace SP.StudioCore.Data
             }
             catch (Exception ex)
             {
-                throw new Exception(this.ThrowException(ex, cmdText, parameters));
+                throw new DataException(this.ThrowException(ex, cmdText, parameters));
             }
             finally
             {
@@ -116,7 +116,7 @@ namespace SP.StudioCore.Data
             }
             catch (Exception ex)
             {
-                throw new Exception(this.ThrowException(ex, cmdText, parameters));
+                throw new DataException(this.ThrowException(ex, cmdText, parameters));
             }
             finally
             {
@@ -178,7 +178,7 @@ namespace SP.StudioCore.Data
             }
             catch (Exception ex)
             {
-                throw new Exception(this.ThrowException(ex, cmdText, parameters));
+                throw new DataException(this.ThrowException(ex, cmdText, parameters));
             }
             finally
             {
@@ -190,7 +190,7 @@ namespace SP.StudioCore.Data
         public void Commit()
         {
             if (tran == null)
-                throw new Exception("未开启事务");
+                throw new DataException("未开启事务");
 
             tran.Commit();
 
@@ -209,7 +209,7 @@ namespace SP.StudioCore.Data
         public void Rollback()
         {
             if (tran == null)
-                throw new Exception("未开启事务");
+                throw new DataException("未开启事务");
             tran.Rollback();
         }
 
@@ -227,10 +227,8 @@ namespace SP.StudioCore.Data
         private string ThrowException(Exception ex, string cmdText, object param)
         {
             StringBuilder sb = new StringBuilder("{")
-                .AppendFormat("\"Message\":\"{0}\"", HttpUtility.JavaScriptStringEncode(ex.Message))
-                .Append(",")
-                .AppendFormat("\"Command\":\"{0}\"", HttpUtility.JavaScriptStringEncode(cmdText));
-
+                .Append($"\"Message\":\"{ HttpUtility.JavaScriptStringEncode(ex.Message) }\"")
+                .Append($",\"Command\":\"{ HttpUtility.JavaScriptStringEncode(cmdText) }\"");
             if (param != null)
             {
                 sb.Append(",\"Params\":{");
@@ -243,7 +241,7 @@ namespace SP.StudioCore.Data
                     {
                         object value = dynamicParameters.Get<object>(paramName);
                         if (value == null) value = string.Empty;
-                        parameters.Add(string.Format("\"{0}\":\"{1}\"", paramName, HttpUtility.JavaScriptStringEncode(value.ToString())));
+                        parameters.Add($"\"{ paramName }\":\"{ HttpUtility.JavaScriptStringEncode(value.ToString()) }\"");
                     }
                 }
                 else
@@ -252,7 +250,7 @@ namespace SP.StudioCore.Data
                     {
                         object value = property.GetValue(param);
                         if (value == null) value = string.Empty;
-                        parameters.Add(string.Format("\"{0}\":\"{1}\"", property.Name, HttpUtility.JavaScriptStringEncode(value.ToString())));
+                        parameters.Add($"\"{ property.Name }\":\"{ HttpUtility.JavaScriptStringEncode(value.ToString()) }\"");
                     }
                 }
                 sb.Append(string.Join(",", parameters))
@@ -272,17 +270,16 @@ namespace SP.StudioCore.Data
         private string ThrowException(Exception ex, string cmdText, params DbParameter[] parameters)
         {
             StringBuilder sb = new StringBuilder("{")
-               .AppendFormat("\"Message\":\"{0}\"", HttpUtility.JavaScriptStringEncode(ex.Message))
-               .Append(",")
-               .AppendFormat("\"Command\":\"{0}\"", HttpUtility.JavaScriptStringEncode(cmdText));
+               .Append($"\"Message\":\"{ HttpUtility.JavaScriptStringEncode(ex.Message) }\"")
+               .Append($",\"Command\":\"{HttpUtility.JavaScriptStringEncode(cmdText)}\"");
             sb.Append(",\"Params\":{");
-            List<string> list = new List<string>();
+            List<string> list = new();
             foreach (DbParameter param in parameters)
             {
-                list.Add(string.Format("\"{0}\":\"{1}\"", param.ParameterName, HttpUtility.JavaScriptStringEncode(param.Value.ToString())));
+                list.Add($"\"{ param.ParameterName }\":\"{ HttpUtility.JavaScriptStringEncode(param.Value.ToString()) }\"");
             }
             sb.Append(string.Join(",", list))
-                .Append("}").Append("}");
+                .Append('}').Append('}');
             return sb.ToString();
         }
 

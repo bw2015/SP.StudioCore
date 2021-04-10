@@ -9,7 +9,7 @@ namespace SP.StudioCore.Web
     /// </summary>
     public sealed class IPHeader
     {
-        public readonly string[] Headers;
+        internal readonly string[] Headers;
 
         public IPHeader(string[] headers)
         {

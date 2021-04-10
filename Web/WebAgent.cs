@@ -266,6 +266,7 @@ namespace SP.StudioCore.Web
         /// </summary>
         /// <param name="time"></param>
         /// <returns></returns>
+        [Obsolete("全部修改成为毫秒")]
         public static long GetTimestamp(DateTime time)
         {
             return (time.ToUniversalTime().Ticks - 621355968000000000) / 10000000;
@@ -276,6 +277,7 @@ namespace SP.StudioCore.Web
         /// </summary>
         /// <param name="timestamp">时间戳（秒）</param>
         /// <returns></returns>
+        [Obsolete("全部修改成为毫秒")]
         public static DateTime GetTimestamp(long timestamp)
         {
             return new DateTime(1970, 1, 1).Add(TimeZoneInfo.Local.BaseUtcOffset).AddSeconds(timestamp);

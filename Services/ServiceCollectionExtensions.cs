@@ -1,7 +1,10 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using SP.StudioCore.Model;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SP.StudioCore.Services
 {
@@ -24,6 +27,20 @@ namespace SP.StudioCore.Services
                  .AddScoped<MessageResult>()
                  // httpContext注入
                  .AddSingleton<IHttpContextAccessor, HttpContextAccessor>(); ;
+        }
+        /// <summary>
+        /// 注入定时任务
+        /// </summary>
+        /// <param name="service"></param>
+        /// <returns></returns>
+        public static IServiceCollection AddJob(this IServiceCollection services)
+        {
+            IEnumerable<Type> types = typeof(ServiceCollectionExtensions).Assembly.GetTypes().Where(t => t.IsPublic && !t.IsAbstract && t.BaseType == typeof(BackgroundService));
+            foreach (Type type in types)
+            {
+                //services.AddHostedService(type);
+            }
+            return services;
         }
     }
 }

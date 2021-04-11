@@ -1,6 +1,7 @@
 ﻿using Elasticsearch.Net;
 using Microsoft.AspNetCore.Http;
 using Nest;
+using SP.StudioCore.Enums;
 using SP.StudioCore.Http;
 using SP.StudioCore.Types;
 using SP.StudioCore.Web;
@@ -241,6 +242,23 @@ namespace SP.StudioCore.ElasticSearch
             return query;
         }
         /// <summary>
+        /// 查询条件与过滤条件
+        /// </summary>
+        /// <typeparam name="TDocument"></typeparam>
+        /// <param name="client"></param>
+        /// <param name="musts">查询条件</param>
+        /// <param name="must_nots">过滤条件</param>
+        /// <returns></returns>
+        public static Func<SearchDescriptor<TDocument>, ISearchRequest> Query<TDocument>(this IElasticClient client, IEnumerable<Func<QueryContainerDescriptor<TDocument>, QueryContainer>> musts, IEnumerable<Func<QueryContainerDescriptor<TDocument>, QueryContainer>> mustnots) where TDocument : class
+        {
+            string indexname = typeof(TDocument).GetIndexName();
+            ISearchRequest query(SearchDescriptor<TDocument> q)
+            {
+                return q.Index(indexname).TrackTotalHits(true).Query(q => q.Bool(b => b.Must(musts).MustNot(mustnots)));
+            }
+            return query;
+        }
+        /// <summary>
         /// 指定索引或别名
         /// </summary>
         /// <typeparam name="TDocument"></typeparam>
@@ -253,6 +271,23 @@ namespace SP.StudioCore.ElasticSearch
             ISearchRequest query(SearchDescriptor<TDocument> q)
             {
                 return q.Index(indexname).TrackTotalHits(true).Query(q => q.Bool(b => b.Must(queries)));
+            }
+            return query;
+        }
+        /// <summary>
+        /// 查询条件与过滤条件
+        /// </summary>
+        /// <typeparam name="TDocument"></typeparam>
+        /// <param name="client"></param>
+        /// <param name="indexname"></param>
+        /// <param name="musts"></param>
+        /// <param name="mustnots"></param>
+        /// <returns></returns>
+        public static Func<SearchDescriptor<TDocument>, ISearchRequest> Query<TDocument>(this IElasticClient client, string indexname, IEnumerable<Func<QueryContainerDescriptor<TDocument>, QueryContainer>> musts, IEnumerable<Func<QueryContainerDescriptor<TDocument>, QueryContainer>> mustnots) where TDocument : class
+        {
+            ISearchRequest query(SearchDescriptor<TDocument> q)
+            {
+                return q.Index(indexname).TrackTotalHits(true).Query(q => q.Bool(b => b.Must(musts).MustNot(mustnots)));
             }
             return query;
         }
@@ -325,8 +360,9 @@ namespace SP.StudioCore.ElasticSearch
             query.Term(field, value);
             return query;
         }
+
         /// <summary>
-        /// 
+        /// 匹配一个或者多个值，同OR
         /// </summary>
         /// <typeparam name="TDocument"></typeparam>
         /// <typeparam name="TValue"></typeparam>
@@ -759,16 +795,27 @@ namespace SP.StudioCore.ElasticSearch
         /// <param name="search">查询条件</param>
         /// <param name="interval">聚合格式</param>
         /// <param name="condition">聚合条件</param>
+        /// <param name="script">聚合条件字段，多字段逗号分隔</param>
         /// <param name="fields">聚合内容字段</param>
         /// <returns></returns>
-        public static Func<SearchDescriptor<TDocument>, ISearchRequest> GroupByDate<TDocument, TValue>(this Func<SearchDescriptor<TDocument>, ISearchRequest> search, DateInterval interval, Expression<Func<TDocument, DateTime>> condition, params Expression<Func<TDocument, TValue>>[] fields) where TDocument : class
+        public static Func<SearchDescriptor<TDocument>, ISearchRequest> GroupByDate<TDocument, TValue>(this Func<SearchDescriptor<TDocument>, ISearchRequest> search, DateInterval interval, Expression<Func<TDocument, DateTime>> condition, string script, params Expression<Func<TDocument, TValue>>[] fields) where TDocument : class
         {
             string fieldName = condition.GetFieldName();
-            if (string.IsNullOrWhiteSpace(fieldName)) throw new Exception("Group By FieldName IS NULL");
-            Func<AggregationContainerDescriptor<TDocument>, IAggregationContainer> group = (aggs) =>
+            if (string.IsNullOrWhiteSpace(fieldName)) throw new NullReferenceException("Group By FieldName IS NULL");
+            IAggregationContainer group(AggregationContainerDescriptor<TDocument> aggs)
             {
-                return aggs.DateHistogram(fieldName, d => d.FixedInterval(interval).Format("yyyy-MM-dd").Aggregations(GroupBy(fields)));
-            };
+                string[] group_field = WebAgent.GetArray<string>(script);
+                string _script = string.Empty;
+                for (int i = 0; i < group_field.Length; i++)
+                {
+                    _script += "doc['" + group_field[i] + "'].value";
+                    if (i + 1 < group_field.Length)
+                    {
+                        _script += "+'-'+";
+                    }
+                }
+                return aggs.DateHistogram(fieldName, d => d.Field(condition).CalendarInterval(interval).Format("yyyy-MM-dd").Aggregations(aggs => aggs.Terms("group_by_script", t => t.Script(_script).Aggregations(GroupBy(fields)))));
+            }
             return (s) =>
             {
                 s.Size(0).Aggregations(group);
@@ -848,56 +895,77 @@ namespace SP.StudioCore.ElasticSearch
         /// 时间聚合转换
         /// </summary>
         /// <param name="response"></param>
+        /// <param name="field">日期聚合的条件</param>
+        /// <param name="script">聚合条件脚本，多字段逗号分隔，注意（顺序跟Group中的script一致）</param>
         /// <returns></returns>
-        public static IEnumerable<TDocument> ToDateAggregate<TDocument, TValue>(this ISearchResponse<TDocument> response, Expression<Func<TDocument, TValue>> field) where TDocument : class
+        public static IEnumerable<TDocument> ToDateAggregate<TDocument>(this ISearchResponse<TDocument> response, Expression<Func<TDocument, DateTime>> field, string script) where TDocument : class
         {
             if (response == null) throw new NullReferenceException();
             string condition = field.GetFieldName();
-            IEnumerable<PropertyInfo> properties = typeof(TDocument).GetProperties().Where(c => c.HasAttribute<AggregateAttribute>() || c.HasAttribute<CountAttribute>() || c.Name == condition);
+            PropertyInfo propertyCondition = field.ToPropertyInfo();
+            IEnumerable<PropertyInfo> properties = typeof(TDocument).GetProperties();
+            string[] scripts = WebAgent.GetArray<string>(script.ToLower());
             foreach (DateHistogramBucket bucket in response.Aggregations.DateHistogram(condition).Buckets)
             {
                 TDocument document = Activator.CreateInstance<TDocument>();
-                foreach (PropertyInfo property in properties)
+                DateTime key_date = Convert.ToDateTime(bucket.KeyAsString);
+                foreach (var item in bucket.Terms("group_by_script").Buckets)
                 {
-                    object? value = null;
-                    if (property.HasAttribute<CountAttribute>())
+                    string[] key_value = WebAgent.GetArray<string>(item.Key, '-');
+                    foreach (PropertyInfo property in properties)
                     {
-                        value = bucket.DocCount;
+                        object? value = null;
+                        if (property.HasAttribute<CountAttribute>())
+                        {
+                            value = item.DocCount;
+                        }
+                        else if (scripts.Contains(property.Name.ToLower()))
+                        {
+                            int index = System.Array.IndexOf(scripts, property.Name.ToLower());
+                            if (property.PropertyType.IsEnum)
+                            {
+                                value = key_value[index].ToEnum(property.PropertyType);
+                            }
+                            else
+                            {
+                                value = key_value[index];
+                            }
+                        }
+                        else if (property.Name.ToLower() == propertyCondition.Name.ToLower())
+                        {
+                            value = key_date;
+                        }
+                        else
+                        {
+                            AggregateAttribute aggregate = property.GetAttribute<AggregateAttribute>();
+                            if (aggregate == null) continue;
+                            string fieldname = aggregate.Name ?? property.GetFieldName();
+                            if (aggregate.Type == AggregateType.Sum)
+                            {
+                                value = item.Sum(fieldname)?.Value;
+                            }
+                            else if (aggregate.Type == AggregateType.Average)
+                            {
+                                value = item.Average(fieldname)?.Value;
+                            }
+                            else if (aggregate.Type == AggregateType.Count)
+                            {
+                                value = item.ValueCount(fieldname)?.Value;
+                            }
+                            else if (aggregate.Type == AggregateType.Max)
+                            {
+                                value = item.Max(fieldname)?.Value;
+                            }
+                            else if (aggregate.Type == AggregateType.Min)
+                            {
+                                value = item.Min(fieldname)?.Value;
+                            }
+                        }
+                        if (value == null) continue;
+                        property.SetValue(document, Convert.ChangeType(value, property.PropertyType));
                     }
-                    else if (property.Name == condition)
-                    {
-                        value = Convert.ToDateTime(bucket.KeyAsString);
-                    }
-                    else
-                    {
-                        AggregateAttribute aggregate = property.GetAttribute<AggregateAttribute>();
-                        if (aggregate == null) continue;
-                        string fieldname = aggregate.Name ?? property.GetFieldName();
-                        if (aggregate.Type == AggregateType.Sum)
-                        {
-                            value = bucket.Sum(fieldname)?.Value;
-                        }
-                        else if (aggregate.Type == AggregateType.Average)
-                        {
-                            value = bucket.Average(fieldname)?.Value;
-                        }
-                        else if (aggregate.Type == AggregateType.Count)
-                        {
-                            value = bucket.ValueCount(fieldname)?.Value;
-                        }
-                        else if (aggregate.Type == AggregateType.Max)
-                        {
-                            value = bucket.Max(fieldname)?.Value;
-                        }
-                        else if (aggregate.Type == AggregateType.Min)
-                        {
-                            value = bucket.Min(fieldname)?.Value;
-                        }
-                    }
-                    if (value == null) continue;
-                    property.SetValue(document, Convert.ChangeType(value, property.PropertyType));
+                    yield return document;
                 }
-                yield return document;
             }
         }
 

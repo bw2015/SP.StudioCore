@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore.Internal;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace SP.StudioCore.Utils
@@ -95,6 +96,24 @@ namespace SP.StudioCore.Utils
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// 取一个二维数组的交集
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="list"></param>
+        /// <returns></returns>
+        public static IEnumerable<T> Intersect<T>(this T[][] list)
+        {
+            if (list == null) throw new ArgumentNullException(nameof(list));
+            if (list.Length == 1) return list[0];
+            IEnumerable<T> result = list[0];
+            for (int index = 1; index < list.Length; index++)
+            {
+                result = result.Intersect(list[index]);
+            }
+            return result;
         }
 
         /// <summary>

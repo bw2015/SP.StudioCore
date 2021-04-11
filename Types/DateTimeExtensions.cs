@@ -42,5 +42,19 @@ namespace SP.StudioCore.Types
         {
             return time.Year <= 1900 ? DateTime.Now : time;
         }
+
+        /// <summary>
+        /// 数字时间格式转化成为时分秒
+        /// </summary>
+        /// <param name="minute"></param>
+        /// <returns></returns>
+        public static string GetMinuteTime(this decimal minute)
+        {
+            TimeSpan time = TimeSpan.FromMinutes((double)minute);
+            List<string> result = new List<string>();
+            if (time.Hours > 0) result.Add(time.Hours.ToString());
+            result.Add(time.ToString(@"mm\:ss"));
+            return string.Join(":", result);
+        }
     }
 }

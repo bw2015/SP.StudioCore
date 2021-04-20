@@ -29,10 +29,15 @@ namespace SP.StudioCore.MQ.RabbitMQ
                     var configurationDefault = new ConfigurationDefault();
                     RabbitConnect rabbitConnect = configurationDefault["Rabbit:" + connectionConfigName];
                     string config = configurationDefault["Rabbit:Product:" + productConfigName];
-                    if (string.IsNullOrWhiteSpace(config)) config = $"ExchangeName={productConfigName}&RoutingKey=&UseConfirmModel=true";
+                    if (string.IsNullOrWhiteSpace(config)) config = $"ExchangeName={productConfigName}&RoutingKey=&UseConfirmModel=true&AutoCreateExchange=true&ExchangeType=fanout";
                     ProductConfig productConfig = config;
 
-                    Items.TryAdd(keyName, new RabbitManager(rabbitConnect, productConfig));
+                    var rabbitManager = new RabbitManager(rabbitConnect, productConfig);
+                    
+                    // 自动创建交换器
+                    if (productConfig.AutoCreateExchange) rabbitManager.CreateExchange();
+
+                    Items.TryAdd(keyName, rabbitManager);
                 }
             }
 

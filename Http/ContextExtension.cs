@@ -155,7 +155,7 @@ namespace SP.StudioCore.Http
         public static T GetItem<T>(this HttpContext context)
         {
             if (context == null || !context.Items.ContainsKey(typeof(T))) return default;
-            return (T) context.Items[typeof(T)];
+            return (T)context.Items[typeof(T)];
         }
 
         public static void SetItem<T>(this HttpContext context, T value)
@@ -190,7 +190,7 @@ namespace SP.StudioCore.Http
         public static T GetItem<T>(this HttpContext context, string name)
         {
             if (!context.Items.ContainsKey(name)) return default;
-            return (T) context.Items[name];
+            return (T)context.Items[name];
         }
 
 
@@ -225,7 +225,7 @@ namespace SP.StudioCore.Http
             if (data != null) return data;
             try
             {
-                using (MemoryStream ms = new MemoryStream((int) context.Request.ContentLength))
+                using (MemoryStream ms = new MemoryStream((int)context.Request.ContentLength))
                 {
                     context.Request.Body.CopyToAsync(ms).Wait();
                     ms.Position = 0;
@@ -326,7 +326,7 @@ namespace SP.StudioCore.Http
             Regex url = new Regex(@"^(http|https)://(?<Domain>.+?)/", RegexOptions.IgnoreCase);
             try
             {
-                foreach (string key in new[] {"X-Forwarded-Site", "Ali-Swift-LOG-Host", "Referer", "Host"})
+                foreach (string key in new[] { "X-Forwarded-Site", "Ali-Swift-LOG-Host", "Referer", "Host" })
                 {
                     string value = context.Request.Headers[key];
                     if (string.IsNullOrEmpty(value)) continue;
@@ -408,7 +408,7 @@ namespace SP.StudioCore.Http
 
         public static Result ShowError(this HttpContext context, HttpStatusCode statusCode, string error = null)
         {
-            context.Response.StatusCode = (int) statusCode;
+            context.Response.StatusCode = (int)statusCode;
             context.Response.ContentType = "text/html";
             return statusCode.ShowError(error);
         }
@@ -429,7 +429,7 @@ namespace SP.StudioCore.Http
             }
 
             StringBuilder sb = new StringBuilder();
-            sb.AppendFormat("<html><head><title>{0} {1}</title><meta name=\"description\" content=\"{2}\" /><body><h1><center>{0} {1}</center></h1>", (int) statusCode, status, error);
+            sb.AppendFormat("<html><head><title>{0} {1}</title><meta name=\"description\" content=\"{2}\" /><body><h1><center>{0} {1}</center></h1>", (int)statusCode, status, error);
             sb.Append("<hr />");
             sb.AppendFormat("<center>{0}/{1}</center>", typeof(ContextExtensions).Assembly.GetName().Name, typeof(ContextExtensions).Assembly.GetName().Version);
             sb.Append("</body></html>");
@@ -489,11 +489,20 @@ namespace SP.StudioCore.Http
         /// <returns></returns>
         public static byte[] ToArray(this IFormFile file)
         {
-            using (MemoryStream ms = new MemoryStream())
+            if (file == null) return null;
+            using (MemoryStream ms = new())
             {
                 file.CopyTo(ms);
                 return ms.ToArray();
             }
+        }
+
+        public static string ToString(this IFormFile file, Encoding encoding = null)
+        {
+            byte[] data = file.ToArray();
+            if (data == null) return null;
+            if (encoding == null) encoding = Encoding.UTF8;
+            return encoding.GetString(data);
         }
 
         #endregion

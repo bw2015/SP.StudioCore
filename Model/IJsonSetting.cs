@@ -20,7 +20,14 @@ namespace SP.StudioCore.Model
         {
             if (!string.IsNullOrEmpty(jsonString) && jsonString.StartsWith("{"))
             {
-                JsonConvert.PopulateObject(jsonString, this);
+                try
+                {
+                    JsonConvert.PopulateObject(jsonString, this);
+                }
+                catch
+                {
+                    Console.WriteLine($"錯誤的數據格式:{ jsonString }");
+                }
             }
         }
 

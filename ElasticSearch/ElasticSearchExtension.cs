@@ -734,6 +734,7 @@ namespace SP.StudioCore.ElasticSearch
             return (s) =>
             {
                 s.Size(0).Aggregations(GroupBy(field));
+                search.Invoke(s);
                 return s;
             };
         }

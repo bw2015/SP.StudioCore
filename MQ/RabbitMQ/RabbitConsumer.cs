@@ -14,39 +14,44 @@ namespace SP.StudioCore.MQ.RabbitMQ
     public class RabbitConsumer : IRabbitConsumer
     {
         /// <summary>
-        ///     创建消息队列属性
+        /// 创建消息队列属性
         /// </summary>
         private readonly RabbitConnect _connect;
-
         /// <summary>
         /// 创建连接会话对象
         /// </summary>
         private IModel _channel;
-
         /// <summary>
         /// 后台定时检查连接状态
         /// </summary>
         private Task _checkConnectStatsTask;
-
         /// <summary>
         /// 最后一次ACK确认时间
         /// </summary>
         private DateTime _lastAckAt;
-
+        /// <summary>
+        /// 消费监听
+        /// </summary>
         private IListenerMessage _listener;
+        /// <summary>
+        /// 是否自动ack
+        /// </summary>
         private bool _autoAck;
-
-        /// <summary> 最后ACK多少秒超时则重连（默认5分钟） </summary>
+        /// <summary>
+        /// 最后ACK多少秒超时则重连（默认5分钟）
+        /// </summary>
         private readonly int _lastAckTimeoutRestart;
-
-        /// <summary> 线程数（默认8） </summary>
+        /// <summary>
+        /// 线程数（默认8）
+        /// </summary>
         private readonly int _consumeThreadNums;
-
-        /// <summary> 队列名称 </summary>
+        /// <summary>
+        /// 队列名称
+        /// </summary>
         private readonly string _queueName;
 
         /// <summary>
-        /// 
+        /// 消费客户端
         /// </summary>
         /// <param name="connect"></param>
         /// <param name="queueName">队列名称</param>
@@ -54,14 +59,14 @@ namespace SP.StudioCore.MQ.RabbitMQ
         /// <param name="consumeThreadNums">线程数（默认8）</param>
         public RabbitConsumer(RabbitConnect connect, string queueName, int lastAckTimeoutRestart, int consumeThreadNums)
         {
-            _connect = connect;
-            _lastAckTimeoutRestart = lastAckTimeoutRestart;
-            _consumeThreadNums = consumeThreadNums;
-            this._queueName = queueName;
-
+            this._connect               = connect;
+            this._lastAckTimeoutRestart = lastAckTimeoutRestart;
+            this._consumeThreadNums     = consumeThreadNums;
+            this._queueName             = queueName;
+            this._lastAckAt             = DateTime.Now;
+            
             if (_lastAckTimeoutRestart == 0) _lastAckTimeoutRestart = 5 * 60;
             if (_consumeThreadNums == 0) _consumeThreadNums = 8;
-            _lastAckAt = DateTime.Now;
         }
 
         /// <summary>
@@ -98,8 +103,7 @@ namespace SP.StudioCore.MQ.RabbitMQ
                 while (true)
                 {
                     // 未打开、关闭状态、上一次ACK超时，则重启
-                    if (_channel == null || _channel.IsClosed ||
-                        (DateTime.Now - _lastAckAt).TotalSeconds >= _lastAckTimeoutRestart) ReStart();
+                    if (_channel == null || _channel.IsClosed || (DateTime.Now - _lastAckAt).TotalSeconds >= _lastAckTimeoutRestart) ReStart();
                     Thread.Sleep(3000);
                 }
             });

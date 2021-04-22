@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Extensions.Logging;
 using Nest;
 using SP.StudioCore.Ioc;
@@ -94,6 +95,29 @@ namespace SP.StudioCore.ElasticSearch
                 }).Settings(s => s.NumberOfReplicas(_replicasCount).NumberOfShards(_shardsCount))
             );
             return rsp.IsValid;
+        }
+
+        protected List<TModel> Scroll(ISearchResponse<TModel> searchResponse, int size, Time scrollTime)
+        {
+            var lst = new List<TModel>();
+            if (!searchResponse.IsValid)
+            {
+                if (searchResponse.ServerError.Error.Type == "index_not_found_exception") return new List<TModel>();
+                throw searchResponse.OriginalException;
+            }
+            lst.AddRange(searchResponse.Documents.ToList());
+            
+            // 数量相等，说明还没有读完全部数据
+            while (searchResponse.Documents.Count == size)
+            {
+                searchResponse = Client.Scroll<TModel>(scrollTime, searchResponse.ScrollId);
+                if (searchResponse.Documents.Count > 0)
+                {
+                    lst.AddRange(searchResponse.Documents.ToList());
+                }
+            }
+
+            return lst;
         }
     }
 }

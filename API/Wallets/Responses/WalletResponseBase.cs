@@ -21,7 +21,16 @@ namespace SP.StudioCore.API.Wallets.Responses
             
             if (!isException)
             {
-                JObject info = JObject.Parse(json);
+                JObject info;
+                try
+                {
+                    info = JObject.Parse(json);
+                }
+                catch
+                {
+                    throw new Exception("解析json失败：" + json);
+                }
+                
                 this.Success = info.Get<int>("success") == 1;
                 this.Message = info.Get<string>("msg");
                 if (this.Success && info["info"] != null && info["info"].HasValues && info["info"].Type == JTokenType.Object)

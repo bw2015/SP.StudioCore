@@ -9,35 +9,31 @@ namespace SP.StudioCore.MQ.RabbitMQ
     /// </summary>
     public class RabbitManager : IRabbitManager
     {
-        private static readonly object ObjLock = new object();
+        private static readonly object ObjLock = new();
 
         /// <summary>
         ///     生产消息
         /// </summary>
         private IRabbitProduct _product;
-
-        /// <summary>
-        ///     消费消息
-        /// </summary>
-        private IRabbitConsumer _consumer;
-
         /// <summary>
         /// 配置信息
         /// </summary>
         private readonly ProductConfig _productConfig;
-
         /// <summary>
         /// Rabbit连接
         /// </summary>
         private readonly RabbitConnect _connect;
-
-        /// <summary> 最后ACK多少秒超时则重连（默认5分钟） </summary>
+        /// <summary>
+        /// 最后ACK多少秒超时则重连（默认5分钟）
+        /// </summary>
         private readonly int _lastAckTimeoutRestart;
-
-        /// <summary> 线程数（默认8） </summary>
+        /// <summary>
+        /// 线程数（默认8）
+        /// </summary>
         private readonly int _consumeThreadNums;
-
-        /// <summary> 队列名称 </summary>
+        /// <summary>
+        /// 队列名称
+        /// </summary>
         private readonly string _queueName;
 
         /// <summary> Rabbit管理器 </summary>
@@ -52,12 +48,11 @@ namespace SP.StudioCore.MQ.RabbitMQ
         /// <param name="queueName">队列名称</param>
         /// <param name="lastAckTimeoutRestart">最后ACK多少秒超时则重连（默认5分钟）</param>
         /// <param name="consumeThreadNums">线程数（默认8）</param>
-        public RabbitManager(RabbitConnect connect, string queueName, int consumeThreadNums = 8,
-            int lastAckTimeoutRestart = 5 * 60)
+        public RabbitManager(RabbitConnect connect, string queueName, int consumeThreadNums = 8, int lastAckTimeoutRestart = 5 * 60)
         {
-            _connect = connect;
-            _lastAckTimeoutRestart = lastAckTimeoutRestart;
-            _consumeThreadNums = consumeThreadNums;
+            this._connect = connect;
+            this._lastAckTimeoutRestart = lastAckTimeoutRestart;
+            this._consumeThreadNums = consumeThreadNums;
             this._queueName = queueName;
 
             if (_lastAckTimeoutRestart == 0) _lastAckTimeoutRestart = 5 * 60;
@@ -83,8 +78,7 @@ namespace SP.StudioCore.MQ.RabbitMQ
         /// <summary>
         ///     消费普通消息
         /// </summary>
-        public IRabbitConsumer Consumer =>
-            new RabbitConsumer(_connect, _queueName, _lastAckTimeoutRestart, _consumeThreadNums);
+        public IRabbitConsumer Consumer => new RabbitConsumer(_connect, _queueName, _lastAckTimeoutRestart, _consumeThreadNums);
 
         /// <summary>
         /// 创建队列
@@ -133,16 +127,15 @@ namespace SP.StudioCore.MQ.RabbitMQ
         /// <summary>
         /// 创建交换器
         /// </summary>
-        /// <param name="exchangeType">交换器类型</param>
         /// <param name="durable">是否持久化（默认true）</param>
         /// <param name="autoDelete">是否自动删除（默认false）</param>
         /// <param name="arguments">参数</param>
-        public void CreateExchange(ExchangeType exchangeType, bool durable = true, bool autoDelete = false, IDictionary<string, object> arguments = null)
+        public void CreateExchange(bool durable = true, bool autoDelete = false, IDictionary<string, object> arguments = null)
         {
             if (_connect.Connection == null || !_connect.Connection.IsOpen) _connect.Open();
             using (var channel = _connect.Connection.CreateModel())
             {
-                channel.ExchangeDeclare(_productConfig.ExchangeName, exchangeType.ToString(), durable, autoDelete,
+                channel.ExchangeDeclare(_productConfig.ExchangeName, _productConfig.ExchangeType.ToString(), durable, autoDelete,
                     arguments); // 声明fanout交换器
             }
         }

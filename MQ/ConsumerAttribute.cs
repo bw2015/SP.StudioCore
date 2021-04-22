@@ -42,9 +42,24 @@ namespace SP.StudioCore.MQ
         public string RoutingKey { get; set; } = "";
 
         /// <summary> 线程数 </summary>
-        public int ConsumeThreadNums { get; set; }
+        public int ConsumeThreadNums { get; set; } = 8;
 
         /// <summary> 最后ACK多少秒超时则重连（默认5分钟） </summary>
-        public int LastAckTimeoutRestart { get; set; }
+        public int LastAckTimeoutRestart { get; set; } = 5 * 60;
+        
+        /// <summary>
+        /// 死信交换器
+        /// </summary>
+        public string DlxExchangeName { get; set; }
+        
+        /// <summary>
+        /// 死信路由key
+        /// </summary>
+        public string DlxRoutingKey { get; set; }
+        
+        /// <summary>
+        /// 死信时间
+        /// </summary>
+        public int DlxTime { get; set; }
     }
 }

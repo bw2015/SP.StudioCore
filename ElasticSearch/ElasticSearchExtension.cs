@@ -998,11 +998,11 @@ namespace SP.StudioCore.ElasticSearch
         /// <typeparam name="T"></typeparam>
         /// <param name="response"></param>
         /// <returns></returns>
-        public static List<T> ToList<TDocument, T>(this ISearchResponse<TDocument> response) where TDocument : class
+        public static List<T> ToList<T>(this AggregateDictionary response)
         {
             if (response == null) throw new NullReferenceException();
             List<T> list = new List<T>();
-            foreach (var item in response.Aggregations.Terms("group_by_script").Buckets)
+            foreach (var item in response.Terms("group_by_script").Buckets)
             {
                 list.Add(item.Key.GetValue<T>());
             }

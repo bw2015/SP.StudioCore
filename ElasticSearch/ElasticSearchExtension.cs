@@ -721,12 +721,35 @@ namespace SP.StudioCore.ElasticSearch
                 return search.Invoke(s.Paged(page, limit));
             };
         }
-
+        /// <summary>
+        /// 根据单个字段分组
+        /// </summary>
+        /// <typeparam name="TDocument"></typeparam>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="search"></param>
+        /// <param name="field"></param>
+        /// <returns></returns>
         public static Func<SearchDescriptor<TDocument>, ISearchRequest> GroupBy<TDocument, TValue>(this Func<SearchDescriptor<TDocument>, ISearchRequest> search, Expression<Func<TDocument, TValue>> field) where TDocument : class
         {
             return (s) =>
             {
                 s.Size(0).Aggregations(GroupBy(field));
+                return s;
+            };
+        }
+        /// <summary>
+        /// 根据字符串字段进行分组
+        /// </summary>
+        /// <typeparam name="TDocument"></typeparam>
+        /// <param name="search"></param>
+        /// <param name="field"></param>
+        /// <returns></returns>
+        public static Func<SearchDescriptor<TDocument>, ISearchRequest> GroupBy<TDocument>(this Func<SearchDescriptor<TDocument>, ISearchRequest> search, string field) where TDocument : class
+        {
+            return (s) =>
+            {
+                s.Size(0).Aggregations(aggs => aggs.Terms("group_by_script", t => t.Field(field)));
+                search.Invoke(s);
                 return s;
             };
         }
@@ -967,6 +990,24 @@ namespace SP.StudioCore.ElasticSearch
                     yield return document;
                 }
             }
+        }
+        /// <summary>
+        /// 单个分组ToList
+        /// </summary>
+        /// <typeparam name="TDocument"></typeparam>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="response"></param>
+        /// <returns></returns>
+        public static List<T> ToList<TDocument, T>(this ISearchResponse<TDocument> response) where TDocument : class
+        {
+            if (response == null) throw new NullReferenceException();
+            List<T> list = new List<T>();
+            foreach (var item in response.Aggregations.Terms("group_by_script").Buckets)
+            {
+                list.Add(item.Key.GetValue<T>());
+            }
+            return list;
+
         }
 
         /// <summary>

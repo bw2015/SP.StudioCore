@@ -1,10 +1,13 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyModel;
 using Microsoft.Extensions.Hosting;
 using SP.StudioCore.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using System.Threading.Tasks;
 
 namespace SP.StudioCore.Services
 {
@@ -35,12 +38,33 @@ namespace SP.StudioCore.Services
         /// <returns></returns>
         public static IServiceCollection AddJob(this IServiceCollection services)
         {
-            IEnumerable<Type> types = typeof(ServiceCollectionExtensions).Assembly.GetTypes().Where(t => t.IsPublic && !t.IsAbstract && t.BaseType == typeof(BackgroundService));
-            foreach (Type type in types)
+            foreach (var assemblie in GetAssemblies())
             {
-                //services.AddHostedService(type);
+                IEnumerable<Type> types = assemblie.GetTypes().Where(t => t.IsPublic && !t.IsAbstract && t.BaseType == typeof(BackgroundService));
+                Parallel.ForEach(types, type =>
+                {
+                    Console.WriteLine($"==============已启动{type.Name}任务=================");
+                    BackgroundService? service = (BackgroundService?)Activator.CreateInstance(type);
+                    if (service != null)
+                    {
+                        service.Start();
+                    }
+
+                });
             }
             return services;
+        }
+        /// <summary>
+        /// 获取项目中所有程序集
+        /// </summary>
+        /// <returns></returns>
+        public static IEnumerable<Assembly> GetAssemblies()
+        {
+            var libs = DependencyContext.Default.CompileLibraries.Where(lib => lib.Type == "project");
+            foreach (var lib in libs)
+            {
+                yield return AppDomain.CurrentDomain.Load(lib.Name);
+            }
         }
     }
 }

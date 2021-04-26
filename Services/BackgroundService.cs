@@ -30,7 +30,8 @@ namespace SP.StudioCore.Services
             {
                 try
                 {
-                    this.Execute();
+                    int count = this.Execute();
+                    Console.WriteLine($"[{this.GetType().Name}]-{DateTime.Now}，执行{count}笔数据");
                     Thread.Sleep(Time);
                 }
                 catch (Exception ex)
@@ -53,6 +54,6 @@ namespace SP.StudioCore.Services
         {
             this.Status = true;
         }
-        public abstract void Execute();
+        public abstract int Execute();
     }
 }

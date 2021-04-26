@@ -417,7 +417,7 @@ namespace SP.StudioCore.Mvc
                 json = response.Documents.Select(convert).ToJson();
             }
             sb.Append("{")
-            .AppendFormat("\"RecordCount\":{0},", response.Total)
+            .AppendFormat("\"RecordCount\":{0},", response.Total == -1 ? 0 : response.Total)
             .AppendFormat("\"PageIndex\":{0},", this.PageIndex)
             .AppendFormat("\"PageSize\":{0},", this.PageSize)
             .AppendFormat("\"data\":{0}", data == null ? "null" : data.ToJson())

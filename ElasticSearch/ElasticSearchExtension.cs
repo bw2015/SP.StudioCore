@@ -427,7 +427,7 @@ namespace SP.StudioCore.ElasticSearch
                     }
                     else if (value.Value is Int64)
                     {
-                        query.Range(r => r.GreaterThan((long)v).Field(field));
+                        query.LongRange(r => r.GreaterThan((long)v).Field(field));
                     }
                     else if (value.Value is Decimal)
                     {
@@ -445,7 +445,7 @@ namespace SP.StudioCore.ElasticSearch
                     }
                     else if (value.Value is Int64)
                     {
-                        query.Range(r => r.GreaterThanOrEquals((long)v).Field(field));
+                        query.LongRange(r => r.GreaterThanOrEquals((long)v).Field(field));
                     }
                     else if (value.Value is Decimal)
                     {
@@ -463,7 +463,7 @@ namespace SP.StudioCore.ElasticSearch
                     }
                     else if (value.Value is Int64)
                     {
-                        query.Range(r => r.LessThan((long)v).Field(field));
+                        query.LongRange(r => r.LessThan((long)v).Field(field));
                     }
                     else if (value.Value is Decimal)
                     {
@@ -481,7 +481,7 @@ namespace SP.StudioCore.ElasticSearch
                     }
                     else if (value.Value is Int64)
                     {
-                        query.Range(r => r.LessThanOrEquals((long)v).Field(field));
+                        query.LongRange(r => r.LessThanOrEquals((long)v).Field(field));
                     }
                     else if (value.Value is Decimal)
                     {
@@ -510,7 +510,7 @@ namespace SP.StudioCore.ElasticSearch
                     }
                     else if (value.Value is Int64)
                     {
-                        query.Range(r => r.GreaterThan((long)v).Field(script));
+                        query.LongRange(r => r.GreaterThan((long)v).Field(script));
                     }
                     else if (value.Value is Decimal)
                     {
@@ -528,7 +528,7 @@ namespace SP.StudioCore.ElasticSearch
                     }
                     else if (value.Value is Int64)
                     {
-                        query.Range(r => r.GreaterThanOrEquals((long)v).Field(script));
+                        query.LongRange(r => r.GreaterThanOrEquals((long)v).Field(script));
                     }
                     else if (value.Value is Decimal)
                     {
@@ -546,7 +546,7 @@ namespace SP.StudioCore.ElasticSearch
                     }
                     else if (value.Value is Int64)
                     {
-                        query.Range(r => r.LessThan((long)v).Field(script));
+                        query.LongRange(r => r.LessThan((long)v).Field(script));
                     }
                     else if (value.Value is Decimal)
                     {
@@ -564,7 +564,7 @@ namespace SP.StudioCore.ElasticSearch
                     }
                     else if (value.Value is Int64)
                     {
-                        query.Range(r => r.LessThanOrEquals((long)v).Field(script));
+                        query.LongRange(r => r.LessThanOrEquals((long)v).Field(script));
                     }
                     else if (value.Value is Decimal)
                     {

@@ -41,32 +41,32 @@ namespace SP.StudioCore.Model
         /// <summary>
         /// 权限名字
         /// </summary>
-        private readonly string Name;
+        public string Name { get; private set; }
 
         /// <summary>
         /// 权限ID
         /// </summary>
-        private readonly string ID;
+        public string ID { get; private set; }
 
         /// <summary>
         /// 链接地址
         /// </summary>
-        private readonly string Href;
+        public string Href { get; private set; }
 
         /// <summary>
         /// 图标
         /// </summary>
-        private readonly string Icon;
+        public string Icon { get; private set; }
 
         /// <summary>
         /// 是否已经拥有该权限
         /// </summary>
-        private readonly bool IsChecked;
+        public bool IsChecked { get; private set; }
 
         /// <summary>
         /// 下级菜单
         /// </summary>
-        private readonly List<AdminMenu> menu;
+        public List<AdminMenu> menu { get; private set; }
 
 
         /// <summary>
@@ -96,7 +96,10 @@ namespace SP.StudioCore.Model
             sb.Append("}");
             return sb.ToString();
         }
-
+        public List<AdminMenu> ToList()
+        {
+            return this.menu;
+        }
         public static IEnumerable<string> GetPermissions(XElement root)
         {
             foreach (XElement item in root.Elements())

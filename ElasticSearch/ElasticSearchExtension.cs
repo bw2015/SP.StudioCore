@@ -142,6 +142,7 @@ namespace SP.StudioCore.ElasticSearch
         /// <returns></returns>
         public static long Count<TDocument>(this IElasticClient client) where TDocument : class
         {
+            if (client == null) throw new NullReferenceException();
             string indexname = typeof(TDocument).GetIndexName();
             return client.Count<TDocument>(c => c.Index(indexname)).Count;
         }
@@ -159,6 +160,19 @@ namespace SP.StudioCore.ElasticSearch
             string indexname = typeof(TDocument).GetIndexName();
             return client.Count<TDocument>(c => c.Index(indexname).Query(q => q.Term(field, value))).Count;
         }
+        /// <summary>
+        /// 多条件获取表记录数
+        /// </summary>
+        /// <typeparam name="TDocument"></typeparam>
+        /// <param name="client"></param>
+        /// <param name="queries"></param>
+        /// <returns></returns>
+        public static long Count<TDocument>(this IElasticClient client, params Func<QueryContainerDescriptor<TDocument>, QueryContainer>[] queries) where TDocument : class
+        {
+            if (client == null) throw new NullReferenceException();
+            string indexname = typeof(TDocument).GetIndexName();
+            return client.Count<TDocument>(c => c.Index(indexname).Query(q => q.Bool(b => b.Must(queries)))).Count;
+        }
 
         /// <summary>
         /// 查询表是否存在
@@ -166,11 +180,9 @@ namespace SP.StudioCore.ElasticSearch
         /// <typeparam name="TDocument"></typeparam>
         /// <param name="response"></param>
         /// <returns></returns>
-        public static bool Any<TDocument>(this IElasticClient client) where TDocument : class
+        public static bool Any<TDocument>(this IElasticClient client, params Func<QueryContainerDescriptor<TDocument>, QueryContainer>[] queries) where TDocument : class
         {
-            if (client == null) throw new NullReferenceException();
-            string indexname = typeof(TDocument).GetIndexName();
-            return client.Search<TDocument>(s => s.Index(indexname)).IsValid;
+            return client.Count(queries) > 0;
         }
         /// <summary>
         /// 条件查询表是否存在
@@ -182,16 +194,7 @@ namespace SP.StudioCore.ElasticSearch
         /// <returns></returns>
         public static bool Any<TDocument, TValue>(this IElasticClient client, TValue value, Expression<Func<TDocument, TValue>> field) where TDocument : class
         {
-            if (client == null) throw new NullReferenceException();
-            if (value == null) throw new NullReferenceException();
-            if (field == null) throw new NullReferenceException();
-            string indexname = typeof(TDocument).GetIndexName();
-            string fieldname = field.GetFieldName();
-            if (value is Guid || value is String)
-            {
-                fieldname += ".keyword";
-            }
-            return client.Search<TDocument>(q => q.Index(indexname).Query(q => q.Term(t => t.Field(fieldname).Value(value))).Size(1)).Documents.Count == 1;
+            return client.Count(value, field) > 0;
         }
         /// <summary>
         /// 获取第一条数据
@@ -202,7 +205,7 @@ namespace SP.StudioCore.ElasticSearch
         /// <param name="value"></param>
         /// <param name="field"></param>
         /// <returns>没有则为null</returns>
-        public static TDocument FirstOrDefault<TDocument, TValue>(this IElasticClient client, TValue value, Expression<Func<TDocument, TValue>> field) where TDocument : class
+        public static TDocument? FirstOrDefault<TDocument, TValue>(this IElasticClient client, TValue value, Expression<Func<TDocument, TValue>> field) where TDocument : class
         {
             if (client == null) throw new NullReferenceException();
             if (value == null) throw new NullReferenceException();
@@ -219,7 +222,7 @@ namespace SP.StudioCore.ElasticSearch
         /// <param name="value"></param>
         /// <param name="field"></param>
         /// <returns>没有则为null</returns>
-        public static TDocument FirstOrDefault<TDocument, TValue>(this IElasticClient client, params Func<QueryContainerDescriptor<TDocument>, QueryContainer>[] queries) where TDocument : class
+        public static TDocument? FirstOrDefault<TDocument, TValue>(this IElasticClient client, params Func<QueryContainerDescriptor<TDocument>, QueryContainer>[] queries) where TDocument : class
         {
             if (client == null) throw new NullReferenceException();
             string indexname = typeof(TDocument).GetIndexName();

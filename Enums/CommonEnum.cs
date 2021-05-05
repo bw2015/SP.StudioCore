@@ -125,7 +125,9 @@ namespace SP.StudioCore.Enums
         [Description("千越南盾"), CurrencyExchange(0.3)]
         KVND = 13,
         [Description("千印尼盾"), CurrencyExchange(0.47)]
-        KIDR = 14
+        KIDR = 14,
+        [Description("金币"), CurrencyExchange(1)]
+        COIN = 15,
     }
 
     /// <summary>

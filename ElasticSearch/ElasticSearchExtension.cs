@@ -140,11 +140,11 @@ namespace SP.StudioCore.ElasticSearch
         /// <typeparam name="TDocument"></typeparam>
         /// <param name="client"></param>
         /// <returns></returns>
-        public static long Count<TDocument>(this IElasticClient client) where TDocument : class
+        public static int Count<TDocument>(this IElasticClient client) where TDocument : class
         {
             if (client == null) throw new NullReferenceException();
             string indexname = typeof(TDocument).GetIndexName();
-            return client.Count<TDocument>(c => c.Index(indexname)).Count;
+            return (int)client.Count<TDocument>(c => c.Index(indexname)).Count;
         }
         /// <summary>
         /// 根据条件获取表总记录数
@@ -152,13 +152,13 @@ namespace SP.StudioCore.ElasticSearch
         /// <typeparam name="TDocument"></typeparam>
         /// <param name="client"></param>
         /// <returns></returns>
-        public static long Count<TDocument, TValue>(this IElasticClient client, TValue value, Expression<Func<TDocument, TValue>> field) where TDocument : class
+        public static int Count<TDocument, TValue>(this IElasticClient client, TValue value, Expression<Func<TDocument, TValue>> field) where TDocument : class
         {
             if (client == null) throw new NullReferenceException();
             if (value == null) throw new NullReferenceException();
             if (field == null) throw new NullReferenceException();
             string indexname = typeof(TDocument).GetIndexName();
-            return client.Count<TDocument>(c => c.Index(indexname).Query(q => q.Term(field, value))).Count;
+            return (int)client.Count<TDocument>(c => c.Index(indexname).Query(q => q.Term(field, value))).Count;
         }
         /// <summary>
         /// 多条件获取表记录数
@@ -167,23 +167,66 @@ namespace SP.StudioCore.ElasticSearch
         /// <param name="client"></param>
         /// <param name="queries"></param>
         /// <returns></returns>
-        public static long Count<TDocument>(this IElasticClient client, params Func<QueryContainerDescriptor<TDocument>, QueryContainer>[] queries) where TDocument : class
+        public static int Count<TDocument>(this IElasticClient client, params Func<QueryContainerDescriptor<TDocument>, QueryContainer>[] queries) where TDocument : class
         {
             if (client == null) throw new NullReferenceException();
             string indexname = typeof(TDocument).GetIndexName();
-            return client.Count<TDocument>(c => c.Index(indexname).Query(q => q.Bool(b => b.Must(queries)))).Count;
+            return (int)client.Count<TDocument>(c => c.Index(indexname).Query(q => q.Bool(b => b.Must(queries)))).Count;
         }
-
+        /// <summary>
+        /// 查询表记录数（指定查询条件）
+        /// </summary>
+        /// <typeparam name="TDocument"></typeparam>
+        /// <param name="client"></param>
+        /// <param name="search"></param>
+        /// <returns></returns>
+        public static int Count<TDocument>(this IElasticClient client, Func<SearchDescriptor<TDocument>, ISearchRequest> search) where TDocument : class
+        {
+            if (client == null) throw new NullReferenceException();
+            if (search == null) throw new NullReferenceException();
+            string indexname = typeof(TDocument).GetIndexName();
+            Func<QueryContainerDescriptor<TDocument>, QueryContainer>[]? query = null;
+            foreach (Delegate del in search.GetInvocationList())
+            {
+                if (del.Target == null) continue;
+                dynamic target = del.Target;
+                query = target.queries;
+            }
+            ICountRequest count(CountDescriptor<TDocument> q)
+            {
+                if (query == null)
+                {
+                    return q.Index(indexname);
+                }
+                else
+                {
+                    return q.Index(indexname).Query(q => q.Bool(b => b.Must(query)));
+                }
+            };
+            return (int)client.Count<TDocument>(count).Count;
+        }
         /// <summary>
         /// 查询表是否存在
         /// </summary>
         /// <typeparam name="TDocument"></typeparam>
-        /// <param name="response"></param>
+        /// <param name="queries"></param>
         /// <returns></returns>
         public static bool Any<TDocument>(this IElasticClient client, params Func<QueryContainerDescriptor<TDocument>, QueryContainer>[] queries) where TDocument : class
         {
             return client.Count(queries) > 0;
         }
+        /// <summary>
+        /// 查询表是否存在（指定查询条件）
+        /// </summary>
+        /// <typeparam name="TDocument"></typeparam>
+        /// <param name="client"></param>
+        /// <param name="search"></param>
+        /// <returns></returns>
+        public static bool Any<TDocument>(this IElasticClient client, Func<SearchDescriptor<TDocument>, ISearchRequest> search) where TDocument : class
+        {
+            return client.Count(search) > 0;
+        }
+
         /// <summary>
         /// 条件查询表是否存在
         /// </summary>
@@ -1011,7 +1054,10 @@ namespace SP.StudioCore.ElasticSearch
                 list.Add(item.Key.GetValue<T>());
             }
             return list;
-
+        }
+        public static List<TDocument> ToList<TDocument>(this ISearchResponse<TDocument> response) where TDocument : class
+        {
+            return response.Documents.ToList();
         }
 
         /// <summary>

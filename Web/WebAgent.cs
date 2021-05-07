@@ -247,6 +247,17 @@ namespace SP.StudioCore.Web
             return Regex.IsMatch(input, pattern);
         }
 
+        /// <summary>
+        /// 是否符合C#类名的规则
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public static bool IsClassName(string input)
+        {
+            string pattern = @"^[_a-z][_a-z0-9]+$";
+            return Regex.IsMatch(input, pattern, RegexOptions.IgnoreCase);
+        }
+
         #region ========  时间戳  ========
 
         /// <summary>

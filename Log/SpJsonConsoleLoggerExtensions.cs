@@ -18,17 +18,17 @@ namespace SP.StudioCore.Log
             {
                 logging.AddSpJsonConsole(opt =>
                 {
-                    opt.UseUtcTimestamp = true;
+                    opt.UseUtcTimestamp = false;
                     opt.TimestampFormat = "yyyy-MM-dd HH:mm:ss";
                 });
-                
+
                 // 非生产环境下添加调试输出
                 if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") != "" && Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") != "Production") logging.AddDebug();
             });
 
             return services;
         }
-        
+
         /// <summary>
         /// 添加Json输出的日志（方便于容器日志采集）
         /// </summary>
@@ -37,10 +37,10 @@ namespace SP.StudioCore.Log
         /// <returns></returns>
         public static ILoggingBuilder AddSpJsonConsole(this ILoggingBuilder builder, Action<JsonConsoleFormatterOptions> options = null)
         {
-            options ??= _ => new JsonConsoleFormatterOptions
+            options ??= _ =>
             {
-                UseUtcTimestamp = true,
-                TimestampFormat = "yyyy-MM-dd HH:mm:ss"
+                _.UseUtcTimestamp = false;
+                _.TimestampFormat = "yyyy-MM-dd HH:mm:ss";
             };
 
             //添加控制台输出

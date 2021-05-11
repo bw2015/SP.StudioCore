@@ -1,31 +1,33 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web;
 
 namespace SP.StudioCore.Mvc
 {
     /// <summary>
-    /// 过滤XSS注入的字符串接收
+    /// 接收到序列化的JSON字符串，直接反序列化成为对象
     /// </summary>
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Parameter, AllowMultiple = false, Inherited = true)]
-    public sealed class FromStringAttribute : ModelBinderAttribute
+    public sealed class FromJsonAttribute : ModelBinderAttribute
     {
-        public FromStringAttribute() : base()
+        public FromJsonAttribute() : base()
         {
-            this.BinderType = typeof(FromStringBinder);
+            this.BinderType = typeof(FromJsonBinder);
         }
     }
 
-    class FromStringBinder : IModelBinder
+    class FromJsonBinder : IModelBinder
     {
         public Task BindModelAsync(ModelBindingContext bindingContext)
         {
             string data = bindingContext.HttpContext.Request.Form[bindingContext.FieldName];
-            bindingContext.Result = ModelBindingResult.Success(HttpUtility.HtmlEncode(data));
+            Type type = bindingContext.ModelType;
+            bindingContext.Result = ModelBindingResult.Success(JsonConvert.DeserializeObject(data, type));
             return Task.CompletedTask;
         }
     }

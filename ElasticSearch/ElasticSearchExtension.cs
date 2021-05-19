@@ -438,6 +438,26 @@ namespace SP.StudioCore.ElasticSearch
             if (value == null) return query;
             if (query == null) throw new NullReferenceException();
             if (field == null) return query;
+            if (value.Length == 0)
+            {
+                switch (typeof(TValue).Name)
+                {
+                    case "Int16":
+                        value = WebAgent.GetArray<TValue>(short.MinValue.ToString());
+                        break;
+                    case "Int32":
+                        value = WebAgent.GetArray<TValue>(int.MinValue.ToString());
+                        break;
+                    case "Int64":
+                        value = WebAgent.GetArray<TValue>(long.MinValue.ToString());
+                        break;
+                    case "Byte":
+                        value = WebAgent.GetArray<TValue>(byte.MinValue.ToString());
+                        break;
+                    default:
+                        break;
+                }
+            }
             query.Terms(t => t.Field(field).Terms(value));
             return query;
         }
@@ -446,6 +466,26 @@ namespace SP.StudioCore.ElasticSearch
             if (value == null) return query;
             if (query == null) throw new NullReferenceException();
             if (script == null) return query;
+            if (value.Length == 0)
+            {
+                switch (typeof(TValue).Name)
+                {
+                    case "Int16":
+                        value = WebAgent.GetArray<TValue>(short.MinValue.ToString());
+                        break;
+                    case "Int32":
+                        value = WebAgent.GetArray<TValue>(int.MinValue.ToString());
+                        break;
+                    case "Int64":
+                        value = WebAgent.GetArray<TValue>(long.MinValue.ToString());
+                        break;
+                    case "Byte":
+                        value = WebAgent.GetArray<TValue>(byte.MinValue.ToString());
+                        break;
+                    default:
+                        break;
+                }
+            }
             query.Terms(t => t.Field(script).Terms(value));
             return query;
         }

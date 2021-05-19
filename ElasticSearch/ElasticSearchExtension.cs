@@ -1025,13 +1025,14 @@ namespace SP.StudioCore.ElasticSearch
                     foreach (PropertyInfo property in properties)
                     {
                         object? value = null;
+                        string name = property.GetFieldName().ToLower();
                         if (property.HasAttribute<CountAttribute>())
                         {
                             value = item.DocCount;
                         }
-                        else if (scripts.Contains(property.Name.ToLower()))
+                        else if (scripts.Contains(name))
                         {
-                            int index = System.Array.IndexOf(scripts, property.Name.ToLower());
+                            int index = System.Array.IndexOf(scripts, name);
                             if (property.PropertyType.IsEnum)
                             {
                                 value = key_value[index].ToEnum(property.PropertyType);

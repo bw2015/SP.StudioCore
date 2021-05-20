@@ -840,6 +840,38 @@ namespace SP.StudioCore.ElasticSearch
                 return s;
             };
         }
+        /// <summary>
+        /// 聚合
+        /// </summary>
+        /// <typeparam name="TDocument"></typeparam>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="search"></param>
+        /// <param name="script"></param>
+        /// <param name="fields"></param>
+        /// <returns></returns>
+        public static Func<SearchDescriptor<TDocument>, ISearchRequest> GroupBy<TDocument, TValue>(this Func<SearchDescriptor<TDocument>, ISearchRequest> search, string script, params Expression<Func<TDocument, TValue>>[] fields) where TDocument : class
+        {
+            IAggregationContainer group(AggregationContainerDescriptor<TDocument> aggs)
+            {
+                string[] group_field = WebAgent.GetArray<string>(script);
+                string _script = string.Empty;
+                for (int i = 0; i < group_field.Length; i++)
+                {
+                    _script += "doc['" + group_field[i] + "'].value";
+                    if (i + 1 < group_field.Length)
+                    {
+                        _script += "+'-'+";
+                    }
+                }
+                return aggs.Terms("group_by_script", t => t.Script(_script).Aggregations(GroupBy(fields)));
+            };
+            return (s) =>
+            {
+                s.Size(0).Aggregations(group);
+                search.Invoke(s);
+                return s;
+            };
+        }
 
         /// <summary>
         /// 聚合（聚合指定特性Aggregate）
@@ -1000,6 +1032,74 @@ namespace SP.StudioCore.ElasticSearch
                 property.SetValue(document, Convert.ChangeType(value, property.PropertyType));
             }
             return document;
+        }
+        /// <summary>
+        /// 转换聚合值
+        /// </summary>
+        /// <typeparam name="TDocument"></typeparam>
+        /// <param name="response"></param>
+        /// <param name="script"></param>
+        /// <returns></returns>
+        public static IEnumerable<TDocument> ToAggregate<TDocument>(this ISearchResponse<TDocument> response, string script) where TDocument : class
+        {
+            if (response == null) throw new NullReferenceException();
+            IEnumerable<PropertyInfo> properties = typeof(TDocument).GetProperties();
+            string[] scripts = WebAgent.GetArray<string>(script.ToLower());
+            foreach (var item in response.Aggregations.Terms("group_by_script").Buckets)
+            {
+                TDocument document = Activator.CreateInstance<TDocument>();
+                string[] key_value = WebAgent.GetArray<string>(item.Key, '-');
+                foreach (PropertyInfo property in properties)
+                {
+                    object? value = null;
+                    string name = property.GetFieldName().ToLower();
+                    if (property.HasAttribute<CountAttribute>())
+                    {
+                        value = item.DocCount;
+                    }
+                    else if (scripts.Contains(name))
+                    {
+                        int index = System.Array.IndexOf(scripts, name);
+                        if (property.PropertyType.IsEnum)
+                        {
+                            value = key_value[index].ToEnum(property.PropertyType);
+                        }
+                        else
+                        {
+                            value = key_value[index];
+                        }
+                    }
+                    else
+                    {
+                        AggregateAttribute aggregate = property.GetAttribute<AggregateAttribute>();
+                        if (aggregate == null) continue;
+                        string fieldname = aggregate.Name ?? property.GetFieldName();
+                        if (aggregate.Type == AggregateType.Sum)
+                        {
+                            value = item.Sum(fieldname)?.Value;
+                        }
+                        else if (aggregate.Type == AggregateType.Average)
+                        {
+                            value = item.Average(fieldname)?.Value;
+                        }
+                        else if (aggregate.Type == AggregateType.Count)
+                        {
+                            value = item.ValueCount(fieldname)?.Value;
+                        }
+                        else if (aggregate.Type == AggregateType.Max)
+                        {
+                            value = item.Max(fieldname)?.Value;
+                        }
+                        else if (aggregate.Type == AggregateType.Min)
+                        {
+                            value = item.Min(fieldname)?.Value;
+                        }
+                    }
+                    if (value == null) continue;
+                    property.SetValue(document, Convert.ChangeType(value, property.PropertyType));
+                }
+                yield return document;
+            }
         }
         /// <summary>
         /// 时间聚合转换

@@ -26,6 +26,7 @@ namespace SP.StudioCore.Mvc
         public Task BindModelAsync(ModelBindingContext bindingContext)
         {
             string data = bindingContext.HttpContext.Request.Form[bindingContext.FieldName];
+            if (string.IsNullOrEmpty(data)) return Task.CompletedTask;
             Type type = bindingContext.ModelType;
             bindingContext.Result = ModelBindingResult.Success(JsonConvert.DeserializeObject(data, type));
             return Task.CompletedTask;

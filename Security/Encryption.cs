@@ -1,6 +1,7 @@
 ﻿using SP.StudioCore.Utils;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -102,6 +103,114 @@ namespace SP.StudioCore.Security
         public static string GetHash(this string input, int length = 2)
         {
             return toMD5(input).Substring(0, length);
+        }
+
+
+        /// <summary>
+        /// DES加密
+        /// </summary>
+        /// <param name="data">加密数据</param>
+        /// <param name="key">8位字符的密钥字符串</param>
+        /// <param name="iv">8位字符的初始化向量字符串</param>
+        /// <returns></returns>
+        public static string DESEncrypt(string data, string key, string iv)
+        {
+            byte[] byKey = System.Text.ASCIIEncoding.ASCII.GetBytes(key);
+            byte[] byIV = System.Text.ASCIIEncoding.ASCII.GetBytes(iv);
+
+            using (DESCryptoServiceProvider cryptoProvider = new DESCryptoServiceProvider())
+            {
+                int i = cryptoProvider.KeySize;
+                MemoryStream ms = new MemoryStream();
+                CryptoStream cst = new CryptoStream(ms, cryptoProvider.CreateEncryptor(byKey, byIV), CryptoStreamMode.Write);
+
+                StreamWriter sw = new(cst);
+                sw.Write(data);
+                sw.Flush();
+                cst.FlushFinalBlock();
+                sw.Flush();
+                return Convert.ToBase64String(ms.GetBuffer(), 0, (int)ms.Length);
+            }
+        }
+
+        /// <summary>
+        /// DES解密
+        /// </summary>
+        /// <param name="data">解密数据</param>
+        /// <param name="key">8位字符的密钥字符串(需要和加密时相同)</param>
+        /// <param name="iv">8位字符的初始化向量字符串(需要和加密时相同)</param>
+        /// <returns></returns>
+        public static string DESDecrypt(string data, string key, string iv)
+        {
+            byte[] byKey = Encoding.ASCII.GetBytes(key);
+            byte[] byIV = Encoding.ASCII.GetBytes(iv);
+
+            byte[] byEnc;
+            try
+            {
+                byEnc = Convert.FromBase64String(data);
+            }
+            catch
+            {
+                return null;
+            }
+
+            DESCryptoServiceProvider cryptoProvider = new DESCryptoServiceProvider();
+            MemoryStream ms = new MemoryStream(byEnc);
+            CryptoStream cst = new CryptoStream(ms, cryptoProvider.CreateDecryptor(byKey, byIV), CryptoStreamMode.Read);
+            StreamReader sr = new StreamReader(cst);
+            return sr.ReadToEnd();
+        }
+
+        /// <summary>
+        ///  AES 加密
+        /// </summary>
+        /// <param name="str">明文（待加密）</param>
+        /// <param name="key">密文</param>
+        /// <returns></returns>
+        public static string AesEncrypt(string str, string key)
+        {
+            if (string.IsNullOrEmpty(str)) return null;
+            Byte[] toEncryptArray = Encoding.UTF8.GetBytes(str);
+
+            using (RijndaelManaged rm = new RijndaelManaged
+            {
+                Key = Encoding.UTF8.GetBytes(key),
+                Mode = CipherMode.ECB,
+                Padding = PaddingMode.PKCS7
+            })
+            {
+
+                ICryptoTransform cTransform = rm.CreateEncryptor();
+                Byte[] resultArray = cTransform.TransformFinalBlock(toEncryptArray, 0, toEncryptArray.Length);
+                return Convert.ToBase64String(resultArray);
+            }
+        }
+
+        /// <summary>
+        ///  AES 解密
+        /// </summary>
+        /// <param name="str">明文（待解密）</param>
+        /// <param name="key">密文</param>
+        /// <returns></returns>
+        public static string AesDecrypt(string str, string key)
+        {
+            if (string.IsNullOrEmpty(str)) return null;
+            Byte[] toEncryptArray = Convert.FromBase64String(str);
+
+            using (RijndaelManaged rm = new RijndaelManaged
+            {
+                Key = Encoding.UTF8.GetBytes(key),
+                Mode = CipherMode.ECB,
+                Padding = PaddingMode.PKCS7
+            })
+            {
+
+                ICryptoTransform cTransform = rm.CreateDecryptor();
+                Byte[] resultArray = cTransform.TransformFinalBlock(toEncryptArray, 0, toEncryptArray.Length);
+
+                return Encoding.UTF8.GetString(resultArray);
+            }
         }
     }
 }

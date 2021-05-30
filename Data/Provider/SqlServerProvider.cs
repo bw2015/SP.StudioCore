@@ -168,7 +168,7 @@ namespace SP.StudioCore.Data.Provider
             using (IExpressionCondition expression = db.GetExpressionCondition(condition))
             {
                 string conditionSql = expression.ToCondition(out DynamicParameters parameters);
-                string sql = $"SELECT {fieldName} FROM [{typeof(T).GetTableName()}] {conditionSql}";
+                string sql = $"SELECT [{fieldName}] FROM [{typeof(T).GetTableName()}] {conditionSql}";
                 IDataReader reader = db.ReadData(CommandType.Text, sql, parameters);
                 while (reader.Read())
                 {

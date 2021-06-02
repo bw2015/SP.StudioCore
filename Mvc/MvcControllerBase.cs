@@ -408,6 +408,10 @@ namespace SP.StudioCore.Mvc
             };
 
             ISearchResponse<T> response = ESDB.Search(action);
+            if (!response.IsValid)
+            {
+                throw new Exception(response.ServerError.ToString());
+            }
             if (convert == null)
             {
                 json = response.Documents.ToJson();

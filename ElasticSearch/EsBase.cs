@@ -17,9 +17,10 @@ namespace SP.StudioCore.ElasticSearch
         protected readonly      IElasticClient           Client     = IocCollection.GetService<IElasticClient>();
         protected readonly      ILogger<TAgent>          Logger     = IocCollection.GetService<ILoggerFactory>().CreateLogger<TAgent>();
         private static readonly Dictionary<string, bool> IndexCache = new();
-        protected               string                   IndexName => $"{_prefixIndexName}_{DateTime.Now.ToString(_splitIndexDateFormat)}";
+        protected               string                   IndexName => $"{_prefixIndexName}_{_indexDateTime.ToString(_splitIndexDateFormat)}";
         protected readonly      string[]                 AliasNames;
-
+        private readonly        DateTime                 _indexDateTime;
+        
         /// <summary>
         /// ES基类
         /// </summary>
@@ -28,10 +29,11 @@ namespace SP.StudioCore.ElasticSearch
         /// <param name="shardsCount">分片数量</param>
         /// <param name="splitIndexDateFormat">按时间分索引</param>
         /// <param name="replicasCount">副本数量</param>
-        public EsBase(string prefixIndexName, string[] aliasNames, int replicasCount = 0, int shardsCount = 3, string splitIndexDateFormat = "yyyy_MM")
+        public EsBase(string prefixIndexName, string[] aliasNames, int replicasCount = 0, int shardsCount = 3, DateTime? indexDateTime=null, string splitIndexDateFormat = "yyyy_MM")
         {
             _prefixIndexName      = prefixIndexName;
             AliasNames            = aliasNames;
+            _indexDateTime        = indexDateTime ?? DateTime.Now;
             _replicasCount        = replicasCount;
             _shardsCount          = shardsCount;
             _splitIndexDateFormat = splitIndexDateFormat;
@@ -45,7 +47,7 @@ namespace SP.StudioCore.ElasticSearch
         /// <param name="shardsCount">分片数量</param>
         /// <param name="splitIndexDateFormat">按时间分索引</param>
         /// <param name="replicasCount">副本数量</param>
-        public EsBase(string prefixIndexName, string aliasName, int replicasCount = 0, int shardsCount = 3, string splitIndexDateFormat = "yyyy_MM") : this(prefixIndexName, new[] {aliasName}, replicasCount, shardsCount, splitIndexDateFormat)
+        public EsBase(string prefixIndexName, string aliasName, int replicasCount = 0, int shardsCount = 3, DateTime? indexDateTime =null, string splitIndexDateFormat = "yyyy_MM") : this(prefixIndexName, new[] {aliasName}, replicasCount, shardsCount,indexDateTime, splitIndexDateFormat)
         {
         }
 

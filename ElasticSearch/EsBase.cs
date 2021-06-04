@@ -10,15 +10,15 @@ namespace SP.StudioCore.ElasticSearch
 {
     public abstract class EsBase<TAgent, TModel> where TModel : class where TAgent : class
     {
-        private readonly string _prefixIndexName;
-        private readonly int _replicasCount;
-        private readonly int _shardsCount;
-        private readonly string _splitIndexDateFormat;
-        protected readonly IElasticClient Client = IocCollection.GetService<IElasticClient>();
-        protected readonly ILogger<TAgent> Logger = IocCollection.GetService<ILoggerFactory>().CreateLogger<TAgent>();
+        private readonly        string                   _prefixIndexName;
+        private readonly        int                      _replicasCount;
+        private readonly        int                      _shardsCount;
+        private readonly        string                   _splitIndexDateFormat;
+        protected readonly      IElasticClient           Client     = IocCollection.GetService<IElasticClient>();
+        protected readonly      ILogger<TAgent>          Logger     = IocCollection.GetService<ILoggerFactory>().CreateLogger<TAgent>();
         private static readonly Dictionary<string, bool> IndexCache = new();
-        protected string IndexName => $"{_prefixIndexName}_{DateTime.Now.ToString(_splitIndexDateFormat)}";
-        protected readonly string[] AliasNames;
+        protected               string                   IndexName => $"{_prefixIndexName}_{DateTime.Now.ToString(_splitIndexDateFormat)}";
+        protected readonly      string[]                 AliasNames;
 
         /// <summary>
         /// ES基类
@@ -30,10 +30,10 @@ namespace SP.StudioCore.ElasticSearch
         /// <param name="replicasCount">副本数量</param>
         public EsBase(string prefixIndexName, string[] aliasNames, int replicasCount = 0, int shardsCount = 3, string splitIndexDateFormat = "yyyy_MM")
         {
-            _prefixIndexName = prefixIndexName;
-            AliasNames = aliasNames;
-            _replicasCount = replicasCount;
-            _shardsCount = shardsCount;
+            _prefixIndexName      = prefixIndexName;
+            AliasNames            = aliasNames;
+            _replicasCount        = replicasCount;
+            _shardsCount          = shardsCount;
             _splitIndexDateFormat = splitIndexDateFormat;
         }
 
@@ -59,6 +59,21 @@ namespace SP.StudioCore.ElasticSearch
             if (!result.IsValid)
             {
                 Logger.LogError($"索引失败：{model.ToJson()} \r\n" + result.OriginalException.Message);
+            }
+
+            return result.IsValid;
+        }
+
+        /// <summary>
+        /// 写入数据
+        /// </summary>
+        public virtual bool Insert(List<TModel> lst)
+        {
+            WhenNotExistsAddIndex();
+            var result = Client.IndexMany(lst, IndexName);
+            if (!result.IsValid)
+            {
+                Logger.LogError($"索引失败：共{lst.Count}条记录 \r\n" + result.OriginalException.Message);
             }
 
             return result.IsValid;
@@ -91,6 +106,7 @@ namespace SP.StudioCore.ElasticSearch
                     {
                         des.Alias(aliasName);
                     }
+
                     return des;
                 }).Settings(s => s.NumberOfReplicas(_replicasCount).NumberOfShards(_shardsCount))
             );
@@ -105,8 +121,9 @@ namespace SP.StudioCore.ElasticSearch
                 if (searchResponse.ServerError.Error.Type == "index_not_found_exception") return new List<TModel>();
                 throw searchResponse.OriginalException;
             }
+
             lst.AddRange(searchResponse.Documents.ToList());
-            
+
             // 数量相等，说明还没有读完全部数据
             while (searchResponse.Documents.Count == size)
             {

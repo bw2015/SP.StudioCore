@@ -123,7 +123,7 @@ namespace SP.StudioCore.Json
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-            throw new NotImplementedException();
+            return (bool)existingValue;
         }
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
@@ -150,7 +150,7 @@ namespace SP.StudioCore.Json
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-            throw new NotImplementedException();
+            return Guid.Parse((string)existingValue);
         }
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)

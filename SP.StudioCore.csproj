@@ -8,6 +8,15 @@
     <StartupObject />
     <SignAssembly>false</SignAssembly>
     <Nullable>enable</Nullable>
+    <Version>1.0.1</Version>
+    <Authors>betwin2015</Authors>
+    <Company>BetWin</Company>
+    <PackageProjectUrl>https://github.com/bw2015/SP.StudioCore</PackageProjectUrl>
+    <PackageIcon>Sp.Studio.png</PackageIcon>
+    <RepositoryUrl>https://github.com/bw2015/SP.StudioCore.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -37,6 +46,10 @@
     <Compile Remove="MQ\Configs\IRabbitManager.cs" />
     <Compile Remove="MQ\Configs\MQConfig.cs" />
     <Compile Remove="MQ\RabbitMQ\Configuration\ConsumerConfig.cs" />
+    <None Include="F:\Documents\Desktop\Sp.Studio.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 
   <ItemGroup>

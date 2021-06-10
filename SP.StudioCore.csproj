@@ -12,7 +12,7 @@
     <Authors>betwin2015</Authors>
     <Company>BetWin</Company>
     <PackageProjectUrl>https://github.com/bw2015/SP.StudioCore</PackageProjectUrl>
-    <PackageIcon>Sp.Studio.png</PackageIcon>
+    <PackageIcon>app.png</PackageIcon>
     <RepositoryUrl>https://github.com/bw2015/SP.StudioCore.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -46,7 +46,7 @@
     <Compile Remove="MQ\Configs\IRabbitManager.cs" />
     <Compile Remove="MQ\Configs\MQConfig.cs" />
     <Compile Remove="MQ\RabbitMQ\Configuration\ConsumerConfig.cs" />
-    <None Include="F:\Documents\Desktop\Sp.Studio.png">
+    <None Include="app.png">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>

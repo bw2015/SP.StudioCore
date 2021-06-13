@@ -5,6 +5,7 @@ using SP.StudioCore.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -29,7 +30,16 @@ namespace SP.StudioCore.Mvc
             string data = bindingContext.HttpContext.Request.Form[bindingContext.FieldName];
             if (string.IsNullOrEmpty(data)) return Task.CompletedTask;
             Type type = bindingContext.ModelType;
-            bindingContext.Result = ModelBindingResult.Success(JsonConvert.DeserializeObject(data, type));
+            // 判断是否包含 string 构造，如果存在则调用构造转换
+            ConstructorInfo? constructor = type.GetConstructor(new[] { typeof(string) });
+            if (constructor != null)
+            {
+                bindingContext.Result = ModelBindingResult.Success(constructor.Invoke(new[] { data }));
+            }
+            else
+            {
+                bindingContext.Result = ModelBindingResult.Success(JsonConvert.DeserializeObject(data, type));
+            }
             return Task.CompletedTask;
         }
     }

@@ -204,5 +204,22 @@ namespace SP.StudioCore.Array
         {
             return array.GroupBy(keySelector).Select(t => t.ToArray());
         }
+
+        /// <summary>
+        /// 二维数组的循环处理
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="array"></param>
+        /// <param name="action"></param>
+        public static void ForEach<T>(this T[][] array, Action<T> action)
+        {
+            for (int i = 0; i < array.Length; i++)
+            {
+                for (int j = 0; j < array[i].Length; j++)
+                {
+                    action(array[i][j]);
+                }
+            }
+        }
     }
 }

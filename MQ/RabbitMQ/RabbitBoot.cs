@@ -26,14 +26,14 @@ namespace SP.StudioCore.MQ.RabbitMQ
             {
                 lock (objLock)
                 {
-                    var configurationDefault = new ConfigurationDefault();
-                    RabbitConnect rabbitConnect = configurationDefault["Rabbit:" + connectionConfigName];
-                    string config = configurationDefault["Rabbit:Product:" + productConfigName];
+                    //var configurationDefault = new Config();
+                    RabbitConnect rabbitConnect = Config.GetConfig("Rabbit", connectionConfigName);
+                    string config = Config.GetConfig("Rabbit", "Product", productConfigName);
                     if (string.IsNullOrWhiteSpace(config)) config = $"ExchangeName={productConfigName}&RoutingKey=&UseConfirmModel=true&AutoCreateExchange=true&ExchangeType=fanout";
                     ProductConfig productConfig = config;
 
                     var rabbitManager = new RabbitManager(rabbitConnect, productConfig);
-                    
+
                     // 自动创建交换器
                     if (productConfig.AutoCreateExchange) rabbitManager.CreateExchange();
 
@@ -53,8 +53,8 @@ namespace SP.StudioCore.MQ.RabbitMQ
         /// <param name="consumeThreadNums">线程数（默认8）</param>
         public static IRabbitManager GetConsumerInstance(string connectionConfigName, string queueName, int consumeThreadNums, int lastAckTimeoutRestart)
         {
-            var configurationDefault = new ConfigurationDefault();
-            RabbitConnect rabbitConnect = configurationDefault["Rabbit:" + connectionConfigName];
+            //var configurationDefault = new Config();
+            RabbitConnect rabbitConnect = Config.GetConfig("Rabbit", connectionConfigName);
 
             return new RabbitManager(rabbitConnect, queueName, consumeThreadNums, lastAckTimeoutRestart);
         }

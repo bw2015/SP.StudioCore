@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Web;
 
 namespace SP.StudioCore.Gateway.Push
@@ -31,12 +32,12 @@ namespace SP.StudioCore.Gateway.Push
         public string Token { get; set; }
 
         /// <summary>
-        /// 频道配置
+        /// 默认频道配置
         /// </summary>
         [Description("频道")]
         public string Channel { get; set; }
 
-        public bool SendPhoto(string photo, params string[] channel)
+        public bool sendPhoto(string photo, params string[] channel)
         {
             string url = $"{this.Url}bot{this.Token}/sendPhoto";
             foreach (string id in this.GetChannels(channel))
@@ -53,7 +54,7 @@ namespace SP.StudioCore.Gateway.Push
         /// <param name="message"></param>
         /// <param name="channel"></param>
         /// <returns></returns>
-        public bool Send(string message, params string[] channel)
+        public bool sendMessage(string message, params string[] channel)
         {
             string url = $"{this.Url}bot{this.Token}/sendMessage";
             foreach (string id in this.GetChannels(channel))
@@ -61,6 +62,23 @@ namespace SP.StudioCore.Gateway.Push
                 string data = $"chat_id={id}&text={HttpUtility.UrlEncode(message)}&parse_mode=HTML";
                 NetAgent.UploadData(url, data, Encoding.UTF8);
             }
+            return true;
+        }
+
+        /// <summary>
+        /// 引用回复信息
+        /// </summary>
+        /// <returns></returns>
+        public bool replyMessage(long replyId, string message, params string[] channel)
+        {
+            string url = $"{this.Url}bot{this.Token}/sendMessage";
+            List<Task> task = new();
+            foreach (string id in this.GetChannels(channel))
+            {
+                string data = string.Format("chat_id={0}&text={1}&reply_to_message_id={2}&parse_mode=HTML", id, HttpUtility.UrlEncode(message.ToString()), replyId);
+                task.Add(Task.Run(() => { NetAgent.UploadData(url, data, Encoding.UTF8); }));
+            }
+            Task.WaitAll(task.ToArray());
             return true;
         }
 

@@ -335,4 +335,22 @@ namespace SP.StudioCore.Cache.Redis
 
         #endregion
     }
+
+    public abstract class RedisCacheBase<T> : RedisCacheBase where T : RedisCacheBase, new()
+    {
+        protected RedisCacheBase(string connectionString) : base(connectionString)
+        {
+        }
+
+        private static T _intance;
+        /// <summary>
+        /// 单例模式
+        /// </summary>
+        /// <returns></returns>
+        public static T Instance()
+        {
+            if (_intance == null) _intance = new T();
+            return _intance;
+        }
+    }
 }

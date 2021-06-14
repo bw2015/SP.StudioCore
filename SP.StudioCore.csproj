@@ -8,7 +8,7 @@
     <StartupObject />
     <SignAssembly>false</SignAssembly>
     <Nullable>enable</Nullable>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <Authors>betwin2015</Authors>
     <Company>BetWin</Company>
     <PackageProjectUrl>https://github.com/bw2015/SP.StudioCore</PackageProjectUrl>
@@ -25,11 +25,8 @@
 
   <ItemGroup>
     <Compile Remove="Ipdb\**" />
-    <Compile Remove="Tools\**" />
     <EmbeddedResource Remove="Ipdb\**" />
-    <EmbeddedResource Remove="Tools\**" />
     <None Remove="Ipdb\**" />
-    <None Remove="Tools\**" />
     <None Update="ipipfree.ipdb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

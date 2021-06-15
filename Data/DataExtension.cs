@@ -59,6 +59,7 @@ namespace SP.StudioCore.Data
             {
                 DatabaseType.SqlServer => new SqlServerProvider(db),
                 DatabaseType.MySql => new MySqlProvider(db),
+                DatabaseType.SQLite => new SqliteProvider(db),
                 _ => throw new NotSupportedException(db.DBType.ToString())
             };
         }
@@ -74,6 +75,7 @@ namespace SP.StudioCore.Data
             {
                 DatabaseType.SqlServer => new SqlServerProvider(db),
                 DatabaseType.MySql => new MySqlProvider(db),
+                DatabaseType.SQLite => new SqliteProvider(db),
                 _ => throw new NotSupportedException(db.DBType.ToString())
             };
         }
@@ -89,6 +91,7 @@ namespace SP.StudioCore.Data
             {
                 DatabaseType.SqlServer => new SqlServerProvider(db),
                 DatabaseType.MySql => new MySqlProvider(db),
+                DatabaseType.SQLite => new SqliteProvider(db),
                 _ => throw new NotSupportedException(db.DBType.ToString())
             };
         }
@@ -105,6 +108,7 @@ namespace SP.StudioCore.Data
             {
                 DatabaseType.SqlServer => new SqlServerExpressionCondition(expression),
                 DatabaseType.MySql => new MySqlExpressionCondition(expression),
+                DatabaseType.SQLite => new SqliteExpressionCondition(expression),
                 _ => throw new NotSupportedException(db.DBType.ToString())
             };
         }

@@ -25,5 +25,18 @@ namespace SP.StudioCore.Mvc.Exceptions
         {
             return result.WriteAsync(context);
         }
+
+        public ResultException()
+        {
+        }
+
+        public ResultException(string message) : base(message)
+        {
+            result = new Result(false, message);
+        }
+
+        public ResultException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
     }
 }

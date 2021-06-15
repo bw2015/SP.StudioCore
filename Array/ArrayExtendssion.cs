@@ -7,6 +7,7 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using System.Web;
+using Array = System.Array;
 
 namespace SP.StudioCore.Array
 {
@@ -24,7 +25,7 @@ namespace SP.StudioCore.Array
         /// <returns></returns>
         public static T Get<T>(this string[] args, string argName, T defaultValue)
         {
-            int index = args.IndexOf(argName);
+            int index = System.Array.IndexOf(args, argName);
             if (index == -1 || args.Length < index + 1) return defaultValue;
             string value = args[index + 1];
             return value.GetValue<T>();

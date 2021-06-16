@@ -41,26 +41,19 @@ namespace SP.StudioCore.IO
         /// <param name="directoryPath">指定目录的绝对路径</param>         
         public static bool IsEmptyDirectory(string directoryPath)
         {
-            try
+            //判断是否存在文件 
+            string[] fileNames = GetFileNames(directoryPath);
+            if (fileNames.Length > 0)
             {
-                //判断是否存在文件 
-                string[] fileNames = GetFileNames(directoryPath);
-                if (fileNames.Length > 0)
-                {
-                    return false;
-                }
-                //判断是否存在文件夹 
-                string[] directoryNames = GetDirectories(directoryPath);
-                if (directoryNames.Length > 0)
-                {
-                    return false;
-                }
-                return true;
+                return false;
             }
-            catch (Exception ex)
+            //判断是否存在文件夹 
+            string[] directoryNames = GetDirectories(directoryPath);
+            if (directoryNames.Length > 0)
             {
-                throw ex;
+                return false;
             }
+            return true;
         }
         #endregion
         #region 检测指定目录中是否存在指定的文件 
@@ -72,23 +65,16 @@ namespace SP.StudioCore.IO
         /// 范例："Log*.xml"表示搜索所有以Log开头的Xml文件。</param>         
         public static bool Contains(string directoryPath, string searchPattern)
         {
-            try
+            //获取指定的文件列表 
+            string[] fileNames = GetFileNames(directoryPath, searchPattern, false);
+            //判断指定文件是否存在 
+            if (fileNames.Length == 0)
             {
-                //获取指定的文件列表 
-                string[] fileNames = GetFileNames(directoryPath, searchPattern, false);
-                //判断指定文件是否存在 
-                if (fileNames.Length == 0)
-                {
-                    return false;
-                }
-                else
-                {
-                    return true;
-                }
+                return false;
             }
-            catch (Exception ex)
+            else
             {
-                throw ex;
+                return true;
             }
         }
         /// <summary> 
@@ -100,23 +86,16 @@ namespace SP.StudioCore.IO
         /// <param name="isSearchChild">是否搜索子目录</param> 
         public static bool Contains(string directoryPath, string searchPattern, bool isSearchChild)
         {
-            try
+            //获取指定的文件列表 
+            string[] fileNames = GetFileNames(directoryPath, searchPattern, true);
+            //判断指定文件是否存在 
+            if (fileNames.Length == 0)
             {
-                //获取指定的文件列表 
-                string[] fileNames = GetFileNames(directoryPath, searchPattern, true);
-                //判断指定文件是否存在 
-                if (fileNames.Length == 0)
-                {
-                    return false;
-                }
-                else
-                {
-                    return true;
-                }
+                return false;
             }
-            catch (Exception ex)
+            else
             {
-                throw ex;
+                return true;
             }
         }
         #endregion
@@ -168,25 +147,17 @@ namespace SP.StudioCore.IO
         /// <param name="buffer">二进制流数据</param> 
         public static void CreateFile(string filePath, byte[] buffer)
         {
-            try
+            //如果文件不存在则创建该文件 
+            if (!IsExistFile(filePath))
             {
-                //如果文件不存在则创建该文件 
-                if (!IsExistFile(filePath))
-                {
-                    //创建一个FileInfo对象 
-                    FileInfo file = new FileInfo(filePath);
-                    //创建文件 
-                    FileStream fs = file.Create();
-                    //写入二进制流 
-                    fs.Write(buffer, 0, buffer.Length);
-                    //关闭文件流 
-                    fs.Close();
-                }
-            }
-            catch (Exception ex)
-            {
-                //   LogHelper.WriteTraceLog(TraceLogLevel.Error, ex.Message);
-                throw ex;
+                //创建一个FileInfo对象 
+                FileInfo file = new FileInfo(filePath);
+                //创建文件 
+                FileStream fs = file.Create();
+                //写入二进制流 
+                fs.Write(buffer, 0, buffer.Length);
+                //关闭文件流 
+                fs.Close();
             }
         }
         #endregion
@@ -269,20 +240,13 @@ namespace SP.StudioCore.IO
             {
                 throw new FileNotFoundException();
             }
-            try
+            if (isSearchChild)
             {
-                if (isSearchChild)
-                {
-                    return Directory.GetFiles(directoryPath, searchPattern, SearchOption.AllDirectories);
-                }
-                else
-                {
-                    return Directory.GetFiles(directoryPath, searchPattern, SearchOption.TopDirectoryOnly);
-                }
+                return Directory.GetFiles(directoryPath, searchPattern, SearchOption.AllDirectories);
             }
-            catch (IOException ex)
+            else
             {
-                throw ex;
+                return Directory.GetFiles(directoryPath, searchPattern, SearchOption.TopDirectoryOnly);
             }
         }
         #endregion
@@ -293,14 +257,7 @@ namespace SP.StudioCore.IO
         /// <param name="directoryPath">指定目录的绝对路径</param>         
         public static string[] GetDirectories(string directoryPath)
         {
-            try
-            {
-                return Directory.GetDirectories(directoryPath);
-            }
-            catch (IOException ex)
-            {
-                throw ex;
-            }
+            return Directory.GetDirectories(directoryPath);
         }
         /// <summary> 
         /// 获取指定目录及子目录中所有子目录列表 
@@ -311,20 +268,13 @@ namespace SP.StudioCore.IO
         /// <param name="isSearchChild">是否搜索子目录</param> 
         public static string[] GetDirectories(string directoryPath, string searchPattern, bool isSearchChild)
         {
-            try
+            if (isSearchChild)
             {
-                if (isSearchChild)
-                {
-                    return Directory.GetDirectories(directoryPath, searchPattern, SearchOption.AllDirectories);
-                }
-                else
-                {
-                    return Directory.GetDirectories(directoryPath, searchPattern, SearchOption.TopDirectoryOnly);
-                }
+                return Directory.GetDirectories(directoryPath, searchPattern, SearchOption.AllDirectories);
             }
-            catch (IOException ex)
+            else
             {
-                throw ex;
+                return Directory.GetDirectories(directoryPath, searchPattern, SearchOption.TopDirectoryOnly);
             }
         }
         #endregion
@@ -400,11 +350,6 @@ namespace SP.StudioCore.IO
                 //返回流 
                 return buffer;
             }
-            catch (Exception ex)
-            {
-                //  LogHelper.WriteTraceLog(TraceLogLevel.Error, ex.Message);
-                throw ex;
-            }
             finally
             {
                 //关闭流 
@@ -431,11 +376,6 @@ namespace SP.StudioCore.IO
                 //将文件流读入缓冲区 
                 fs.Read(buffer, 0, fileSize);
                 return buffer;
-            }
-            catch (IOException ex)
-            {
-                // LogHelper.WriteTraceLog(TraceLogLevel.Error, ex.Message);
-                throw ex;
             }
             finally
             {
@@ -466,11 +406,6 @@ namespace SP.StudioCore.IO
             {
                 //读取流 
                 return reader.ReadToEnd();
-            }
-            catch (Exception ex)
-            {
-                //  LogHelper.WriteTraceLog(TraceLogLevel.Error, ex.Message);
-                throw ex;
             }
             finally
             {

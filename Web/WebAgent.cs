@@ -1,4 +1,6 @@
-﻿using SP.StudioCore.Model;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Net.Http.Headers;
+using SP.StudioCore.Model;
 using SP.StudioCore.Properties;
 using SP.StudioCore.Types;
 using System;
@@ -107,6 +109,18 @@ namespace SP.StudioCore.Web
                     break;
             }
             return regex.IsMatch(mobile);
+        }
+
+        /// <summary>
+        /// 是否是移动平台
+        /// </summary>
+        /// <returns></returns>
+        public static bool IsMobile()
+        {
+            if (Context.Current == null) return false;
+            string userAgent = Context.Current.Request.Headers[HeaderNames.UserAgent];
+            if (string.IsNullOrEmpty(userAgent)) return false;
+            return Regex.IsMatch(userAgent, "Mobile|iPad|iPhone|Android", RegexOptions.IgnoreCase);
         }
 
         /// <summary>

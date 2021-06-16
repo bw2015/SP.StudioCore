@@ -116,34 +116,20 @@ namespace SP.StudioCore.Mobile.Android.ApkReader
 
         private bool isReference(List<string> strs)
         {
-            try
+            foreach (string str in strs)
             {
-                foreach (string str in strs)
-                {
-                    if (isReference(str))
-                        return true;
-                }
-            }
-            catch (Exception e)
-            {
-                throw e;
+                if (isReference(str))
+                    return true;
             }
             return false;
         }
 
         private bool isReference(string str)
         {
-            try
+            if (str != null && str.StartsWith("@"))
             {
-                if (str != null && str.StartsWith("@"))
-                {
-                    int.Parse(str, System.Globalization.NumberStyles.HexNumber);
-                    return true;
-                }
-            }
-            catch (Exception e)
-            {
-                throw e;
+                int.Parse(str, System.Globalization.NumberStyles.HexNumber);
+                return true;
             }
             return false;
         }

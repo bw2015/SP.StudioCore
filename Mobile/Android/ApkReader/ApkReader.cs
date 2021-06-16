@@ -88,14 +88,9 @@ namespace SP.StudioCore.Mobile.Android.ApkReader
         {
             string manifestXml = string.Empty;
             APKManifest manifest = new APKManifest();
-            try
-            {
-                manifestXml = manifest.ReadManifestFileIntoXml(manifest_xml);
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+
+            manifestXml = manifest.ReadManifestFileIntoXml(manifest_xml);
+
 
             XmlDocument doc = new XmlDocument();
             doc.LoadXml(manifestXml);
@@ -108,139 +103,131 @@ namespace SP.StudioCore.Mobile.Android.ApkReader
             VER_ICN[VER_ID] = "";
             VER_ICN[ICN_ID] = "";
             VER_ICN[LABEL_ID] = "";
-            try
+            XmlDocument doc = manifestXml;
+            if (doc == null)
+                throw new Exception("Document initialize failed");
+            info.resourcesFileName = "resources.arsx";
+            info.resourcesFileBytes = resources_arsx;
+            // Fill up the permission field
+            extractPermissions(info, doc);
+
+            // Fill up some basic fields
+            info.minSdkVersion = FindInDocument(doc, "uses-sdk", "minSdkVersion");
+            info.targetSdkVersion = FindInDocument(doc, "uses-sdk", "targetSdkVersion");
+            info.versionCode = FindInDocument(doc, "manifest", "versionCode");
+            info.versionName = FindInDocument(doc, "manifest", "versionName");
+            info.packageName = FindInDocument(doc, "manifest", "package");
+
+            int labelID;
+            info.label = FindInDocument(doc, "application", "label");
+            if (info.label.StartsWith("@"))
+                VER_ICN[LABEL_ID] = info.label;
+            else if (int.TryParse(info.label, out labelID))
+                VER_ICN[LABEL_ID] = String.Format("@{0}", labelID.ToString("X4"));
+
+            // Get the value of android:debuggable in the manifest
+            // "0" = false and "-1" = true
+            info.debuggable = FindInDocument(doc, "application", "debuggable");
+
+            // Fill up the support screen field
+            extractSupportScreens(info, doc);
+
+            if (info.versionCode == null)
+                info.versionCode = fuzzFindInDocument(doc, "manifest",
+                                "versionCode");
+
+            if (info.versionName == null)
+                info.versionName = fuzzFindInDocument(doc, "manifest",
+                                "versionName");
+            else if (info.versionName.StartsWith("@"))
+                VER_ICN[VER_ID] = info.versionName;
+
+            String id = FindInDocument(doc, "application", "android:icon");
+            if (null == id)
             {
-                XmlDocument doc = manifestXml;
-                if (doc == null)
-                    throw new Exception("Document initialize failed");
-                info.resourcesFileName = "resources.arsx";
-                info.resourcesFileBytes = resources_arsx;
-                // Fill up the permission field
-                extractPermissions(info, doc);
+                id = fuzzFindInDocument(doc, "manifest", "icon");
+            }
 
-                // Fill up some basic fields
-                info.minSdkVersion = FindInDocument(doc, "uses-sdk", "minSdkVersion");
-                info.targetSdkVersion = FindInDocument(doc, "uses-sdk", "targetSdkVersion");
-                info.versionCode = FindInDocument(doc, "manifest", "versionCode");
-                info.versionName = FindInDocument(doc, "manifest", "versionName");
-                info.packageName = FindInDocument(doc, "manifest", "package");
+            if (null == id)
+            {
+                Debug.WriteLine("icon resId Not Found!");
+                return info;
+            }
 
-                int labelID;
-                info.label = FindInDocument(doc, "application", "label");
-                if (info.label.StartsWith("@"))
-                    VER_ICN[LABEL_ID] = info.label;
-                else if (int.TryParse(info.label, out labelID))
-                    VER_ICN[LABEL_ID] = String.Format("@{0}", labelID.ToString("X4"));
+            // Find real strings
+            if (!info.hasIcon && id != null)
+            {
+                if (id.StartsWith("@android:"))
+                    VER_ICN[ICN_ID] = "@"
+                                    + (id.Substring("@android:".Length));
+                else
+                    VER_ICN[ICN_ID] = String.Format("@{0}", Convert.ToInt32(id).ToString("X4"));
 
-                // Get the value of android:debuggable in the manifest
-                // "0" = false and "-1" = true
-                info.debuggable = FindInDocument(doc, "application", "debuggable");
+                List<String> resId = new List<String>();
 
-                // Fill up the support screen field
-                extractSupportScreens(info, doc);
-
-                if (info.versionCode == null)
-                    info.versionCode = fuzzFindInDocument(doc, "manifest",
-                                    "versionCode");
-
-                if (info.versionName == null)
-                    info.versionName = fuzzFindInDocument(doc, "manifest",
-                                    "versionName");
-                else if (info.versionName.StartsWith("@"))
-                    VER_ICN[VER_ID] = info.versionName;
-
-                String id = FindInDocument(doc, "application", "android:icon");
-                if (null == id)
+                for (int i = 0; i < VER_ICN.Length; i++)
                 {
-                    id = fuzzFindInDocument(doc, "manifest", "icon");
+                    if (VER_ICN[i].StartsWith("@"))
+                        resId.Add(VER_ICN[i]);
                 }
 
-                if (null == id)
-                {
-                    Debug.WriteLine("icon resId Not Found!");
-                    return info;
-                }
+                ApkResourceFinder finder = new ApkResourceFinder();
+                info.resStrings = finder.processResourceTable(info.resourcesFileBytes, resId);
 
-                // Find real strings
-                if (!info.hasIcon && id != null)
+                if (!VER_ICN[VER_ID].Equals(""))
                 {
-                    if (id.StartsWith("@android:"))
-                        VER_ICN[ICN_ID] = "@"
-                                        + (id.Substring("@android:".Length));
+                    List<String> versions = null;
+                    if (info.resStrings.ContainsKey(VER_ICN[VER_ID].ToUpper()))
+                        versions = info.resStrings[VER_ICN[VER_ID].ToUpper()];
+                    if (versions != null)
+                    {
+                        if (versions.Count > 0)
+                            info.versionName = versions[0];
+                    }
                     else
-                        VER_ICN[ICN_ID] = String.Format("@{0}", Convert.ToInt32(id).ToString("X4"));
-
-                    List<String> resId = new List<String>();
-
-                    for (int i = 0; i < VER_ICN.Length; i++)
                     {
-                        if (VER_ICN[i].StartsWith("@"))
-                            resId.Add(VER_ICN[i]);
+                        throw new Exception(
+                                        "VersionName Cant Find in resource with id "
+                                                        + VER_ICN[VER_ID]);
                     }
+                }
 
-                    ApkResourceFinder finder = new ApkResourceFinder();
-                    info.resStrings = finder.processResourceTable(info.resourcesFileBytes, resId);
-
-                    if (!VER_ICN[VER_ID].Equals(""))
+                List<String> iconPaths = null;
+                if (info.resStrings.ContainsKey(VER_ICN[ICN_ID].ToUpper()))
+                    iconPaths = info.resStrings[VER_ICN[ICN_ID].ToUpper()];
+                if (iconPaths != null && iconPaths.Count > 0)
+                {
+                    info.iconFileNameToGet = new List<String>();
+                    info.iconFileName = new List<string>();
+                    foreach (String iconFileName in iconPaths)
                     {
-                        List<String> versions = null;
-                        if (info.resStrings.ContainsKey(VER_ICN[VER_ID].ToUpper()))
-                            versions = info.resStrings[VER_ICN[VER_ID].ToUpper()];
-                        if (versions != null)
+                        if (iconFileName != null)
                         {
-                            if (versions.Count > 0)
-                                info.versionName = versions[0];
-                        }
-                        else
-                        {
-                            throw new Exception(
-                                            "VersionName Cant Find in resource with id "
-                                                            + VER_ICN[VER_ID]);
-                        }
-                    }
-
-                    List<String> iconPaths = null;
-                    if (info.resStrings.ContainsKey(VER_ICN[ICN_ID].ToUpper()))
-                        iconPaths = info.resStrings[VER_ICN[ICN_ID].ToUpper()];
-                    if (iconPaths != null && iconPaths.Count > 0)
-                    {
-                        info.iconFileNameToGet = new List<String>();
-                        info.iconFileName = new List<string>();
-                        foreach (String iconFileName in iconPaths)
-                        {
-                            if (iconFileName != null)
+                            if (iconFileName.Contains(@"/"))
                             {
-                                if (iconFileName.Contains(@"/"))
-                                {
-                                    info.iconFileNameToGet.Add(iconFileName);
-                                    info.iconFileName.Add(iconFileName);
-                                    info.hasIcon = true;
-                                }
+                                info.iconFileNameToGet.Add(iconFileName);
+                                info.iconFileName.Add(iconFileName);
+                                info.hasIcon = true;
                             }
                         }
                     }
-                    else
-                    {
-                        throw new Exception("Icon Cant Find in resource with id "
-                                        + VER_ICN[ICN_ID]);
-                    }
-
-                    if (!VER_ICN[LABEL_ID].Equals(""))
-                    {
-                        List<String> labels = null;
-                        if (info.resStrings.ContainsKey(VER_ICN[LABEL_ID]))
-                            labels = info.resStrings[VER_ICN[LABEL_ID]];
-                        if (labels.Count > 0)
-                        {
-                            info.label = labels[0];
-                        }
-                    }
+                }
+                else
+                {
+                    throw new Exception("Icon Cant Find in resource with id "
+                                    + VER_ICN[ICN_ID]);
                 }
 
-            }
-            catch (Exception e)
-            {
-                throw e;
+                if (!VER_ICN[LABEL_ID].Equals(""))
+                {
+                    List<String> labels = null;
+                    if (info.resStrings.ContainsKey(VER_ICN[LABEL_ID]))
+                        labels = info.resStrings[VER_ICN[LABEL_ID]];
+                    if (labels.Count > 0)
+                    {
+                        info.label = labels[0];
+                    }
+                }
             }
             return info;
         }

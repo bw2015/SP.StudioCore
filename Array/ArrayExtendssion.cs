@@ -222,5 +222,17 @@ namespace SP.StudioCore.Array
                 }
             }
         }
+
+        /// <summary>
+        /// 二维数组判断是否存在
+        /// </summary>
+        public static bool Any<T>(this T[][] array, Func<T, bool> predicate)
+        {
+            foreach (T[] items in array)
+            {
+                if (items.Any(predicate)) return true;
+            }
+            return false;
+        }
     }
 }

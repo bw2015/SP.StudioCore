@@ -135,7 +135,8 @@ namespace SP.StudioCore.ElasticSearch
                     lst.AddRange(searchResponse.Documents.ToList());
                 }
             }
-
+            
+            Client.ClearScroll(s => s.ScrollId(searchResponse.ScrollId));
             return lst;
         }
     }

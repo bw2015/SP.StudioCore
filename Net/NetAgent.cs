@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -14,7 +15,15 @@ namespace SP.StudioCore.Net
         /// <summary>
         /// 默认的用户代理字符串
         /// </summary>
-        private const string USER_AGENT = "SP.StudioCore/3.1";
+        private static string USER_AGENT
+        {
+            get
+            {
+                Assembly assembly = typeof(NetAgent).Assembly;
+                AssemblyName assemblyName = assembly.GetName();
+                return string.Concat(assemblyName.Name, "/", assemblyName.Version);
+            }
+        }
 
         private static WebClient CreateWebClient(string url = null, Encoding encoding = null)
         {
@@ -45,7 +54,7 @@ namespace SP.StudioCore.Net
             {
                 using (MemoryStream cms = new MemoryStream(data))
                 {
-                    using (System.IO.Compression.GZipStream gzip = new System.IO.Compression.GZipStream(cms, System.IO.Compression.CompressionMode.Decompress))
+                    using (System.IO.Compression.GZipStream gzip = new(cms, System.IO.Compression.CompressionMode.Decompress))
                     {
                         byte[] bytes = new byte[1024];
                         int len = 0;

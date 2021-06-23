@@ -9,9 +9,13 @@ namespace SP.StudioCore.Configuration
     public static class Config
     {
         private static readonly IConfigurationRoot config = new ConfigurationBuilder()
-             .AddJsonFile("appsettings.json")
-             .Build();
+            .AddJsonFile("appsettings.json",                                                                 optional: true, reloadOnChange: true)
+            .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}.json", optional: true, reloadOnChange: true) //增加环境配置文件
+            .AddEnvironmentVariables()
+            .Build();
 
+        public static IConfigurationRoot GetConfig() => config;
+        
         public static string GetConfig(string application, string name)
         {
             return config[$"{application}:{name}"];

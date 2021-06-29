@@ -41,9 +41,9 @@ namespace SP.StudioCore.Tools
                     KeepAliveInterval = TimeSpan.FromMinutes(1)
                 })
             .UseStaticFiles()
-            .UseHttpContext();
-
-            app.UseMiddleware<WebSocketMiddleware>()
+            .UseHttpContext()          
+            .UseMiddleware<WebSocketMiddleware>()
+            .UseMiddleware<ToolsExceptionMIddleware>()
                 .Run(async (context) =>
                 {
                     await ToolsFactory.Invote(context).WriteAsync(context).ConfigureAwait(false);

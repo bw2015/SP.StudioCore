@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using SP.StudioCore.Http;
 using SP.StudioCore.Model;
@@ -41,7 +42,7 @@ namespace SP.StudioCore.Tools
             Assembly assembly = Assembly.Load($"Tools.{controller}");
             if (assembly == null) return context.ShowError(HttpStatusCode.BadRequest, controller);
 
-            Type start = assembly.GetType($"Tools.{controller}.Start");
+            Type start = assembly.GetTypes().FirstOrDefault(t => t.IsBaseType<StartBase>());
             if (start == null) return context.ShowError(HttpStatusCode.MethodNotAllowed, $"Tools.{controller}.Start");
 
             MethodInfo methodInfo = start.GetMethod(methodName);
@@ -61,12 +62,16 @@ namespace SP.StudioCore.Tools
                 {
                     return (Result)methodInfo.Invoke(obj, null);
                 }
-                else if (parameters.Length == 1)
+                else if (parameters.Length == 1 && parameters[0].HasAttribute<FromBodyAttribute>())
                 {
                     Type parameterType = parameters[0].ParameterType;
                     string value = context.GetString();
                     object parameterValue = JsonConvert.DeserializeObject(value, parameterType);
                     return (Result)methodInfo.Invoke(obj, new[] { parameterValue });
+                }
+                else
+                {
+                    return (Result)methodInfo.Invoke(obj, parameters.Select(t => context.QF(t.Name).GetValue(t.ParameterType)).ToArray());
                 }
             }
 

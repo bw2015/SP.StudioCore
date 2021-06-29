@@ -74,5 +74,14 @@ namespace SP.StudioCore.Json
             }
             return info;
         }
+
+        public static bool IsNullOrEmpty(this JToken token)
+        {
+            return (token == null) ||
+              (token.Type == JTokenType.Array && !token.HasValues) ||
+              (token.Type == JTokenType.Object && !token.HasValues) ||
+              (token.Type == JTokenType.String && token.Value<string>() == string.Empty) ||
+              (token.Type == JTokenType.Null);
+        }
     }
 }

@@ -17,14 +17,23 @@ namespace SP.StudioCore.Jobs
     {
         private static IJobDelegate JobDelegate = IocCollection.GetService<IJobDelegate>();
 
-        public static void Run(Assembly assembly)
+        public static void Run(Assembly assembly, ParallelOptions options = null)
         {
             IEnumerable<IJobBase> jobs = assembly.GetTypes()
                 .Where(t => !t.IsAbstract && t.IsSubclassOf(typeof(IJobBase)))
                 .Select(t => (IJobBase)Activator.CreateInstance(t));
             string service = assembly.GetName().Name;
 
-            Parallel.ForEach(jobs, job =>
+            if (options == null)
+            {
+                options = new ParallelOptions()
+                {
+                    MaxDegreeOfParallelism = 4
+                };
+            }
+
+            Parallel.ForEach(jobs, options,
+                job =>
             {
                 string jobName = job.GetType().Name;
                 string lockKey = $"{service}:{jobName}";
@@ -46,7 +55,7 @@ namespace SP.StudioCore.Jobs
 
                     }
                     finally
-                    {                        
+                    {
                         if (!job.IsTheard)
                         {
                             JobDelegate.UnlockJob(lockKey);

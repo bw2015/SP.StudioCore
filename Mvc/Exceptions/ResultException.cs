@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using SP.StudioCore.Enums;
 using SP.StudioCore.Model;
 using System;
 using System.Collections.Generic;
@@ -17,6 +18,18 @@ namespace SP.StudioCore.Mvc.Exceptions
         public ResultException(Result result)
         {
             this.result = result;
+        }
+
+        /// <summary>
+        /// 返回错误的枚举类型
+        /// </summary>
+        /// <param name="errorCode"></param>
+        public ResultException(Enum errorCode, string message = null)
+        {
+            this.result = new Result(false, message ?? errorCode.GetDescription(), new
+            {
+                Error = errorCode
+            });
         }
 
         public override string Message => this.result.ToString();

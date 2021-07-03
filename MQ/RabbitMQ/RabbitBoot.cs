@@ -55,7 +55,6 @@ namespace SP.StudioCore.MQ.RabbitMQ
         {
             //var configurationDefault = new Config();
             RabbitConnect rabbitConnect = Config.GetConfig("Rabbit", connectionConfigName);
-
             return new RabbitManager(rabbitConnect, queueName, consumeThreadNums, lastAckTimeoutRestart);
         }
     }

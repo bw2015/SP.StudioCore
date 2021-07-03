@@ -1,6 +1,9 @@
 using System.Net;
+using System.Text.Encodings.Web;
+using System.Web;
 using RabbitMQ.Client;
 using SP.StudioCore.MQ.RabbitMQ.Configuration;
+using SP.StudioCore.Web;
 
 namespace SP.StudioCore.MQ.RabbitMQ
 {
@@ -31,15 +34,15 @@ namespace SP.StudioCore.MQ.RabbitMQ
             _config = config;
             _factoryInfo = new ConnectionFactory //创建连接工厂对象
             {
-                HostName                 = config.Server,      //IP地址
-                Port                     = config.Port,        //端口号
-                UserName                 = config.UserName,    //用户账号
-                Password                 = config.Password,    //用户密码
-                VirtualHost              = config.VirtualHost, // 虚拟主机
+                HostName                 = HttpUtility.UrlDecode(config.Server),      //IP地址
+                Port                     = config.Port,                               //端口号
+                UserName                 = HttpUtility.UrlDecode(config.UserName),    //用户账号
+                Password                 = HttpUtility.UrlDecode(config.Password),    //用户密码
+                VirtualHost              = HttpUtility.UrlDecode(config.VirtualHost), // 虚拟主机
                 AutomaticRecoveryEnabled = true,
             };
         }
-        
+
         public static implicit operator RabbitConnect(string config)
         {
             return config == null ? null : new RabbitConnect(new RabbitServerConfig(config));

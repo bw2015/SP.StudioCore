@@ -64,6 +64,24 @@ namespace SP.StudioCore.Gateway.Push
             }
             return true;
         }
+        /// <summary>
+        /// 发送文本信息
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="channel"></param>
+        /// <returns></returns>
+        public Task SendMessageAsync(string message, params string[] channel)
+        {
+            string url     = $"{this.Url}bot{this.Token}/sendMessage";
+            var    lstTask = new List<Task>();
+            foreach (string id in this.GetChannels(channel))
+            {
+                string data = $"chat_id={id}&text={HttpUtility.UrlEncode(message)}&parse_mode=HTML";
+                lstTask.Add(HttpAgent.PostAsync(url, data, Encoding.UTF8));
+            }
+
+            return Task.WhenAll(lstTask);
+        }
 
         /// <summary>
         /// 引用回复信息

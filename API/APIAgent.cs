@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json.Linq;
+using SP.StudioCore.Ioc;
 using SP.StudioCore.Model;
+using SP.StudioCore.Mvc.Exceptions;
 using SP.StudioCore.Net;
 using System;
 using System.Collections.Generic;
@@ -13,40 +15,21 @@ namespace SP.StudioCore.API
 {
     /// <summary>
     /// 内部API接口的对接
-    /// 务必配置 appsetting.json 文件的 studio:{ uploadUrl:"图片上传接口",imgServer:"图片访问地址" }
+    /// 须注册服务 UploadConfig
     /// </summary>
-    public static class APIAgent
+    public static class UploadAgent
     {
+        private static UploadConfig Config => IocCollection.GetService<UploadConfig>();
+
         /// <summary>
         /// 图片上传路径
         /// </summary>
-        private static string uploadUrl { get; set; }
+        private static string UploadUrl => Config.UploadUrl;
 
         /// <summary>
         /// 图片服务器
         /// </summary>
-        public static string imgServer { get; private set; }
-
-        static APIAgent()
-        {
-            IConfigurationRoot config = new ConfigurationBuilder()
-                  //.SetBasePath(Directory.GetCurrentDirectory())
-                  .AddJsonFile("appsettings.json")
-                  .Build();
-
-            uploadUrl = config["studio:uploadUrl"];
-            imgServer = config["studio:imgServer"];
-        }
-
-        /// <summary>
-        /// 从外部设定
-        /// </summary>
-        public static void Set(string _imgServer, string _uploadUrl)
-        {
-            if (!string.IsNullOrEmpty(_imgServer)) imgServer = _imgServer;
-            if (!string.IsNullOrEmpty(_uploadUrl)) uploadUrl = _uploadUrl;
-
-        }
+        public static string ImgServer => Config.ImgServer;
 
         /// <summary>
         /// 上传文件流
@@ -55,14 +38,14 @@ namespace SP.StudioCore.API
         /// <returns>返回上传结果</returns>
         public static Result Upload(this IFormFile file, string type = null)
         {
-            if (string.IsNullOrEmpty(uploadUrl)) return new Result(false, "未配置上传路径");
+            if (string.IsNullOrEmpty(UploadUrl)) throw new ResultException("未配置上传路径");
             using (MemoryStream ms = new MemoryStream())
             {
                 file.CopyTo(ms);
                 byte[] data = ms.ToArray();
                 Dictionary<string, string> header = new Dictionary<string, string>();
                 if (!string.IsNullOrEmpty(type)) header.Add("x-type", type);
-                string result = NetAgent.UploadData(uploadUrl, data, Encoding.UTF8, null, header);
+                string result = NetAgent.UploadData(UploadUrl, data, Encoding.UTF8, null, header);
                 return new Result(ContentType.Result, result);
             }
         }
@@ -75,14 +58,14 @@ namespace SP.StudioCore.API
         /// <returns></returns>
         public static Result Upload(string url, string type = null)
         {
-            if (string.IsNullOrEmpty(uploadUrl)) return new Result(false, "未配置上传路径");
-            if (!System.Uri.IsWellFormedUriString(url, UriKind.Absolute)) return new Result(false, "资源路径非法");
+            if (string.IsNullOrEmpty(UploadUrl)) throw new ResultException("未配置上传路径");
+            if (!System.Uri.IsWellFormedUriString(url, UriKind.Absolute)) throw new ResultException("资源路径非法");
             byte[] data = NetAgent.DownloadFile(url);
-            if (data == null) return new Result(false, "下载文件失败");
+            if (data == null) throw new ResultException("下载文件失败");
 
             Dictionary<string, string> header = new Dictionary<string, string>();
             if (!string.IsNullOrEmpty(type)) header.Add("x-type", type);
-            string result = NetAgent.UploadData(uploadUrl, data, Encoding.UTF8, null, header);
+            string result = NetAgent.UploadData(UploadUrl, data, Encoding.UTF8, null, header);
             return new Result(ContentType.Result, result);
         }
 
@@ -140,10 +123,26 @@ namespace SP.StudioCore.API
             if (string.IsNullOrEmpty(path))
             {
                 if (string.IsNullOrEmpty(defaultPath)) return defaultPath;
-                return $"{imgServer}{defaultPath}";
+                return $"{ImgServer}{defaultPath}";
             }
             if (path.StartsWith("http")) return path;
-            return $"{imgServer}{path}";
+            return $"{ImgServer}{path}";
         }
+    }
+
+    /// <summary>
+    /// 上传文件的配置（需在服务中注册）
+    /// </summary>
+    public class UploadConfig
+    {
+        public UploadConfig(string uploadUrl, string imgServer)
+        {
+            this.UploadUrl = uploadUrl;
+            this.ImgServer = imgServer;
+        }
+
+        public string UploadUrl { get; set; }
+
+        public string ImgServer { get; set; }
     }
 }

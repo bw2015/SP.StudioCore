@@ -1,7 +1,9 @@
 using System.Net;
 using System.Text.Encodings.Web;
 using System.Web;
+using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
+using SP.StudioCore.Ioc;
 using SP.StudioCore.MQ.RabbitMQ.Configuration;
 using SP.StudioCore.Web;
 
@@ -30,7 +32,12 @@ namespace SP.StudioCore.MQ.RabbitMQ
         /// <param name="config">配置</param>
         public RabbitConnect(RabbitServerConfig config)
         {
-            if (string.IsNullOrWhiteSpace(config.VirtualHost)) config.VirtualHost = "/";
+            ILogger<RabbitConnect> logger = IocCollection.GetService<ILoggerFactory>().CreateLogger<RabbitConnect>();
+            if (string.IsNullOrWhiteSpace(config.VirtualHost))
+            {
+                config.VirtualHost = "/";
+            }
+
             _config = config;
             _factoryInfo = new ConnectionFactory //创建连接工厂对象
             {
@@ -41,6 +48,7 @@ namespace SP.StudioCore.MQ.RabbitMQ
                 VirtualHost              = HttpUtility.UrlDecode(config.VirtualHost), // 虚拟主机
                 AutomaticRecoveryEnabled = true,
             };
+            logger.LogInformation($"UserName：{_factoryInfo.UserName},Password：{_factoryInfo.Password}，VirtualHost：{_factoryInfo.VirtualHost}");
         }
 
         public static implicit operator RabbitConnect(string config)

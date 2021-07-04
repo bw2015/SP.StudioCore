@@ -28,31 +28,36 @@ namespace SP.StudioCore.Jobs
             {
                 options = new ParallelOptions()
                 {
-                    MaxDegreeOfParallelism = 4
+                    MaxDegreeOfParallelism = Math.Min(Environment.ProcessorCount * 4, jobs.Count())
                 };
             }
-
-            Parallel.ForEach(jobs, options,
-                job =>
+            List<string> logs = new List<string>();
+            while (true)
             {
-                string jobName = job.GetType().Name;
-                string lockKey = $"{service}:{jobName}";
-                Console.WriteLine($"Job任务：{jobName}开始执行");
-                Stopwatch sw = new();
-                while (true)
+                int interval = 0;
+                logs.Clear();
+                Parallel.ForEach(jobs, options,
+                job =>
                 {
+                    string jobName = job.GetType().Name;
+                    string lockKey = $"{service}:{jobName}";
+                    Stopwatch sw = new();
                     sw.Restart();
                     try
                     {
                         if (job.IsTheard || JobDelegate.LockJob(lockKey))
                         {
-                            job.Execute();
-                            Console.WriteLine($"Job:{jobName}执行完毕，耗时：{sw.ElapsedMilliseconds}ms");
+                            if (job.Execute().Result)
+                            {
+                                Console.WriteLine($"Job:{jobName}执行完毕，耗时：{sw.ElapsedMilliseconds}ms");
+                            }
                         }
                     }
                     catch (Exception ex)
                     {
-
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine(ex.Message);
+                        Console.ResetColor();
                     }
                     finally
                     {
@@ -61,9 +66,10 @@ namespace SP.StudioCore.Jobs
                             JobDelegate.UnlockJob(lockKey);
                         }
                     }
-                    Thread.Sleep(job.Interval);
-                }
-            });
+                    if (interval < job.Interval) interval = job.Interval;
+                });
+                Thread.Sleep(interval);
+            }
 
         }
     }

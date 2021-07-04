@@ -92,10 +92,28 @@ namespace SP.StudioCore.Net
             return UploadData(url, encoding.GetBytes(data), encoding, wc, headers);
         }
 
+        public static async Task<HttpResponseMessage> UploadDataAsync(string url, string data, Encoding encoding = null, WebClient wc = null, Dictionary<string, string> headers = null)
+        {
+            if (headers == null) headers = new Dictionary<string, string>();
+            if (!headers.ContainsKey("Content-Type"))
+            {
+                headers.Add("Content-Type", "application/x-www-form-urlencoded");
+            }
+            if (!headers.ContainsKey("User-Agent"))
+            {
+                headers.Add("User-Agent", USER_AGENT);
+            }
+            if (encoding == null) encoding = Encoding.UTF8;
+
+            StringContent content = new StringContent(data, encoding, headers["Content-Type"]);
+            Task<HttpResponseMessage> response = new HttpClient().PostAsync(url, content);
+            return response.Result;
+        }
+
         public static async Task PostAsync(string url, string data)
         {
             StringContent content = new StringContent(data, Encoding.UTF8);
-            content.Headers.Add("User-Agent", "USER_AGENT");
+            content.Headers.Add("User-Agent", USER_AGENT);
             content.Headers.Add("Content-Type", "application/x-www-form-urlencoded");
             await new HttpClient().PostAsync(new Uri(url), content).ConfigureAwait(false);
         }

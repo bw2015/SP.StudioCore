@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.Extensions.Logging;
@@ -10,6 +11,7 @@ namespace SP.StudioCore.MQ.RabbitMQ
 {
     public class RabbitProduct : IRabbitProduct
     {
+        private ConcurrentQueue<IModel> Stacks = new();
         /// <summary>
         /// 配置信息
         /// </summary>
@@ -33,8 +35,16 @@ namespace SP.StudioCore.MQ.RabbitMQ
         {
             // 如果连接断开，则要重连
             if (_connect.Connection == null || !_connect.Connection.IsOpen) _connect.Open();
-            var channel = _connect.Connection.CreateModel();
-            if (_productConfig.UseConfirmModel) channel.ConfirmSelect();
+            
+            // 从池中取出频道
+            var tryPop = Stacks.TryDequeue(out var channel);
+            
+            // 取出失败，说明没有可用频道，需要创建新的
+            if (!tryPop || channel.IsClosed)
+            {
+                channel = _connect.Connection.CreateModel();
+                if (_productConfig.UseConfirmModel) channel.ConfirmSelect();
+            }
             return channel;
         }
 
@@ -43,9 +53,7 @@ namespace SP.StudioCore.MQ.RabbitMQ
         /// </summary>
         public void Close(IModel channel)
         {
-            channel.Close();
-            channel.Dispose();
-            channel = null;
+            Stacks.Enqueue(channel);
         }
 
         /// <summary>

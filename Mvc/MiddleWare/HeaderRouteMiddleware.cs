@@ -2,6 +2,7 @@
 using SP.StudioCore.Http;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
@@ -20,6 +21,7 @@ namespace SP.StudioCore.Mvc.MiddleWare
         }
         public async Task Invoke(HttpContext context)
         {
+            var    sw   = Stopwatch.StartNew();
             string path = context.Request.Path.Value;
             if (path == "/")
             {
@@ -59,6 +61,8 @@ namespace SP.StudioCore.Mvc.MiddleWare
             {
                 context.Request.Path = path[1..];
             }
+
+            Console.WriteLine($"HeaderRouteMiddleware {sw.ElapsedMilliseconds}");
             await _next(context).ConfigureAwait(false);
         }
     }

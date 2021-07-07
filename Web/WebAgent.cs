@@ -338,6 +338,22 @@ namespace SP.StudioCore.Web
             return GetTimestamps(DateTime.Now);
         }
 
+        /// <summary>
+        /// 获取当前的时间戳（毫秒，GTM+0），2020年1月1日开始算
+        /// </summary>
+        public static long GetTimestampsBy2020()
+        {
+            return GetTimestamps(DateTime.Now) - 1577808000000; //GetTimestamps(new DateTime(2020, 01, 01));
+        }
+
+        /// <summary>
+        /// 获取当前的时间戳（毫秒，GTM+0），2020年1月1日开始算
+        /// </summary>
+        public static DateTime GetTimestampsBy2020(long timestamp)
+        {
+            return GetTimestamps(timestamp + 1577808000000);
+        }
+
         #endregion
 
         #region ========  域名处理  ========

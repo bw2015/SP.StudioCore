@@ -291,7 +291,6 @@ namespace SP.StudioCore.Web
         /// </summary>
         /// <param name="time"></param>
         /// <returns></returns>
-        [Obsolete("全部修改成为毫秒")]
         public static long GetTimestamp(DateTime time)
         {
             return (time.ToUniversalTime().Ticks - 621355968000000000) / 10000000;
@@ -315,6 +314,16 @@ namespace SP.StudioCore.Web
         public static long GetTimestamps(DateTime time)
         {
             return (time.ToUniversalTime().Ticks - 621355968000000000) / 10000;
+        }
+
+        public static long GetTimestamps(DateTime time, TimeZoneInfo timeZone)
+        {
+            return (time.Subtract(timeZone.BaseUtcOffset).Ticks - 621355968000000000) / 10000;
+        }
+
+        public static long GetTimestamps(DateTime time, TimeSpan offsetTime)
+        {
+            return (time.Subtract(offsetTime).Ticks - 621355968000000000) / 10000;
         }
 
         /// <summary>

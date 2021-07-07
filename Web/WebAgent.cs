@@ -302,7 +302,6 @@ namespace SP.StudioCore.Web
         /// </summary>
         /// <param name="timestamp">时间戳（秒）</param>
         /// <returns></returns>
-        [Obsolete("全部修改成为毫秒")]
         public static DateTime GetTimestamp(long timestamp)
         {
             return new DateTime(1970, 1, 1).Add(TimeZoneInfo.Local.BaseUtcOffset).AddSeconds(timestamp);
@@ -326,6 +325,28 @@ namespace SP.StudioCore.Web
         public static DateTime GetTimestamps(long timestamp)
         {
             return new DateTime(1970, 1, 1).Add(TimeZoneInfo.Local.BaseUtcOffset).AddMilliseconds(timestamp);
+        }
+
+        /// <summary>
+        /// 时间戳转化成为指定时区的时间格式（毫秒)
+        /// </summary>
+        /// <param name="timestamp"></param>
+        /// <param name="timeZone"></param>
+        /// <returns></returns>
+        public static DateTime GetTimestamps(long timestamp, TimeZoneInfo timeZone)
+        {
+            return new DateTime(1970, 1, 1).Add(timeZone.BaseUtcOffset).AddMilliseconds(timestamp);
+        }
+
+        /// <summary>
+        /// 时间戳转化成为指定时区的时间格式（毫秒)
+        /// </summary>
+        /// <param name="timestamp"></param>
+        /// <param name="offsetTime"></param>
+        /// <returns></returns>
+        public static DateTime GetTimestamps(long timestamp, TimeSpan offsetTime)
+        {
+            return new DateTime(1970, 1, 1).Add(offsetTime).AddMilliseconds(timestamp);
         }
 
         /// <summary>

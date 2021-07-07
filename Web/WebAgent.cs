@@ -291,7 +291,6 @@ namespace SP.StudioCore.Web
         /// </summary>
         /// <param name="time"></param>
         /// <returns></returns>
-        [Obsolete("全部修改成为毫秒")]
         public static long GetTimestamp(DateTime time)
         {
             return (time.ToUniversalTime().Ticks - 621355968000000000) / 10000000;
@@ -302,7 +301,6 @@ namespace SP.StudioCore.Web
         /// </summary>
         /// <param name="timestamp">时间戳（秒）</param>
         /// <returns></returns>
-        [Obsolete("全部修改成为毫秒")]
         public static DateTime GetTimestamp(long timestamp)
         {
             return new DateTime(1970, 1, 1).Add(TimeZoneInfo.Local.BaseUtcOffset).AddSeconds(timestamp);
@@ -318,6 +316,16 @@ namespace SP.StudioCore.Web
             return (time.ToUniversalTime().Ticks - 621355968000000000) / 10000;
         }
 
+        public static long GetTimestamps(DateTime time, TimeZoneInfo timeZone)
+        {
+            return (time.Subtract(timeZone.BaseUtcOffset).Ticks - 621355968000000000) / 10000;
+        }
+
+        public static long GetTimestamps(DateTime time, TimeSpan offsetTime)
+        {
+            return (time.Subtract(offsetTime).Ticks - 621355968000000000) / 10000;
+        }
+
         /// <summary>
         /// 时间戳转化成为本地时间（毫秒）
         /// </summary>
@@ -326,6 +334,28 @@ namespace SP.StudioCore.Web
         public static DateTime GetTimestamps(long timestamp)
         {
             return new DateTime(1970, 1, 1).Add(TimeZoneInfo.Local.BaseUtcOffset).AddMilliseconds(timestamp);
+        }
+
+        /// <summary>
+        /// 时间戳转化成为指定时区的时间格式（毫秒)
+        /// </summary>
+        /// <param name="timestamp"></param>
+        /// <param name="timeZone"></param>
+        /// <returns></returns>
+        public static DateTime GetTimestamps(long timestamp, TimeZoneInfo timeZone)
+        {
+            return new DateTime(1970, 1, 1).Add(timeZone.BaseUtcOffset).AddMilliseconds(timestamp);
+        }
+
+        /// <summary>
+        /// 时间戳转化成为指定时区的时间格式（毫秒)
+        /// </summary>
+        /// <param name="timestamp"></param>
+        /// <param name="offsetTime"></param>
+        /// <returns></returns>
+        public static DateTime GetTimestamps(long timestamp, TimeSpan offsetTime)
+        {
+            return new DateTime(1970, 1, 1).Add(offsetTime).AddMilliseconds(timestamp);
         }
 
         /// <summary>

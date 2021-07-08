@@ -22,12 +22,15 @@ namespace SP.StudioCore.MQ.RabbitMQ
         /// </summary>
         private readonly RabbitConnect _connect;
 
+        private static object objLock = new();
+        
         public RabbitProduct(RabbitConnect connect, ProductConfig productConfig)
         {
             _connect       = connect;
             _productConfig = productConfig;
         }
 
+        
         /// <summary>
         ///     开启生产消息
         /// </summary>
@@ -35,17 +38,20 @@ namespace SP.StudioCore.MQ.RabbitMQ
         {
             // 如果连接断开，则要重连
             if (_connect.Connection == null || !_connect.Connection.IsOpen) _connect.Open();
-            
-            // 从池中取出频道
-            var tryPop = Stacks.TryDequeue(out var channel);
-            
-            // 取出失败，说明没有可用频道，需要创建新的
-            if (!tryPop || channel.IsClosed)
+
+            lock (objLock)
             {
-                channel = _connect.Connection.CreateModel();
-                if (_productConfig.UseConfirmModel) channel.ConfirmSelect();
+                // 从池中取出频道
+                var tryPop = Stacks.TryDequeue(out var channel);
+            
+                // 取出失败，说明没有可用频道，需要创建新的
+                if (!tryPop || channel.IsClosed)
+                {
+                    channel = _connect.Connection.CreateModel();
+                    if (_productConfig.UseConfirmModel) channel.ConfirmSelect();
+                }
+                return channel;
             }
-            return channel;
         }
 
         /// <summary>

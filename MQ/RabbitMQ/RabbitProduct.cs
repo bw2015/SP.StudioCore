@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using SP.StudioCore.Ioc;
@@ -27,8 +28,21 @@ namespace SP.StudioCore.MQ.RabbitMQ
         
         public RabbitProduct(RabbitConnect connect, ProductConfig productConfig)
         {
+            if (productConfig.MinChannelPool == 0) productConfig.MinChannelPool = 10;
             _connect       = connect;
             _productConfig = productConfig;
+
+            _connect.Open();
+            // 启动后，后台立即创建10个频道
+            Task.Factory.StartNew(() => 
+            {
+                for (int i = 0; i < productConfig.MinChannelPool; i++)
+                {
+                    var channel = _connect.Connection.CreateModel();
+                    if (_productConfig.UseConfirmModel) channel.ConfirmSelect();
+                    Stacks.Enqueue(channel);
+                }
+            });
         }
 
         

@@ -27,5 +27,8 @@ namespace SP.StudioCore.MQ.RabbitMQ.Configuration
 
         /// <summary> 交换器类型 </summary>
         public ExchangeType ExchangeType { get; set; }
+        
+        /// <summary> 频道连接池（推荐设为10）</summary>
+        public int MinChannelPool { get; set; }
     }
 }

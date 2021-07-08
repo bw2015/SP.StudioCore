@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
@@ -94,18 +95,24 @@ namespace SP.StudioCore.MQ.RabbitMQ
             IModel channel = null;
             try
             {
+                var sw2 = Stopwatch.StartNew();
                 channel = CreateChannel();
 
                 var basicProperties = channel.CreateBasicProperties();
                 // 默认设置为消息持久化
                 if (funcBasicProperties != null) funcBasicProperties(basicProperties);
                 else basicProperties.DeliveryMode = 2;
-
+                if (sw2.ElapsedMilliseconds > 10) Console.WriteLine($"CreateChannel耗时：{sw2.ElapsedMilliseconds}");
+                sw2.Restart();
+                
                 //消息内容
                 var body = Encoding.UTF8.GetBytes(message);
                 //发送消息
                 channel.BasicPublish(exchange: exchange, routingKey: routingKey, basicProperties: basicProperties, body: body);
-                return !_productConfig.UseConfirmModel || channel.WaitForConfirms();
+                var result =  !_productConfig.UseConfirmModel || channel.WaitForConfirms();
+                
+                if (sw2.ElapsedMilliseconds > 10) Console.WriteLine($"BasicPublish耗时：{sw2.ElapsedMilliseconds}");
+                return result;
             }
             catch (Exception e)
             {

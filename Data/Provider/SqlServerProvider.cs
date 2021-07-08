@@ -530,7 +530,7 @@ namespace SP.StudioCore.Data.Provider
             ColumnProperty identity = SchemaCache.GetColumns<T>().FirstOrDefault(t => t.Identity);
             if (!identity) throw new InvalidOperationException();
             IEnumerable<ColumnProperty> fields = SchemaCache.GetColumns<T>().Where(t => !t.Identity);
-            string sql = $"INSERT INTO [{typeof(T).GetTableName()}]({ string.Join(",", fields.Select(t => $"[{t.Name}]")) }) VALUES({ string.Join(",", fields.Select(t => $"@{t.Name}")) });SELECT @@IDENTITY;";
+            string sql = $"INSERT INTO [{typeof(T).GetTableName()}]({ string.Join(",", fields.Select(t => $"[{t.Name}]")) }) VALUES({ string.Join(",", fields.Select(t => $"@{t.Name}")) });SELECT SCOPE_IDENTITY();";
             DynamicParameters parameters = new DynamicParameters();
             foreach (ColumnProperty field in fields)
             {

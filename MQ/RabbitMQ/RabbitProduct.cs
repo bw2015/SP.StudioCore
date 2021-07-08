@@ -23,7 +23,7 @@ namespace SP.StudioCore.MQ.RabbitMQ
         /// </summary>
         private readonly RabbitConnect _connect;
 
-        private static object objLock = new();
+        private static readonly object objLock = new();
         
         public RabbitProduct(RabbitConnect connect, ProductConfig productConfig)
         {
@@ -46,11 +46,10 @@ namespace SP.StudioCore.MQ.RabbitMQ
                 var tryPop = Stacks.TryDequeue(out var channel);
             
                 // 取出失败，说明没有可用频道，需要创建新的
-                if (!tryPop || channel.IsClosed)
-                {
-                    channel = _connect.Connection.CreateModel();
-                    if (_productConfig.UseConfirmModel) channel.ConfirmSelect();
-                }
+                if (tryPop && channel is {IsClosed: false}) return channel;
+                
+                channel = _connect.Connection.CreateModel();
+                if (_productConfig.UseConfirmModel) channel.ConfirmSelect();
                 return channel;
             }
         }
@@ -97,12 +96,14 @@ namespace SP.StudioCore.MQ.RabbitMQ
             {
                 var sw2 = Stopwatch.StartNew();
                 channel = CreateChannel();
-
+                if (sw2.ElapsedMilliseconds > 10) Console.WriteLine($"CreateChannel耗时：{sw2.ElapsedMilliseconds}");
+                sw2.Restart();
+                
                 var basicProperties = channel.CreateBasicProperties();
                 // 默认设置为消息持久化
                 if (funcBasicProperties != null) funcBasicProperties(basicProperties);
                 else basicProperties.DeliveryMode = 2;
-                if (sw2.ElapsedMilliseconds > 10) Console.WriteLine($"CreateChannel耗时：{sw2.ElapsedMilliseconds}");
+                if (sw2.ElapsedMilliseconds > 10) Console.WriteLine($"CreateBasicProperties耗时：{sw2.ElapsedMilliseconds}");
                 sw2.Restart();
                 
                 //消息内容

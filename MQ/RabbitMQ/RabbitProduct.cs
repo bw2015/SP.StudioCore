@@ -30,7 +30,7 @@ namespace SP.StudioCore.MQ.RabbitMQ
 
         public RabbitProduct(RabbitConnect connect, ProductConfig productConfig)
         {
-            if (productConfig.MinFreeChannelPool == 0) productConfig.MinFreeChannelPool = 5;
+            if (productConfig.MinFreeChannelPool == 0) productConfig.MinFreeChannelPool = 8;
             if (productConfig.MaxFreeChannelPool == 0) productConfig.MaxFreeChannelPool = 10;
             _connect       = connect;
             _productConfig = productConfig;

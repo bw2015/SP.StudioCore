@@ -18,8 +18,7 @@ namespace SP.StudioCore.MQ.RabbitMQ
         /// <param name="productConfigName">生产者配置名称</param>
         /// <param name="connectionConfigName">rabbit服务器配置名称</param>
         /// <returns></returns>
-        public static IRabbitManager GetProductInstance(string productConfigName,
-            string connectionConfigName = "Connection")
+        public static IRabbitManager GetProductInstance(string productConfigName, string connectionConfigName = "Connection")
         {
             var keyName = "Product." + productConfigName;
             if (!Items.ContainsKey(keyName))

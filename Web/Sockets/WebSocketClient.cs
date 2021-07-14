@@ -26,6 +26,6 @@ namespace SP.StudioCore.Web.Sockets
         /// <summary>
         /// 附加数据
         /// </summary>
-        public Dictionary<string, object> Data { get; set; }
+        public Dictionary<string, string> Query { get; set; }
     }
 }

@@ -41,14 +41,14 @@ namespace SP.StudioCore.Tools
                 }
                 //后台成功接收到连接请求并建立连接后，前台的webSocket.onopen = function (event){}才执行
                 WebSocket webSocket = await context.WebSockets.AcceptWebSocketAsync().ConfigureAwait(true); ;
-                var data = context.Request.Query.ToDictionary(t => t.Key, t => (object)t.Value);
+                Dictionary<string, string> data = context.Request.Query.ToDictionary(t => t.Key, t => t.Value.ToString());
                 if (!data.ContainsKey("IP")) data.Add("IP", IPAgent.GetIP(context));
                 if (!data.ContainsKey("IPAddress")) data.Add("IPAddress", IPAgent.GetAddress(IPAgent.GetIP(context)));
                 wsClient = ws.Register(new WebSocketClient
                 {
                     ID = Guid.NewGuid(),
                     WebSocket = webSocket,
-                    Data = data
+                    Query = data
                 });
                 try
                 {

@@ -7,6 +7,7 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
 using SP.StudioCore.Ioc;
+using SP.StudioCore.Log;
 
 
 namespace SP.StudioCore.MQ.RabbitMQ
@@ -190,6 +191,8 @@ namespace SP.StudioCore.MQ.RabbitMQ
                 }
                 catch (Exception e)
                 {
+                    // 全局异常处理
+                    IocCollection.GetService<IGlobalException>().Handle(e);
                     // 消费失败后处理
                     IocCollection.GetService<ILoggerFactory>().CreateLogger(listener.GetType())
                         .LogError(e, e.ToString());

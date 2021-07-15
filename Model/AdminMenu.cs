@@ -34,6 +34,7 @@ namespace SP.StudioCore.Model
                     text = root.GetAttributeValue(language.ToString().ToLower());
                     break;
             }
+            Console.WriteLine(text);
             if (!string.IsNullOrWhiteSpace(text))
             {
                 this.Name = text;

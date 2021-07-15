@@ -24,7 +24,20 @@ namespace SP.StudioCore.Model
 
         public AdminMenu(Language language, XElement root, bool menuOnly, params string[] permission)
         {
-            this.Name = root.GetAttributeValue("name").Get(language);
+            this.Name = root.GetAttributeValue("name");
+            string text = null;
+            switch (language)
+            {
+                case Language.CHN:
+                    break;
+                default:
+                    text = root.GetAttributeValue(language.ToString().ToLower());
+                    break;
+            }
+            if (!string.IsNullOrWhiteSpace(text))
+            {
+                this.Name = text;
+            }
             this.ID = root.GetAttributeValue("ID");
             this.Href = root.GetAttributeValue("href");
             this.Icon = root.GetAttributeValue("icon");

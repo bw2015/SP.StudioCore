@@ -39,6 +39,8 @@ namespace SP.StudioCore.Model
             {
                 this.Name = text;
             }
+
+            Console.WriteLine($"++++++++++++{text}++++++++++++");
             this.ID = root.GetAttributeValue("ID");
             this.Href = root.GetAttributeValue("href");
             this.Icon = root.GetAttributeValue("icon");

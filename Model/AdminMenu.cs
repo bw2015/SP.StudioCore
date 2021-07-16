@@ -32,7 +32,7 @@ namespace SP.StudioCore.Model
                     break;
                 default:
                     text = root.GetAttributeValue(language.ToString().ToLower());
-                    Console.WriteLine($"======{language.ToString().ToLower()}======");
+                    Console.WriteLine($"======语种：{language.ToString().ToLower()}==内容：{text}====");
                     break;
             }
             Console.WriteLine(text);

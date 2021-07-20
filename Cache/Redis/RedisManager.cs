@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using SP.StudioCore.LinkTrack;
 
 namespace SP.StudioCore.Cache.Redis
 {
@@ -32,7 +33,7 @@ namespace SP.StudioCore.Cache.Redis
 
         public virtual IDatabase NewExecutor(int db = -1)
         {
-            return this.Instance().GetDatabase(db);
+            return new LinkTrackWarp(this.Instance().GetDatabase(db));
             //if (dbCache.ContainsKey(db))
             //{
             //    return dbCache[db];

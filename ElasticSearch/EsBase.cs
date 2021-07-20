@@ -1,8 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Elasticsearch.Net;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Nest;
+using SP.StudioCore.Configuration;
 using SP.StudioCore.Ioc;
 using SP.StudioCore.Json;
 
@@ -10,17 +13,30 @@ namespace SP.StudioCore.ElasticSearch
 {
     public abstract class EsBase<TAgent, TModel> where TModel : class where TAgent : class
     {
-        private readonly        string                   _prefixIndexName;
-        private readonly        int                      _replicasCount;
-        private readonly        int                      _shardsCount;
-        private readonly        string                   _splitIndexDateFormat;
-        protected readonly      IElasticClient           Client     = IocCollection.GetService<IElasticClient>();
-        protected readonly      ILogger<TAgent>          Logger     = IocCollection.GetService<ILoggerFactory>().CreateLogger<TAgent>();
-        private static readonly Dictionary<string, bool> IndexCache = new();
-        protected               string                   IndexName => $"{_prefixIndexName}_{_indexDateTime.ToString(_splitIndexDateFormat)}";
-        protected readonly      string[]                 AliasNames;
-        private readonly        DateTime                 _indexDateTime;
-        
+        private readonly string _prefixIndexName;
+        private readonly int    _replicasCount;
+        private readonly int    _shardsCount;
+
+        private readonly string _splitIndexDateFormat;
+
+        //protected static readonly IElasticClient           Client     = IocCollection.GetService<IElasticClient>();
+        protected static readonly IElasticClient           Client;
+        protected readonly        ILogger<TAgent>          Logger     = IocCollection.GetService<ILoggerFactory>().CreateLogger<TAgent>();
+        private static readonly   Dictionary<string, bool> IndexCache = new();
+        protected                 string                   IndexName => $"{_prefixIndexName}_{_indexDateTime.ToString(_splitIndexDateFormat)}";
+        protected readonly        string[]                 AliasNames;
+        private readonly          DateTime                 _indexDateTime;
+
+        // 这里不知道为什么取不到IocCollection.GetService<IElasticClient>();先暂时这么用
+        static EsBase()
+        {
+            IConfigurationRoot configuration = Config.GetConfig();
+            var                esConnection  = configuration.GetConnectionString("ESConnection");
+            var urls                 = esConnection.Split(';').Select(http => new Uri(http));
+            var staticConnectionPool = new StaticConnectionPool(urls);
+            Client = new ElasticClient(new ConnectionSettings(staticConnectionPool));
+        }
+
         /// <summary>
         /// ES基类
         /// </summary>
@@ -29,7 +45,7 @@ namespace SP.StudioCore.ElasticSearch
         /// <param name="shardsCount">分片数量</param>
         /// <param name="splitIndexDateFormat">按时间分索引</param>
         /// <param name="replicasCount">副本数量</param>
-        public EsBase(string prefixIndexName, string[] aliasNames, int replicasCount = 0, int shardsCount = 3, DateTime? indexDateTime=null, string splitIndexDateFormat = "yyyy_MM")
+        public EsBase(string prefixIndexName, string[] aliasNames, int replicasCount = 0, int shardsCount = 3, DateTime? indexDateTime = null, string splitIndexDateFormat = "yyyy_MM")
         {
             _prefixIndexName      = prefixIndexName;
             AliasNames            = aliasNames;
@@ -47,7 +63,7 @@ namespace SP.StudioCore.ElasticSearch
         /// <param name="shardsCount">分片数量</param>
         /// <param name="splitIndexDateFormat">按时间分索引</param>
         /// <param name="replicasCount">副本数量</param>
-        public EsBase(string prefixIndexName, string aliasName, int replicasCount = 0, int shardsCount = 3, DateTime? indexDateTime =null, string splitIndexDateFormat = "yyyy_MM") : this(prefixIndexName, new[] {aliasName}, replicasCount, shardsCount,indexDateTime, splitIndexDateFormat)
+        public EsBase(string prefixIndexName, string aliasName, int replicasCount = 0, int shardsCount = 3, DateTime? indexDateTime = null, string splitIndexDateFormat = "yyyy_MM") : this(prefixIndexName, new[] {aliasName}, replicasCount, shardsCount, indexDateTime, splitIndexDateFormat)
         {
         }
 
@@ -135,7 +151,7 @@ namespace SP.StudioCore.ElasticSearch
                     lst.AddRange(searchResponse.Documents.ToList());
                 }
             }
-            
+
             Client.ClearScroll(s => s.ScrollId(searchResponse.ScrollId));
             return lst;
         }

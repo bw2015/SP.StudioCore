@@ -22,12 +22,7 @@ namespace SP.StudioCore.LinkTrack.Core
         /// <summary>
         ///     静态属性
         /// </summary>
-        private static FsLinkTrack _current;
-
-        /// <summary>
-        ///     静态属性
-        /// </summary>
-        public static FsLinkTrack Current => _current ??= new FsLinkTrack();
+        public static FsLinkTrack Current { get; } = new();
 
         /// <summary>
         ///     获取数据
@@ -134,9 +129,9 @@ namespace SP.StudioCore.LinkTrack.Core
             {
                 var contentTypes = contentType.Split(';').ToList();
                 contentTypes.RemoveAll(o => o.Contains("charset"));
-                
+
                 // 如果有application，则直接获取
-                var application  = contentTypes.Find(o => o.Contains("application"));
+                var application = contentTypes.Find(o => o.Contains("application"));
                 contentType = !string.IsNullOrWhiteSpace(application) ? application : string.Join(";", contentTypes);
             }
 

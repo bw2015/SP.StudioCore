@@ -21,7 +21,7 @@ namespace SP.StudioCore.ElasticSearch
 
         //protected static readonly IElasticClient           Client     = IocCollection.GetService<IElasticClient>();
         protected static readonly IElasticClient           Client;
-        protected readonly        ILogger<TAgent>          Logger     = IocCollection.GetService<ILoggerFactory>().CreateLogger<TAgent>();
+        //protected readonly        ILogger<TAgent>          Logger     = IocCollection.GetService<ILoggerFactory>().CreateLogger<TAgent>();
         private static readonly   Dictionary<string, bool> IndexCache = new();
         protected                 string                   IndexName => $"{_prefixIndexName}_{_indexDateTime.ToString(_splitIndexDateFormat)}";
         protected readonly        string[]                 AliasNames;
@@ -76,7 +76,8 @@ namespace SP.StudioCore.ElasticSearch
             var result = Client.Index(new IndexRequest<TModel>(model, IndexName));
             if (!result.IsValid)
             {
-                Logger.LogError($"索引失败：{model.ToJson()} \r\n" + result.OriginalException.Message);
+                //Logger.LogError($"索引失败：{model.ToJson()} \r\n" + result.OriginalException.Message);
+                Console.WriteLine($"索引失败：{model.ToJson()} \r\n" + result.OriginalException.Message);
             }
 
             return result.IsValid;
@@ -91,7 +92,8 @@ namespace SP.StudioCore.ElasticSearch
             var result = Client.IndexMany(lst, IndexName);
             if (!result.IsValid)
             {
-                Logger.LogError($"索引失败：共{lst.Count}条记录 \r\n" + result.OriginalException.Message);
+                //Logger.LogError($"索引失败：共{lst.Count}条记录 \r\n" + result.OriginalException.Message);
+                Console.WriteLine($"索引失败：共{lst.Count}条记录 \r\n" + result.OriginalException.Message);
             }
 
             return result.IsValid;

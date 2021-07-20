@@ -82,7 +82,7 @@ namespace SP.StudioCore.LinkTrack
                 }
                 catch (System.Exception e)
                 {
-                    Console.WriteLine(e.Message);
+                    Console.WriteLine(e.ToString());
                 }
 
                 Thread.Sleep(_sleepMs);

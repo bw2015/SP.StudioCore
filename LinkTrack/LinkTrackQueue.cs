@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -20,7 +21,8 @@ namespace SP.StudioCore.LinkTrack
         /// <param name="remainCount">队列中当前剩余多少要处理</param>
         protected override void OnDequeue(List<LinkTrackContext> lst, int remainCount)
         {
-            new LinkTrackEs().Insert(lst.Select(o => new LinkTrackContextPO
+            Console.WriteLine("写入ES");
+            var result = new LinkTrackEs().Insert(lst.Select(o => new LinkTrackContextPO
             {
                 Id           = $"{o.AppId}_{o.ContextId}",
                 AppId        = o.AppId,
@@ -38,6 +40,7 @@ namespace SP.StudioCore.LinkTrack
                 ResponseBody = o.ResponseBody,
                 RequestIp    = o.RequestIp
             }).ToList());
+            if (!result) Console.WriteLine("写入失败");
         }
 
         /// <summary>

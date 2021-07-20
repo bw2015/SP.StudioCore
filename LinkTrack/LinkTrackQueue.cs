@@ -7,8 +7,7 @@ namespace SP.StudioCore.LinkTrack
 {
     public class LinkTrackQueue : BaseAsyncQueue<LinkTrackContext>
     {
-        private static LinkTrackQueue _instance;
-        public static  LinkTrackQueue Instance => _instance;
+        public static LinkTrackQueue Instance { get; } = new();
 
         private LinkTrackQueue() : base(500000, 100, 500)
         {

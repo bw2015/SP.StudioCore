@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Reflection;
+using System.Resources;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -31,7 +32,7 @@ namespace SP.StudioCore.Tools
             {
                 path += "/Index";
             }
-            Regex regex = new(@"^/(?<Controller>\w+)/(?<Method>\w+)$", RegexOptions.IgnoreCase);
+            Regex regex = new(@"^/(?<Controller>\w+)/(?<Method>[\w\.]+)$", RegexOptions.IgnoreCase);
             if (!regex.IsMatch(path))
             {
                 return context.ShowError(HttpStatusCode.MethodNotAllowed, path);
@@ -41,6 +42,12 @@ namespace SP.StudioCore.Tools
 
             Assembly assembly = Assembly.Load($"Tools.{controller}");
             if (assembly == null) return context.ShowError(HttpStatusCode.BadRequest, controller);
+
+            Result? staticFile = GetStaticFile(assembly, path);
+            if (staticFile.HasValue)
+            {
+                return staticFile.Value;
+            }
 
             Type start = assembly.GetTypes().FirstOrDefault(t => t.IsBaseType<StartBase>());
             if (start == null) return context.ShowError(HttpStatusCode.MethodNotAllowed, $"Tools.{controller}.Start");
@@ -76,6 +83,37 @@ namespace SP.StudioCore.Tools
             }
 
             return context.ShowError(HttpStatusCode.BadRequest, $"{path},{  string.Join(",", parameters.Select(t => t.ParameterType.Name)) }");
+        }
+
+        /// <summary>
+        /// 从资源文件中读取静态文件内容
+        /// </summary>
+        /// <returns></returns>
+        internal static Result? GetStaticFile(Assembly assembly, string path)
+        {
+            Regex staticRegex = new Regex(@"\.html$|\.htm$|\.css$|\.js$", RegexOptions.IgnoreCase);
+            if (!staticRegex.IsMatch(path)) return null;
+
+            string resourceName = path.Substring(path.LastIndexOf('/') + 1);
+            resourceName = resourceName.Substring(0, resourceName.IndexOf('.'));
+
+            Type? resourceType = assembly.GetType($"{assembly.GetName().Name}.Properties.Resources");
+            if (resourceType == null) return null;
+            ResourceManager rm = new ResourceManager(resourceType);
+            if (rm == null) return null;
+            object? resource = rm.GetObject(resourceName);
+            if (resource == null) return null;
+
+            string extend = staticRegex.Match(path).Value;
+            ContentType contentType = extend switch
+            {
+                ".html" => ContentType.HTML,
+                ".htm" => ContentType.HTML,
+                "css" => ContentType.CSS,
+                "js" => ContentType.JS,
+                _ => ContentType.TEXT
+            };
+            return new Result(contentType, resource);
         }
 
 

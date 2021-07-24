@@ -62,6 +62,16 @@ namespace SP.StudioCore.API
                 return false;
             }
         }
+
+        /// <summary>
+        /// 删除文件
+        /// </summary>
+        public static bool Delete(this OSSSetting setting, string objectName)
+        {
+            OssClient client = new OssClient(setting.endpoint, setting.accessKeyId, setting.accessKeySecret);
+            DeleteObjectResult result = client.DeleteObject(setting.bucketName, objectName);
+            return true;
+        }
     }
 
     /// <summary>

@@ -44,6 +44,10 @@
         <Compile Remove="MQ\Configs\IRabbitManager.cs" />
         <Compile Remove="MQ\Configs\MQConfig.cs" />
         <Compile Remove="MQ\RabbitMQ\Configuration\ConsumerConfig.cs" />
+        <None Remove="Tools\Builder.bat" />
+        <None Remove="Tools\curl.exe" />
+        <None Remove="Tools\ffmpeg.exe" />
+        <None Remove="Tools\ffplay.exe" />
         <None Include="app.png">
             <Pack>True</Pack>
             <PackagePath></PackagePath>

@@ -60,7 +60,8 @@ namespace SP.StudioCore.Model
                     Value = t.GetValue(this, null),
                     t.GetAttribute<DescriptionAttribute>().Description,
                     Type = type,
-                    List = this.GetList(t, type)
+                    List = this.GetList(t, type),
+                    t.PropertyType.IsEnum
                 };
             });
         }

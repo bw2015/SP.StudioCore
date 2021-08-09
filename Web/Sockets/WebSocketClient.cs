@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using SP.StudioCore.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -61,7 +62,29 @@ namespace SP.StudioCore.Web.Sockets
         public async Task SendAsync(string message)
         {
             byte[] data = Encoding.UTF8.GetBytes(message);
-            await this.WebSocket.SendAsync(new ArraySegment<byte>(data, 0, data.Length), WebSocketMessageType.Text, true, CancellationToken.None);
+            if (this.WebSocket.State == WebSocketState.Open)
+            {
+                await this.WebSocket.SendAsync(new ArraySegment<byte>(data, 0, data.Length), WebSocketMessageType.Text, true, CancellationToken.None);
+            }
+        }
+
+        /// <summary>
+        /// 断开连接
+        /// </summary>
+        /// <returns></returns>
+        public async Task CloseAsync()
+        {
+            try
+            {
+                if (this.WebSocket.State == WebSocketState.Open)
+                {
+                    await this.WebSocket.CloseAsync(WebSocketCloseStatus.Empty, string.Empty, CancellationToken.None);
+                }
+            }
+            catch (Exception ex)
+            {
+                ConsoleHelper.WriteLine(ex.Message, ConsoleColor.Red);
+            }
         }
     }
 }

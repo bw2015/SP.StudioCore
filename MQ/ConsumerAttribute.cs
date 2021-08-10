@@ -61,5 +61,10 @@ namespace SP.StudioCore.MQ
         /// 死信时间
         /// </summary>
         public int DlxTime { get; set; }
+
+        /// <summary>
+        /// 最后一个Consumer取消订阅后，Queue是否自动删除。
+        /// </summary>
+        public bool AutoDelete { get; set; }
     }
 }

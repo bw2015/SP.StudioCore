@@ -51,6 +51,12 @@ namespace SP.StudioCore.MQ
             var consumerAttribute = consumer.GetCustomAttribute<ConsumerAttribute>();
             if (consumerAttribute == null || !consumerAttribute.Enable) return;
 
+            // 不指定消费者名字，则随机创建一个
+            if (string.IsNullOrEmpty(consumerAttribute.QueueName))
+            {
+                consumerAttribute.QueueName = $"{consumerAttribute.ExchangeName}-{Guid.NewGuid().ToString("N").Substring(0, 8)}";
+                consumerAttribute.AutoDelete = true;
+            }
             var consumerInstance = RabbitBoot.GetConsumerInstance(consumerAttribute.Name, consumerAttribute.QueueName,
                 consumerAttribute.ConsumeThreadNums, consumerAttribute.LastAckTimeoutRestart);
 
@@ -64,7 +70,8 @@ namespace SP.StudioCore.MQ
                 if (!string.IsNullOrWhiteSpace(consumerAttribute.DlxRoutingKey)) arguments["x-dead-letter-routing-key"] = consumerAttribute.DlxRoutingKey;
                 if (consumerAttribute.DlxTime > 0) arguments["x-message-ttl"] = consumerAttribute.DlxTime;
                 consumerInstance.CreateExchange(consumerAttribute.ExchangeName, consumerAttribute.ExchangeType);
-                consumerInstance.CreateQueueAndBind(consumerAttribute.QueueName, consumerAttribute.ExchangeName, consumerAttribute.RoutingKey, arguments: arguments);
+                consumerInstance.CreateQueueAndBind(consumerAttribute.QueueName, consumerAttribute.ExchangeName, consumerAttribute.RoutingKey, 
+                    arguments: arguments, autoDelete: consumerAttribute.AutoDelete);
             }
 
             logger?.LogInformation($"正在启动：{consumer.Name}");

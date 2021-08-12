@@ -32,7 +32,7 @@ namespace SP.StudioCore.MQ.RabbitMQ
         {
             if (productConfig.MinFreeChannelPool == 0) productConfig.MinFreeChannelPool = 8;
             if (productConfig.MaxFreeChannelPool == 0) productConfig.MaxFreeChannelPool = 10;
-            _connect = connect;
+            _connect       = connect;
             _productConfig = productConfig;
 
             _connect.Open();
@@ -88,13 +88,13 @@ namespace SP.StudioCore.MQ.RabbitMQ
 
             //lock (objLock)
             //{
-            //// 从池中取出频道
-            //var tryPop = Stacks.TryDequeue(out var channel);
+            // 从池中取出频道
+            var tryPop = Stacks.TryDequeue(out var channel);
 
-            //// 取出失败，说明没有可用频道，需要创建新的
-            //if (tryPop && channel is { IsClosed: false }) return channel;
+            // 取出失败，说明没有可用频道，需要创建新的
+            if (tryPop && channel is { IsClosed: false }) return channel;
 
-            var channel = _connect.Connection.CreateModel();
+            channel = _connect.Connection.CreateModel();
             if (_productConfig.UseConfirmModel) channel.ConfirmSelect();
             return channel;
             //}

@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using SP.StudioCore.Configuration;
 using SP.StudioCore.MQ.RabbitMQ;
 
 namespace SP.StudioCore.MQ
@@ -23,6 +24,8 @@ namespace SP.StudioCore.MQ
             IServiceProvider serviceProvider = services.BuildServiceProvider();
             ILogger<ConsumerStartup> logger = serviceProvider.GetService<ILoggerFactory>().CreateLogger<ConsumerStartup>();
 
+            string consumerSelector = Config.GetConfig("Rabbit", "Consumer");
+
             var lst = Assembly.GetCallingAssembly().GetTypes()
                 .Where(o => o.IsClass && o.GetInterfaces().Contains(typeof(IListenerMessage)));
 
@@ -30,6 +33,11 @@ namespace SP.StudioCore.MQ
             {
                 foreach (var consumer in lst)
                 {
+                    if (!string.IsNullOrEmpty(consumerSelector))
+                    {
+                        string[] selectors = consumerSelector.Split(',');
+                        if (!selectors.Contains(consumer.Name)) continue;
+                    }
                     RunConsumer(consumer, logger);
                 }
 
@@ -70,7 +78,7 @@ namespace SP.StudioCore.MQ
                 if (!string.IsNullOrWhiteSpace(consumerAttribute.DlxRoutingKey)) arguments["x-dead-letter-routing-key"] = consumerAttribute.DlxRoutingKey;
                 if (consumerAttribute.DlxTime > 0) arguments["x-message-ttl"] = consumerAttribute.DlxTime;
                 consumerInstance.CreateExchange(consumerAttribute.ExchangeName, consumerAttribute.ExchangeType);
-                consumerInstance.CreateQueueAndBind(consumerAttribute.QueueName, consumerAttribute.ExchangeName, consumerAttribute.RoutingKey, 
+                consumerInstance.CreateQueueAndBind(consumerAttribute.QueueName, consumerAttribute.ExchangeName, consumerAttribute.RoutingKey,
                     arguments: arguments, autoDelete: consumerAttribute.AutoDelete);
             }
 

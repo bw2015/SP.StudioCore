@@ -28,7 +28,10 @@ namespace SP.StudioCore.MQ.RabbitMQ
                     //var configurationDefault = new Config();
                     RabbitConnect rabbitConnect = Config.GetConfig("Rabbit", connectionConfigName);
                     string config = Config.GetConfig("Rabbit", "Product", productConfigName);
-                    if (string.IsNullOrWhiteSpace(config)) config = $"ExchangeName={productConfigName}&RoutingKey=&UseConfirmModel=true&AutoCreateExchange=true&ExchangeType=fanout";
+                    if (string.IsNullOrWhiteSpace(config))
+                    {
+                        config = $"ExchangeName={productConfigName}&RoutingKey=&UseConfirmModel=true&AutoCreateExchange=true&ExchangeType=fanout";
+                    }
                     ProductConfig productConfig = config;
 
                     var rabbitManager = new RabbitManager(rabbitConnect, productConfig);

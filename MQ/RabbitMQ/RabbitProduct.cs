@@ -32,7 +32,7 @@ namespace SP.StudioCore.MQ.RabbitMQ
         {
             if (productConfig.MinFreeChannelPool == 0) productConfig.MinFreeChannelPool = 8;
             if (productConfig.MaxFreeChannelPool == 0) productConfig.MaxFreeChannelPool = 10;
-            _connect       = connect;
+            _connect = connect;
             _productConfig = productConfig;
 
             _connect.Open();
@@ -65,7 +65,7 @@ namespace SP.StudioCore.MQ.RabbitMQ
                         var tryPop = Stacks.TryDequeue(out var channel);
 
                         // 取出失败，说明没有可用频道，需要创建新的
-                        if (tryPop && channel is {IsClosed: false})
+                        if (tryPop && channel is { IsClosed: false })
                         {
                             channel.Close();
                             channel.Dispose();
@@ -86,18 +86,18 @@ namespace SP.StudioCore.MQ.RabbitMQ
             // 如果连接断开，则要重连
             if (_connect.Connection == null || !_connect.Connection.IsOpen) _connect.Open();
 
-            lock (objLock)
-            {
-                // 从池中取出频道
-                var tryPop = Stacks.TryDequeue(out var channel);
+            //lock (objLock)
+            //{
+            //// 从池中取出频道
+            //var tryPop = Stacks.TryDequeue(out var channel);
 
-                // 取出失败，说明没有可用频道，需要创建新的
-                if (tryPop && channel is {IsClosed: false}) return channel;
+            //// 取出失败，说明没有可用频道，需要创建新的
+            //if (tryPop && channel is { IsClosed: false }) return channel;
 
-                channel = _connect.Connection.CreateModel();
-                if (_productConfig.UseConfirmModel) channel.ConfirmSelect();
-                return channel;
-            }
+            var channel = _connect.Connection.CreateModel();
+            if (_productConfig.UseConfirmModel) channel.ConfirmSelect();
+            return channel;
+            //}
         }
 
         /// <summary>
@@ -142,14 +142,14 @@ namespace SP.StudioCore.MQ.RabbitMQ
             {
                 var sw2 = Stopwatch.StartNew();
                 channel = CreateChannel();
-                if (sw2.ElapsedMilliseconds > 10) Console.WriteLine($"CreateChannel耗时：{sw2.ElapsedMilliseconds}");
+                if (sw2.ElapsedMilliseconds > 10) Console.WriteLine($"RabbitMQ CreateChannel: {sw2.ElapsedMilliseconds}ms");
                 sw2.Restart();
 
                 var basicProperties = channel.CreateBasicProperties();
                 // 默认设置为消息持久化
                 if (funcBasicProperties != null) funcBasicProperties(basicProperties);
                 else basicProperties.DeliveryMode = 2;
-                if (sw2.ElapsedMilliseconds > 10) Console.WriteLine($"CreateBasicProperties耗时：{sw2.ElapsedMilliseconds}");
+                if (sw2.ElapsedMilliseconds > 10) Console.WriteLine($"RabbitMQ CreateBasicProperties: {sw2.ElapsedMilliseconds}ms");
                 sw2.Restart();
 
                 //消息内容
@@ -158,12 +158,12 @@ namespace SP.StudioCore.MQ.RabbitMQ
                 channel.BasicPublish(exchange: exchange, routingKey: routingKey, basicProperties: basicProperties, body: body);
                 var result = !_productConfig.UseConfirmModel || channel.WaitForConfirms();
 
-                if (sw2.ElapsedMilliseconds > 10) Console.WriteLine($"BasicPublish耗时：{sw2.ElapsedMilliseconds}");
+                if (sw2.ElapsedMilliseconds > 10) Console.WriteLine($"RabbitMQ BasicPublish: {sw2.ElapsedMilliseconds}ms");
                 return result;
             }
             catch (Exception e)
             {
-                IocCollection.GetService<ILoggerFactory>().CreateLogger<RabbitProduct>().LogError(e.ToString(), e);
+                IocCollection.GetService<ILoggerFactory>()?.CreateLogger<RabbitProduct>().LogError(e.ToString(), e);
                 return false;
             }
             finally

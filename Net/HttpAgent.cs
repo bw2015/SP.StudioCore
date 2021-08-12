@@ -179,5 +179,32 @@ namespace SP.StudioCore.Net
         public static Task<string> PutAsync(string url, Dictionary<string, string> postData, Encoding encoding = null, string contentType = "application/x-www-form-urlencoded", int requestTimeout = 0, CookieContainer cookie = null) =>
             PutAsync(url, string.Join("&", postData.Select(keyVal => $"{keyVal.Key}={keyVal.Value}")), null, encoding, contentType, requestTimeout, cookie);
 
+        /// <summary>
+        /// Head请求
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        public static async Task<HttpResponseMessage> HeadAsync(string url, Dictionary<string, string> headers = null, int requestTimeout = 3000)
+        {
+            HttpRequestMessage request = new HttpRequestMessage
+            {
+                Method = new HttpMethod("HEAD"),
+                RequestUri = new Uri(url)
+            };
+
+            if (headers != null)
+            {
+                foreach (var header in headers)
+                {
+                    if (request.Headers.Contains(header.Key)) continue;
+                    request.Headers.Add(header.Key, header.Value);
+                }
+            }
+            var cancellationTokenSource = new CancellationTokenSource();
+            if (requestTimeout > 0) cancellationTokenSource.CancelAfter(requestTimeout);
+            HttpResponseMessage response = await httpClient.SendAsync(request, cancellationTokenSource.Token);
+            return response;
+        }
+
     }
 }

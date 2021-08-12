@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using SP.StudioCore.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -21,7 +23,7 @@ namespace SP.StudioCore.Tools
         protected static void WorkStartup(string[] args,
             Action<HostBuilderContext, IServiceCollection> configureDelegate)
         {
-            CreateWorkHostBuilder(args, configureDelegate).Build().Run(); 
+            CreateWorkHostBuilder(args, configureDelegate).Build().Run();
         }
 
         protected static void WorkStartup<THostedService>(string[] args) where THostedService : class, IHostedService
@@ -29,6 +31,26 @@ namespace SP.StudioCore.Tools
             CreateWorkHostBuilder(args, (hostContext, services) =>
             {
                 services.AddHostedService<THostedService>();
+            }).Build().Run();
+        }
+
+        protected static void WorkStartup(Assembly assembly, string[] args)
+        {
+            // 找出所有的Work类型
+            Type[] works = assembly.GetTypes().Where(t => t.IsClass && t.GetInterfaces().Contains(typeof(IHostedService))).ToArray();
+
+            CreateWorkHostBuilder(args, (hostContext, services) =>
+            {
+                foreach (Type work in works)
+                {
+                    ConsoleHelper.WriteLine(work.FullName, ConsoleColor.Green);
+
+                    MethodInfo method = typeof(ServiceCollectionHostedServiceExtensions).GetMethods().FirstOrDefault(t => t.Name == "AddHostedService" && t.GetParameters().Length == 1);
+
+                    method.MakeGenericMethod(work).Invoke(null,new object[] { services });
+                }
+                //ServiceCollectionHostedServiceExtensions.AddHostedService(services);
+                // services.AddHostedService<THostedService>();
             }).Build().Run();
         }
 

@@ -32,7 +32,7 @@ namespace SP.StudioCore.MQ.RabbitMQ
         /// <param name="config">配置</param>
         public RabbitConnect(RabbitServerConfig config)
         {
-            ILogger<RabbitConnect> logger = IocCollection.GetService<ILoggerFactory>().CreateLogger<RabbitConnect>();
+            //ILogger<RabbitConnect>? logger = IocCollection.GetService<ILoggerFactory>()?.CreateLogger<RabbitConnect>();
             if (string.IsNullOrWhiteSpace(config.VirtualHost))
             {
                 config.VirtualHost = "/";
@@ -48,7 +48,7 @@ namespace SP.StudioCore.MQ.RabbitMQ
                 VirtualHost              = HttpUtility.UrlDecode(config.VirtualHost), // 虚拟主机
                 AutomaticRecoveryEnabled = true,
             };
-            logger.LogInformation($"UserName：{_factoryInfo.UserName},Password：{_factoryInfo.Password}，VirtualHost：{_factoryInfo.VirtualHost}");
+            //logger?.LogInformation($"UserName：{_factoryInfo.UserName},Password：{_factoryInfo.Password}，VirtualHost：{_factoryInfo.VirtualHost}");
         }
 
         public static implicit operator RabbitConnect(string config)

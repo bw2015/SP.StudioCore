@@ -46,7 +46,9 @@ namespace SP.StudioCore.Log
             //添加控制台输出
             builder.AddConsoleFormatter<SpJsonConsole, JsonConsoleFormatterOptions>(_ => options(_));
 
-            builder.AddConsole(o => { o.FormatterName = "json"; });
+            builder.AddConsole(o => {
+                o.FormatterName = "json"; 
+            });
             return builder;
         }
     }

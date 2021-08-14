@@ -89,7 +89,7 @@ namespace SP.StudioCore.MQ.RabbitMQ
             //lock (objLock)
             //{
             // 从池中取出频道
-            var tryPop = Stacks.TryDequeue(out var channel);
+            var tryPop = Stacks.TryDequeue(out IModel? channel);
 
             // 取出失败，说明没有可用频道，需要创建新的
             if (tryPop && channel is { IsClosed: false }) return channel;

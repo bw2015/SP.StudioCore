@@ -12,7 +12,12 @@ namespace SP.StudioCore.MQ
 {
     public class ConsumerStartup
     {
-        public static void Run<TStartup>() where TStartup : class
+        /// <summary>
+        /// 执行消费队列
+        /// </summary>
+        /// <typeparam name="TStartup"></typeparam>
+        /// <param name="consumers">指定要执行的消费队列/为空则是全部</param>
+        public static void Run<TStartup>(params string[] consumers) where TStartup : class
         {
             IServiceCollection services = new ServiceCollection();
             // 为了实现调用自定义的启动类，并执行ConfigureServices方法，这里采用Invoke的方式实现
@@ -24,8 +29,6 @@ namespace SP.StudioCore.MQ
             IServiceProvider serviceProvider = services.BuildServiceProvider();
             ILogger<ConsumerStartup> logger = serviceProvider.GetService<ILoggerFactory>().CreateLogger<ConsumerStartup>();
 
-            string consumerSelector = Config.GetConfig("Rabbit", "Consumer");
-
             var lst = Assembly.GetCallingAssembly().GetTypes()
                 .Where(o => o.IsClass && o.GetInterfaces().Contains(typeof(IListenerMessage)));
 
@@ -33,10 +36,9 @@ namespace SP.StudioCore.MQ
             {
                 foreach (var consumer in lst)
                 {
-                    if (!string.IsNullOrEmpty(consumerSelector))
+                    if (consumers != null && consumers.Any())
                     {
-                        string[] selectors = consumerSelector.Split(',');
-                        if (!selectors.Contains(consumer.Name)) continue;
+                        if (!consumers.Contains(consumer.Name)) continue;
                     }
                     RunConsumer(consumer, logger);
                 }

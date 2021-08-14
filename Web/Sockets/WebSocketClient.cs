@@ -13,29 +13,19 @@ namespace SP.StudioCore.Web.Sockets
     /// <summary>
     /// WebSocket 客户端
     /// </summary>
-    public class WebSocketClient
+    public class WebSocketClient : IDisposable
     {
         public WebSocketClient() { }
 
         public WebSocketClient(HttpContext context, WebSocket webSocket)
         {
+            this.ID = Guid.NewGuid();
             this.WebSocket = webSocket;
-            this.Query = new Dictionary<string, string>();
-            foreach (string key in context.Request.Query.Keys)
-            {
-                this.Query.Add(key, context.Request.Query[key].ToString());
-            }
-            if (this.Query.ContainsKey("sid"))
-            {
-                this.ID = Guid.Parse(this.Query["sid"]);
-            }
-            else
-            {
-                this.ID = Guid.NewGuid();
-            }
-            string ip = IPAgent.GetIP(context);
-            if (!Query.ContainsKey("IP")) Query.Add("IP", ip);
-            if (!Query.ContainsKey("IPAddress")) Query.Add("IPAddress", IPAgent.GetAddress(ip));
+            this.Host = context.Request.Host.Value;
+            this.Query = context.Request.Query.ToDictionary(t => t.Key, t => t.Value.ToString());
+            this.Headers = context.Request.Headers.ToDictionary(t => t.Key, t => t.Value.ToString());
+            this.IpAddress = IPAgent.GetIP(context);
+            this.Join = WebAgent.GetTimestamps();
         }
 
         /// <summary>
@@ -50,9 +40,26 @@ namespace SP.StudioCore.Web.Sockets
         public WebSocket WebSocket { get; set; }
 
         /// <summary>
+        /// 连接主机
+        /// </summary>
+        public string Host { get; set; }
+
+        /// <summary>
         /// 附加数据
         /// </summary>
         public Dictionary<string, string> Query { get; set; }
+
+        public Dictionary<string, string> Headers { get; set; }
+
+        /// <summary>
+        /// 客户端的IP地址
+        /// </summary>
+        public string IpAddress { get; set; }
+
+        /// <summary>
+        /// 连接时间
+        /// </summary>
+        public long Join { get; set; }
 
         /// <summary>
         /// 发送消息
@@ -62,9 +69,20 @@ namespace SP.StudioCore.Web.Sockets
         public async Task SendAsync(string message)
         {
             byte[] data = Encoding.UTF8.GetBytes(message);
-            if (this.WebSocket.State == WebSocketState.Open)
+            try
             {
-                await this.WebSocket.SendAsync(new ArraySegment<byte>(data, 0, data.Length), WebSocketMessageType.Text, true, CancellationToken.None);
+                if (this.WebSocket.State == WebSocketState.Open)
+                {
+                    await this.WebSocket.SendAsync(new ArraySegment<byte>(data, 0, data.Length), WebSocketMessageType.Text, true, CancellationToken.None);
+                }
+            }
+            catch (WebSocketException ex)
+            {
+
+            }
+            catch (Exception ex)
+            {
+                ConsoleHelper.WriteLine($"[SendAsync - {ex.GetType().Name}] {ex.Message}", ConsoleColor.Red);
             }
         }
 
@@ -76,15 +94,24 @@ namespace SP.StudioCore.Web.Sockets
         {
             try
             {
-                if (this.WebSocket.State == WebSocketState.Open)
+                if (!this.WebSocket.CloseStatus.HasValue)
                 {
                     await this.WebSocket.CloseAsync(WebSocketCloseStatus.Empty, string.Empty, CancellationToken.None);
                 }
             }
+            catch (WebSocketException ex)
+            {
+
+            }
             catch (Exception ex)
             {
-                ConsoleHelper.WriteLine(ex.Message, ConsoleColor.Red);
+                ConsoleHelper.WriteLine($"[CloseAsync - {ex.GetType().Name}] {ex.Message}", ConsoleColor.Red);
             }
+        }
+
+        public void Dispose()
+        {
+            this.WebSocket?.Dispose();
         }
     }
 }

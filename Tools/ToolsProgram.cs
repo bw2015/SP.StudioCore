@@ -34,20 +34,22 @@ namespace SP.StudioCore.Tools
             }).Build().Run();
         }
 
-        protected static void WorkStartup(Assembly assembly, string[] args)
+        protected static void WorkStartup(Assembly assembly, string[] args, Action<HostBuilderContext, IServiceCollection> inject = null)
         {
             // 找出所有的Work类型
             Type[] works = assembly.GetTypes().Where(t => t.IsClass && t.GetInterfaces().Contains(typeof(IHostedService))).ToArray();
 
             CreateWorkHostBuilder(args, (hostContext, services) =>
             {
+                if (inject != null) inject.Invoke(hostContext, services);
+
                 foreach (Type work in works)
                 {
                     ConsoleHelper.WriteLine(work.FullName, ConsoleColor.Green);
 
                     MethodInfo method = typeof(ServiceCollectionHostedServiceExtensions).GetMethods().FirstOrDefault(t => t.Name == "AddHostedService" && t.GetParameters().Length == 1);
 
-                    method.MakeGenericMethod(work).Invoke(null,new object[] { services });
+                    method.MakeGenericMethod(work).Invoke(null, new object[] { services });
                 }
                 //ServiceCollectionHostedServiceExtensions.AddHostedService(services);
                 // services.AddHostedService<THostedService>();

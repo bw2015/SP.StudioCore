@@ -18,34 +18,42 @@ namespace SP.StudioCore.MQ.RabbitMQ
         /// 创建消息队列属性
         /// </summary>
         private readonly RabbitConnect _connect;
+
         /// <summary>
         /// 创建连接会话对象
         /// </summary>
         private IModel _channel;
+
         /// <summary>
-        /// 后台定时检查连接状态
+        /// 针对后台定时检查状态的取消令牌
         /// </summary>
-        private Task _checkConnectStatsTask;
+        private CancellationTokenSource _cts;
+
         /// <summary>
         /// 最后一次ACK确认时间
         /// </summary>
         private DateTime _lastAckAt;
+
         /// <summary>
         /// 消费监听
         /// </summary>
         private IListenerMessage _listener;
+
         /// <summary>
         /// 是否自动ack
         /// </summary>
         private bool _autoAck;
+
         /// <summary>
         /// 最后ACK多少秒超时则重连（默认5分钟）
         /// </summary>
         private readonly int _lastAckTimeoutRestart;
+
         /// <summary>
         /// 线程数（默认8）
         /// </summary>
         private readonly int _consumeThreadNums;
+
         /// <summary>
         /// 队列名称
         /// </summary>
@@ -65,9 +73,9 @@ namespace SP.StudioCore.MQ.RabbitMQ
             this._consumeThreadNums     = consumeThreadNums;
             this._queueName             = queueName;
             this._lastAckAt             = DateTime.Now;
-            
+
             if (_lastAckTimeoutRestart == 0) _lastAckTimeoutRestart = 5 * 60;
-            if (_consumeThreadNums == 0) _consumeThreadNums = 8;
+            if (_consumeThreadNums == 0) _consumeThreadNums         = 8;
         }
 
         /// <summary>
@@ -78,7 +86,7 @@ namespace SP.StudioCore.MQ.RabbitMQ
         public void Start(IListenerMessage listener, bool autoAck = false)
         {
             _listener = listener;
-            _autoAck = autoAck;
+            _autoAck  = autoAck;
             Connect(_listener, _autoAck);
             CheckStatsAndConnect();
         }
@@ -96,18 +104,37 @@ namespace SP.StudioCore.MQ.RabbitMQ
         /// 定时检查连接状态
         /// </summary>
         private void CheckStatsAndConnect()
-        {
+        { 
             // 检查连接状态
-            _checkConnectStatsTask?.Dispose();
-            _checkConnectStatsTask = Task.Factory.StartNew(() =>
+            _cts = new CancellationTokenSource();
+            Task.Factory.StartNew(token =>
             {
-                while (true)
+                var cancellationToken = (CancellationToken)token;
+                try
                 {
-                    // 未打开、关闭状态、上一次ACK超时，则重启
-                    if (_channel == null || _channel.IsClosed || (DateTime.Now - _lastAckAt).TotalSeconds >= _lastAckTimeoutRestart) ReStart();
-                    Thread.Sleep(3000);
+                    while (true)
+                    {
+                        cancellationToken.ThrowIfCancellationRequested();
+                        // 未打开、关闭状态、上一次ACK超时，则重启
+                        if (_channel == null || _channel.IsClosed)
+                        {
+                            IocCollection.GetService<ILoggerFactory>().CreateLogger(this.GetType()).LogWarning($"发现Rabbit未连接，或已关闭，开始重新连接");
+                            ReStart();
+                        }
+                        else if ((DateTime.Now - _lastAckAt).TotalSeconds >= _lastAckTimeoutRestart)
+                        {
+                            IocCollection.GetService<ILoggerFactory>().CreateLogger(this.GetType()).LogWarning($"rabbit距上一次消费过去了{(DateTime.Now - _lastAckAt).TotalSeconds}秒后没有新的消息，尝试重新连接Rabbit。");
+                            ReStart();
+                        }
+
+                        Thread.Sleep(3000);
+                    }
                 }
-            });
+                catch (Exception e)
+                {
+                    IocCollection.GetService<ILoggerFactory>().CreateLogger(this.GetType()).LogWarning(e.Message);
+                }
+            }, _cts.Token);
         }
 
         /// <summary>
@@ -122,7 +149,7 @@ namespace SP.StudioCore.MQ.RabbitMQ
             // 只获取一次
             var resp = _channel.BasicGet(_queueName, autoAck);
 
-            var result = false;
+            var result  = false;
             var message = Encoding.UTF8.GetString(resp.Body.ToArray());
             try
             {
@@ -172,15 +199,15 @@ namespace SP.StudioCore.MQ.RabbitMQ
         {
             Connect();
 
-            _channel.BasicQos(0, (ushort) _consumeThreadNums, false);
+            _channel.BasicQos(0, (ushort)_consumeThreadNums, false);
             var consumer = new EventingBasicConsumer(_channel);
             consumer.Received += (model, ea) =>
             {
-                var result = false;
+                var result  = false;
                 var message = Encoding.UTF8.GetString(ea.Body.ToArray());
                 try
                 {
-                    result = listener.Consumer(message, model, ea);
+                    result     = listener.Consumer(message, model, ea);
                     _lastAckAt = DateTime.Now;
                 }
                 catch (AlreadyClosedException e) // rabbit被关闭了，重新打开链接
@@ -225,7 +252,8 @@ namespace SP.StudioCore.MQ.RabbitMQ
         /// </summary>
         public void Close()
         {
-            _checkConnectStatsTask?.Dispose();
+            _cts?.Cancel();
+
             if (_channel != null)
             {
                 _channel.Close();

@@ -44,6 +44,17 @@ namespace SP.StudioCore.Cache.Redis
             }
         }
 
+        public static IEnumerable<HashEntry> ToHash<T>(this T obj) where T : struct
+        {
+            IEnumerable<FieldInfo> fields = obj.GetType().GetFields();
+            foreach (FieldInfo field in fields.Where(t => t.IsPublic))
+            {
+                RedisValue? value = field.GetValue(obj)?.GetRedisValue();
+                if (value == null) continue;
+                yield return new HashEntry(field.Name, value.Value);
+            }
+        }
+
         public static IEnumerable<HashEntry> ToHashEntry<T>(this T t, params Expression<Func<T, object>>[] fields) where T : class, new()
         {
             bool isHasCache = typeof(T).HasAttribute<ICacheAttribute>();
@@ -277,6 +288,21 @@ namespace SP.StudioCore.Cache.Redis
                 PropertyInfo property = typeof(T).GetProperty(name, BindingFlags.Public | BindingFlags.Instance);
                 if (property == null || !property.CanWrite) continue;
                 property.SetValue(t, item.Value.GetRedisValue(property.PropertyType));
+            }
+            return t;
+        }
+
+        public static T GetRedisHash<T>(this IEnumerable<HashEntry> fields) where T : struct
+        {
+            if (!fields.Any()) return default;
+            T t = new T();
+            foreach (HashEntry item in fields)
+            {
+                string name = (string)item.Name;
+                if (name.Contains('.')) continue;
+                FieldInfo field = typeof(T).GetField(name, BindingFlags.Public | BindingFlags.Instance);
+                if (field == null) continue;
+                field.SetValue(t, item.Value.GetRedisValue(field.FieldType));
             }
             return t;
         }

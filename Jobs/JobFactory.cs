@@ -1,4 +1,5 @@
 ﻿using SP.StudioCore.Ioc;
+using SP.StudioCore.Utils;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -19,10 +20,12 @@ namespace SP.StudioCore.Jobs
 
         public static void Run(Assembly assembly, ParallelOptions options = null)
         {
-            IEnumerable<IJobBase> jobs = assembly.GetTypes()
+            if (assembly == null) return;
+            IEnumerable<IJobBase?> jobs = assembly.GetTypes()
                 .Where(t => !t.IsAbstract && t.IsSubclassOf(typeof(IJobBase)))
-                .Select(t => (IJobBase)Activator.CreateInstance(t));
-            string service = assembly.GetName().Name;
+                .Select(t => (IJobBase?)Activator.CreateInstance(t));
+
+            string? service = assembly?.GetName().Name;
 
             if (options == null)
             {
@@ -55,9 +58,7 @@ namespace SP.StudioCore.Jobs
                     }
                     catch (Exception ex)
                     {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine(ex.Message);
-                        Console.ResetColor();
+                        ConsoleHelper.WriteLine(ex.Message, ConsoleColor.Red);
                     }
                     finally
                     {

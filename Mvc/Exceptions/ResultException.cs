@@ -13,7 +13,7 @@ namespace SP.StudioCore.Mvc.Exceptions
     /// </summary>
     public class ResultException : Exception
     {
-        private Result result;
+        protected Result result;
 
         public ResultException(Result result)
         {
@@ -24,7 +24,7 @@ namespace SP.StudioCore.Mvc.Exceptions
         /// 返回错误的枚举类型
         /// </summary>
         /// <param name="errorCode"></param>
-        public ResultException(Enum errorCode, string message = null)
+        public ResultException(Enum errorCode, string? message = null)
         {
             this.result = new Result(false, message ?? errorCode.GetDescription(), new
             {
@@ -34,7 +34,7 @@ namespace SP.StudioCore.Mvc.Exceptions
 
         public override string Message => this.result.ToString();
 
-        public Task WriteAsync(HttpContext context)
+        public virtual Task WriteAsync(HttpContext context)
         {
             return result.WriteAsync(context);
         }

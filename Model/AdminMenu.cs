@@ -32,16 +32,12 @@ namespace SP.StudioCore.Model
                     break;
                 default:
                     text = root.GetAttributeValue(language.ToString().ToLower());
-                    Console.WriteLine($"======语种：{language.ToString().ToLower()}==内容：{text}====");
                     break;
             }
-            Console.WriteLine(text);
             if (!string.IsNullOrWhiteSpace(text))
             {
                 this.Name = text;
             }
-
-            Console.WriteLine($"++++++++++++{text}++++++++++++");
             this.ID = root.GetAttributeValue("ID");
             this.Href = root.GetAttributeValue("href");
             this.Icon = root.GetAttributeValue("icon");

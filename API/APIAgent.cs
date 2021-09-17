@@ -133,8 +133,10 @@ namespace SP.StudioCore.API
     /// <summary>
     /// 上传文件的配置（需在服务中注册）
     /// </summary>
-    public class UploadConfig
+    public class UploadConfig : ISetting
     {
+        public UploadConfig(string setting) : base(setting) { }
+
         public UploadConfig(string uploadUrl, string imgServer)
         {
             this.UploadUrl = uploadUrl;
@@ -144,5 +146,10 @@ namespace SP.StudioCore.API
         public string UploadUrl { get; set; }
 
         public string ImgServer { get; set; }
+
+        public static implicit operator UploadConfig(string config)
+        {
+            return new UploadConfig(config);
+        }
     }
 }

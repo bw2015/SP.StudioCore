@@ -314,6 +314,40 @@ namespace SP.StudioCore.Http
             return obj;
         }
 
+        public static object? Fill(this IFormCollection form, Type type, string prefix = null, bool isHtmlEncode = true)
+        {
+            object? obj = Activator.CreateInstance(type);
+            if (obj == null) return null;
+            foreach (string key in form.Keys)
+            {
+                string name = key;
+                if (!string.IsNullOrEmpty(prefix))
+                {
+                    if (!name.StartsWith(prefix)) continue;
+                    name = name.Substring(prefix.Length);
+                }
+
+                PropertyInfo? property = type.GetProperty(name);
+                if (property == null) continue;
+                string value = form[key];
+                object objValue;
+
+                switch (property.PropertyType.Name)
+                {
+                    case "String":
+                        objValue = (isHtmlEncode && property.HasAttribute<HtmlEncodeAttribute>()) ? HttpUtility.HtmlDecode(value) : value;
+                        break;
+                    default:
+                        objValue = value.GetValue(property.PropertyType);
+                        break;
+                }
+
+                property.SetValue(obj, objValue);
+            }
+
+            return obj;
+        }
+
         /// <summary>
         /// 获取当前的域名（支持反代过来的域名）
         /// 顺序："X-Forwarded-Site", "Ali-Swift-LOG-Host", "Referer", "Host"

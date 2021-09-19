@@ -18,7 +18,7 @@ namespace SP.StudioCore.Jobs
     {
         private static IJobDelegate JobDelegate = IocCollection.GetService<IJobDelegate>();
 
-        public static void Run(Assembly assembly, ParallelOptions options = null)
+        public static void Run(Assembly assembly, ParallelOptions? options = null)
         {
             if (assembly == null) return;
             IEnumerable<IJobBase?> jobs = assembly.GetTypes()

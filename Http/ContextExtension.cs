@@ -240,8 +240,9 @@ namespace SP.StudioCore.Http
             }
         }
 
-        public static string GetString(this HttpContext context, Encoding encoding = null)
+        public static string GetString(this HttpContext context, Encoding? encoding = null)
         {
+            if (context == null) return string.Empty;
             if (encoding == null) encoding = Encoding.UTF8;
             byte[] data = context.GetData();
             if (data == null) return string.Empty;
@@ -272,7 +273,7 @@ namespace SP.StudioCore.Http
         /// <param name="obj">具有初始值的对象</param>
         /// <param name="prefix">前缀</param>
         /// <returns></returns>
-        public static T Fill<T>(this IFormCollection form, string prefix = null) where T : class, new()
+        public static T Fill<T>(this IFormCollection form, string? prefix = null) where T : class, new()
         {
             T obj = new T();
             return form.Fill(obj, prefix);
@@ -282,7 +283,7 @@ namespace SP.StudioCore.Http
         /// 对已有对象赋值
         /// </summary>
         ///  <param name="isHtmlEncode">是否过滤</param>
-        public static T Fill<T>(this IFormCollection form, T obj, string prefix = null, bool isHtmlEncode = true) where T : class
+        public static T Fill<T>(this IFormCollection form, T obj, string? prefix = null, bool isHtmlEncode = true) where T : class
         {
             foreach (string key in form.Keys)
             {
@@ -314,7 +315,7 @@ namespace SP.StudioCore.Http
             return obj;
         }
 
-        public static object? Fill(this IFormCollection form, Type type, string prefix = null, bool isHtmlEncode = true)
+        public static object? Fill(this IFormCollection form, Type type, string? prefix = null, bool isHtmlEncode = true)
         {
             object? obj = Activator.CreateInstance(type);
             if (obj == null) return null;
@@ -440,7 +441,7 @@ namespace SP.StudioCore.Http
 
         #region =========== 错误页面提示  ===============
 
-        public static Result ShowError(this HttpContext context, HttpStatusCode statusCode, string error = null)
+        public static Result ShowError(this HttpContext context, HttpStatusCode statusCode, string? error = null)
         {
             context.Response.StatusCode = (int)statusCode;
             context.Response.ContentType = "text/html";
@@ -453,7 +454,7 @@ namespace SP.StudioCore.Http
         /// <param name="statusCode"></param>
         /// <param name="error"></param>
         /// <returns></returns>
-        public static string ShowError(this HttpStatusCode statusCode, string error = null)
+        public static string ShowError(this HttpStatusCode statusCode, string? error = null)
         {
             string status = Regex.Replace(statusCode.ToString(), "[A-Z]", t => { return " " + t.Value; });
             status = statusCode.ToString();
@@ -470,7 +471,7 @@ namespace SP.StudioCore.Http
             return sb.ToString();
         }
 
-        public static Result ShowError(this HttpContext context, ErrorType type, string error = null, Dictionary<string, object> output = null)
+        public static Result ShowError(this HttpContext context, ErrorType type, string? error = null, Dictionary<string, object>? output = null)
         {
             if (string.IsNullOrEmpty(error)) error = type.GetDescription(context.GetLanguage());
             if (output == null)
@@ -531,7 +532,7 @@ namespace SP.StudioCore.Http
             }
         }
 
-        public static string ToString(this IFormFile file, Encoding encoding = null)
+        public static string? ToString(this IFormFile file, Encoding? encoding = null)
         {
             byte[] data = file.ToArray();
             if (data == null) return null;

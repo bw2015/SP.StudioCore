@@ -343,7 +343,7 @@ namespace SP.StudioCore.Cache.Redis
         /// <param name="t"></param>
         /// <param name="fields"></param>
         /// <param name="prefix">前缀名</param>
-        public static void Fill<T>(this T t, IEnumerable<HashEntry> fields, string prefix = null) where T : class, new()
+        public static void Fill<T>(this T t, IEnumerable<HashEntry> fields, string? prefix = null) where T : class, new()
         {
             foreach (HashEntry item in fields)
             {

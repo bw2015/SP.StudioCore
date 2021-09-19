@@ -331,6 +331,20 @@ namespace SP.StudioCore.Data.Provider
             }
         }
 
+        public int Update<T, TField1, TField2>(Expression<Func<T, TField1>> field1, TField1 value1, Expression<Func<T, TField2>> field2, TField2 value2, Expression<Func<T, bool>> condition) where T : class, new()
+        {
+            using (IExpressionCondition expression = db.GetExpressionCondition(condition))
+            {
+                string conditionSql = expression.ToCondition(out DynamicParameters parameters);
+                ColumnProperty column1 = SchemaCache.GetColumnProperty(field1);
+                ColumnProperty column2 = SchemaCache.GetColumnProperty(field2);
+                parameters.Add("@Value1", value1.GetSafeValue(typeof(TField1)));
+                parameters.Add("@Value2", value2.GetSafeValue(typeof(TField2)));
+                string sql = $"UPDATE {typeof(T).GetTableName()} SET [{column1.Name}] = @Value1,[{column2.Name}] = @Value2 {conditionSql};";
+                return db.ExecuteNonQuery(CommandType.Text, sql, parameters);
+            }
+        }
+
         /// <summary>
         /// 多字段更新
         /// </summary>
@@ -556,7 +570,6 @@ namespace SP.StudioCore.Data.Provider
             }
             return this.db.ExecuteNonQuery(CommandType.Text, sb.ToString(), parameters) == 1;
         }
-
 
     }
 }

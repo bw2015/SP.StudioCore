@@ -36,7 +36,7 @@ namespace SP.StudioCore.API
         /// </summary>
         /// <param name="type">自定义的文件扩展名</param>
         /// <returns>返回上传结果</returns>
-        public static Result Upload(this IFormFile file, string type = null)
+        public static Result Upload(this IFormFile file, string? type = null)
         {
             if (string.IsNullOrEmpty(UploadUrl)) throw new ResultException("未配置上传路径");
             using (MemoryStream ms = new MemoryStream())
@@ -56,7 +56,7 @@ namespace SP.StudioCore.API
         /// <param name="url">远程文件URL</param>
         /// <param name="type"></param>
         /// <returns></returns>
-        public static Result Upload(string url, string type = null)
+        public static Result Upload(string url, string? type = null)
         {
             if (string.IsNullOrEmpty(UploadUrl)) throw new ResultException("未配置上传路径");
             if (!System.Uri.IsWellFormedUriString(url, UriKind.Absolute)) throw new ResultException("资源路径非法");

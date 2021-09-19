@@ -11,7 +11,7 @@ namespace SP.StudioCore.API.Wallets.Logs
     /// </summary>
     public struct WalletLog
     {
-        public WalletLog(string action, bool? success, string url, string postData, string resultData, long time, object extendData = null)
+        public WalletLog(string action, bool? success, string url, string postData, string resultData, long time, object? extendData = null)
         {
             this.Action = action;
             this.Success = success != null && success.Value;

@@ -55,12 +55,12 @@ namespace SP.StudioCore.Json
             return objectType.IsEnum || (objectType.IsGenericType && objectType.GetGenericTypeDefinition() == typeof(Nullable<>) && objectType.GetGenericArguments()[0].IsEnum);
         }
 
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override object ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
         {
             throw new NotImplementedException();
         }
 
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
             if (value == null)
             {
@@ -94,12 +94,12 @@ namespace SP.StudioCore.Json
             return typeof(DateTime).IsAssignableFrom(objectType);
         }
 
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override object ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
         {
             throw new NotImplementedException();
         }
 
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
             DateTime date = (DateTime)value;
             if (date.Year <= 1900)
@@ -121,14 +121,14 @@ namespace SP.StudioCore.Json
             return typeof(bool).IsAssignableFrom(objectType);
         }
 
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override object ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
         {
-            return (bool)existingValue;
+            return existingValue != null && (bool)existingValue;
         }
 
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
-            if ((bool)value)
+            if (value != null && (bool)value)
             {
                 writer.WriteValue(1);
             }
@@ -148,13 +148,15 @@ namespace SP.StudioCore.Json
             return typeof(Guid).IsAssignableFrom(objectType);
         }
 
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override object ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
         {
+            if (existingValue == null) return Guid.Empty;
             return Guid.Parse((string)existingValue);
         }
 
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
+            if (value == null) return;
             Guid obj = (Guid)value;
             if (obj == Guid.Empty)
             {
@@ -176,14 +178,14 @@ namespace SP.StudioCore.Json
             return objectType == typeof(String);
         }
 
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override object ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
         {
             throw new NotImplementedException();
         }
 
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
-            string obj = (string)value;
+            string obj = value == null ? string.Empty : (string)value;
             if (obj == null)
             {
                 writer.WriteValue(string.Empty);
@@ -207,15 +209,22 @@ namespace SP.StudioCore.Json
             return objectType == typeof(JsonString);
         }
 
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override object ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
         {
             throw new NotImplementedException();
         }
 
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
-            JsonString obj = (JsonString)value;
-            writer.WriteRawValue(obj.ToString());
+            if (value == null)
+            {
+                writer.WriteRawValue("null");
+            }
+            else
+            {
+                JsonString obj = (JsonString)value;
+                writer.WriteRawValue(obj.ToString());
+            }
         }
 
         public override bool CanRead => false;

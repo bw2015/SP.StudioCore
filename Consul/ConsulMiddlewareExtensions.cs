@@ -14,7 +14,7 @@ namespace SP.StudioCore.Consul
     /// </summary>
     public static class ConsulMiddlewareExtensions
     {
-        public static IApplicationBuilder UseConsul(this IApplicationBuilder app, IHostApplicationLifetime lifetime, ConsulOption consulOption = null)
+        public static IApplicationBuilder UseConsul(this IApplicationBuilder app, IHostApplicationLifetime lifetime, ConsulOption? consulOption = null)
         {
             if (consulOption == null)
             {

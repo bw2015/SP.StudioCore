@@ -92,6 +92,9 @@ namespace SP.StudioCore.Data
         public int Update<T, TValue>(Expression<Func<T, TValue>> field, TValue value, Expression<Func<T, bool>> condition) where T : class, new() =>
             provider.Update(field, value, condition);
 
+        public int Update<T, TField1, TField2>(Expression<Func<T, TField1>> field1, TField1 value1, Expression<Func<T, TField2>> field2, TField2 value2, Expression<Func<T, bool>> condition) where T : class, new() =>
+            provider.Update(field1, value1, field2, value2, condition);
+
         public int Update<T>(T entity, Expression<Func<T, bool>> condition, params Expression<Func<T, object>>[] fields) where T : class, new() =>
             provider.Update(entity, condition, fields);
 

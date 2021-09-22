@@ -16,7 +16,7 @@ namespace SP.StudioCore.Jobs
         protected ILogger Logger => IocCollection.GetService<ILogger>();
 
         /// <summary>
-        /// 时间执行间隔
+        /// 时间执行间隔（毫秒）
         /// </summary>
         public abstract int Interval { get; }
 

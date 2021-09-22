@@ -54,7 +54,8 @@ namespace SP.StudioCore.Net
         /// <param name="requestTimeout">超时时间</param>
         /// <param name="encoding">编码格式</param>
         /// <param name="cookie">是否需要cookie</param>
-        public static Task<string> GetAsync(string url, Dictionary<string, string> postData, Encoding encoding = null, int requestTimeout = 0, CookieContainer cookie = null) => GetAsync(url, String.Join("&", postData.Select(keyVal => $"{keyVal.Key}={keyVal.Value}")), null, encoding, requestTimeout, cookie);
+        public static Task<string> GetAsync(string url, Dictionary<string, string> postData, Encoding encoding = null, int requestTimeout = 0, CookieContainer cookie = null) 
+            => GetAsync(url, String.Join("&", postData.Select(keyVal => $"{keyVal.Key}={keyVal.Value}")), null, encoding, requestTimeout, cookie);
 
         /// <summary>
         /// http request请求

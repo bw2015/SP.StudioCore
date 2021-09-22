@@ -18,7 +18,7 @@ namespace SP.StudioCore.Jobs
     {
         private static IJobDelegate JobDelegate = IocCollection.GetService<IJobDelegate>();
 
-        public static void Run(Assembly assembly, ParallelOptions? options = null)
+        public static void Run(Assembly assembly)
         {
             if (assembly == null) return;
             IEnumerable<IJobBase?> jobs = assembly.GetTypes()
@@ -27,51 +27,47 @@ namespace SP.StudioCore.Jobs
 
             string? service = assembly?.GetName().Name;
 
-            if (options == null)
-            {
-                options = new ParallelOptions()
-                {
-                    MaxDegreeOfParallelism = Math.Min(Environment.ProcessorCount * 4, jobs.Count())
-                };
-            }
-            List<string> logs = new List<string>();
-            while (true)
-            {
-                int interval = 0;
-                logs.Clear();
-                Parallel.ForEach(jobs, options,
-                job =>
-                {
-                    string jobName = job.GetType().Name;
-                    string lockKey = $"{service}:{jobName}";
-                    Stopwatch sw = new();
-                    sw.Restart();
-                    try
-                    {
-                        if (job.IsTheard || JobDelegate.LockJob(lockKey))
-                        {
-                            if (job.Execute().Result)
-                            {
-                                Console.WriteLine($"Job:{jobName}执行完毕，耗时：{sw.ElapsedMilliseconds}ms");
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        ConsoleHelper.WriteLine(ex.Message, ConsoleColor.Red);
-                    }
-                    finally
-                    {
-                        if (!job.IsTheard)
-                        {
-                            JobDelegate.UnlockJob(lockKey);
-                        }
-                    }
-                    if (interval < job.Interval) interval = job.Interval;
-                });
-                Thread.Sleep(interval);
-            }
+            Parallel.ForEach(jobs, job =>
+             {
+                 if (job == null) return;
 
+                 while (true)
+                 {
+                     string jobName = $"{service}:{job.GetType().Name}";
+                     bool isRun = false;
+                     try
+                     {
+                         if (job.IsTheard || JobDelegate.LockJob(jobName, job.Interval))
+                         {
+                             job.Execute().Wait();
+                             isRun = true;
+                         }
+                     }
+                     catch (Exception ex)
+                     {
+                         ConsoleHelper.WriteLine(ex.Message, ConsoleColor.Red);
+                         JobDelegate.Exception(ex);
+                     }
+                     finally
+                     {
+                         if (isRun)
+                         {
+                             ConsoleHelper.WriteLine($"[{DateTime.Now}]\tJob:{jobName} => 执行完毕", ConsoleColor.Green);
+                         }
+                         else
+                         {
+                             ConsoleHelper.WriteLine($"[{DateTime.Now}]\tJob:{jobName} => 跳过执行", ConsoleColor.DarkYellow);
+                         }
+                         //if (!job.IsTheard)
+                         //{
+                         //    JobDelegate.UnlockJob(jobName);
+                         //}
+                     }
+                     Thread.Sleep(job.Interval);
+                 }
+             });
         }
+
     }
 }
+

@@ -13,12 +13,18 @@ namespace SP.StudioCore.Jobs
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
-        public bool LockJob(string key);
+        public bool LockJob(string key, int time);
 
         /// <summary>
         /// 解锁任务
         /// </summary>
         /// <param name="key"></param>
         public void UnlockJob(string key);
+
+        /// <summary>
+        /// 异常处理
+        /// </summary>
+        /// <param name="ex"></param>
+        public void Exception(Exception ex);
     }
 }

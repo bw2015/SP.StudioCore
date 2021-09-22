@@ -152,9 +152,9 @@ namespace SP.StudioCore.Enums
             {
                 string enumName = type.FullName;
                 dic.Add(enumName, new Dictionary<string, string>());
-                foreach (object item in Enum.GetValues(type))
+                foreach (Enum item in Enum.GetValues(type))
                 {
-                    dic[enumName].Add(item.ToString(), ((Enum)item).GetDescription(language));
+                    dic[enumName].Add(item.ToString(), item.GetDescription(language));
                 }
             }
             return dic;

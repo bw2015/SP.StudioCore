@@ -143,7 +143,7 @@ namespace SP.StudioCore.MQ.RabbitMQ
                 //var sw2 = Stopwatch.StartNew();
                 channel = CreateChannel();
                 //if (sw2.ElapsedMilliseconds > 10) Console.WriteLine($"RabbitMQ CreateChannel: {sw2.ElapsedMilliseconds}ms");
-                sw2.Restart();
+                //sw2.Restart();
 
                 var basicProperties = channel.CreateBasicProperties();
                 // 默认设置为消息持久化

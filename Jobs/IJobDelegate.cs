@@ -26,5 +26,13 @@ namespace SP.StudioCore.Jobs
         /// </summary>
         /// <param name="ex"></param>
         public void Exception(Exception ex);
+
+        /// <summary>
+        /// 保存服务日志
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="content"></param>
+        /// <param name="time"></param>
+        public void ServiceLog(string type, object content, long time);
     }
 }

@@ -32,7 +32,7 @@ namespace SP.StudioCore.MQ.RabbitMQ
         {
             if (productConfig.MinFreeChannelPool == 0) productConfig.MinFreeChannelPool = 8;
             if (productConfig.MaxFreeChannelPool == 0) productConfig.MaxFreeChannelPool = 10;
-            _connect       = connect;
+            _connect = connect;
             _productConfig = productConfig;
 
             _connect.Open();
@@ -140,17 +140,17 @@ namespace SP.StudioCore.MQ.RabbitMQ
             IModel channel = null;
             try
             {
-                var sw2 = Stopwatch.StartNew();
+                //var sw2 = Stopwatch.StartNew();
                 channel = CreateChannel();
-                if (sw2.ElapsedMilliseconds > 10) Console.WriteLine($"RabbitMQ CreateChannel: {sw2.ElapsedMilliseconds}ms");
+                //if (sw2.ElapsedMilliseconds > 10) Console.WriteLine($"RabbitMQ CreateChannel: {sw2.ElapsedMilliseconds}ms");
                 sw2.Restart();
 
                 var basicProperties = channel.CreateBasicProperties();
                 // 默认设置为消息持久化
                 if (funcBasicProperties != null) funcBasicProperties(basicProperties);
                 else basicProperties.DeliveryMode = 2;
-                if (sw2.ElapsedMilliseconds > 10) Console.WriteLine($"RabbitMQ CreateBasicProperties: {sw2.ElapsedMilliseconds}ms");
-                sw2.Restart();
+                // if (sw2.ElapsedMilliseconds > 10) Console.WriteLine($"RabbitMQ CreateBasicProperties: {sw2.ElapsedMilliseconds}ms");
+                //sw2.Restart();
 
                 //消息内容
                 var body = Encoding.UTF8.GetBytes(message);
@@ -158,7 +158,7 @@ namespace SP.StudioCore.MQ.RabbitMQ
                 channel.BasicPublish(exchange: exchange, routingKey: routingKey, basicProperties: basicProperties, body: body);
                 var result = !_productConfig.UseConfirmModel || channel.WaitForConfirms();
 
-                if (sw2.ElapsedMilliseconds > 10) Console.WriteLine($"RabbitMQ BasicPublish: {sw2.ElapsedMilliseconds}ms");
+                //if (sw2.ElapsedMilliseconds > 10) Console.WriteLine($"RabbitMQ BasicPublish: {sw2.ElapsedMilliseconds}ms");
                 return result;
             }
             catch (Exception e)

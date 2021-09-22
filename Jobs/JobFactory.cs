@@ -35,11 +35,13 @@ namespace SP.StudioCore.Jobs
                  {
                      string jobName = $"{service}:{job.GetType().Name}";
                      bool isRun = false;
+                     Stopwatch sw = Stopwatch.StartNew();
                      try
                      {
                          if (job.IsTheard || JobDelegate.LockJob(jobName, job.Interval))
                          {
-                             job.Execute().Wait();
+                             object content = job.Execute();
+                             JobDelegate.ServiceLog(job.GetType().Name, content, sw.ElapsedMilliseconds);
                              isRun = true;
                          }
                      }

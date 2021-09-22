@@ -28,6 +28,6 @@ namespace SP.StudioCore.Jobs
         /// <summary>
         /// 执行任务
         /// </summary>
-        public abstract Task<bool> Execute();
+        public abstract object Execute();
     }
 }

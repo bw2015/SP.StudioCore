@@ -27,6 +27,14 @@ namespace SP.StudioCore.Jobs
 
             string? service = assembly?.GetName().Name;
 
+            ConsoleHelper.WriteLine("JobName    |   FullName    ", ConsoleColor.Green);
+            foreach (var job in jobs)
+            {
+                if (job == null) continue;
+                ConsoleHelper.WriteLine($"{job.GetType().Name}    |   {job.GetType().FullName}    ", ConsoleColor.DarkGreen);
+            }
+
+
             Parallel.ForEach(jobs, job =>
              {
                  if (job == null) return;

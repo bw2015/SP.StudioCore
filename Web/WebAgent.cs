@@ -249,6 +249,18 @@ namespace SP.StudioCore.Web
         }
 
         /// <summary>
+        /// 获取一个指定长度内的随机数
+        /// </summary>
+        /// <param name="length"></param>
+        /// <returns></returns>
+        public static int GetRamdom(int length)
+        {
+            long number = Guid.NewGuid().ToNumber();
+            long quotient = (long)Math.Pow(10, length);
+            return (int)(number % quotient);
+        }
+
+        /// <summary>
         /// 判断是否是英文和数字组成的字符串
         /// </summary>
         /// <param name="input"></param>

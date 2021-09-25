@@ -253,7 +253,7 @@ namespace SP.StudioCore.Web
         /// </summary>
         /// <param name="length"></param>
         /// <returns></returns>
-        public static int GetRamdom(int length)
+        public static int GetRandom(int length)
         {
             long number = Guid.NewGuid().ToNumber();
             long quotient = (long)Math.Pow(10, length);

@@ -68,14 +68,14 @@ namespace SP.StudioCore.MQ.RabbitMQ
         /// <param name="consumeThreadNums">线程数（默认8）</param>
         public RabbitConsumer(RabbitConnect connect, string queueName, int lastAckTimeoutRestart, int consumeThreadNums)
         {
-            this._connect               = connect;
+            this._connect = connect;
             this._lastAckTimeoutRestart = lastAckTimeoutRestart;
-            this._consumeThreadNums     = consumeThreadNums;
-            this._queueName             = queueName;
-            this._lastAckAt             = DateTime.Now;
+            this._consumeThreadNums = consumeThreadNums;
+            this._queueName = queueName;
+            this._lastAckAt = DateTime.Now;
 
             if (_lastAckTimeoutRestart == 0) _lastAckTimeoutRestart = 5 * 60;
-            if (_consumeThreadNums == 0) _consumeThreadNums         = 8;
+            if (_consumeThreadNums == 0) _consumeThreadNums = 8;
         }
 
         /// <summary>
@@ -86,7 +86,7 @@ namespace SP.StudioCore.MQ.RabbitMQ
         public void Start(IListenerMessage listener, bool autoAck = false)
         {
             _listener = listener;
-            _autoAck  = autoAck;
+            _autoAck = autoAck;
             Connect(_listener, _autoAck);
             CheckStatsAndConnect();
         }
@@ -104,7 +104,7 @@ namespace SP.StudioCore.MQ.RabbitMQ
         /// 定时检查连接状态
         /// </summary>
         private void CheckStatsAndConnect()
-        { 
+        {
             // 检查连接状态
             _cts = new CancellationTokenSource();
             Task.Factory.StartNew(token =>
@@ -149,7 +149,7 @@ namespace SP.StudioCore.MQ.RabbitMQ
             // 只获取一次
             var resp = _channel.BasicGet(_queueName, autoAck);
 
-            var result  = false;
+            var result = false;
             var message = Encoding.UTF8.GetString(resp.Body.ToArray());
             try
             {
@@ -203,11 +203,11 @@ namespace SP.StudioCore.MQ.RabbitMQ
             var consumer = new EventingBasicConsumer(_channel);
             consumer.Received += (model, ea) =>
             {
-                var result  = false;
+                var result = false;
                 var message = Encoding.UTF8.GetString(ea.Body.ToArray());
                 try
                 {
-                    result     = listener.Consumer(message, model, ea);
+                    result = listener.Consumer(message, model, ea);
                     _lastAckAt = DateTime.Now;
                 }
                 catch (AlreadyClosedException e) // rabbit被关闭了，重新打开链接
@@ -219,7 +219,7 @@ namespace SP.StudioCore.MQ.RabbitMQ
                 catch (Exception e)
                 {
                     // 全局异常处理
-                    IocCollection.GetService<IGlobalException>().Handle(e);
+                    IocCollection.GetService<IGlobalException>()?.Handle(e);
                     // 消费失败后处理
                     IocCollection.GetService<ILoggerFactory>().CreateLogger(listener.GetType())
                         .LogError(e, e.ToString());

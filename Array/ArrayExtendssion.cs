@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore.Internal;
 using SP.StudioCore.Model;
 using SP.StudioCore.Types;
+using SP.StudioCore.Web;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -233,6 +234,22 @@ namespace SP.StudioCore.Array
                 if (items.Any(predicate)) return true;
             }
             return false;
+        }
+
+        /// <summary>
+        /// 从数组中随机取出一个
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="list"></param>
+        /// <returns></returns>
+        public static T GetRandom<T>(this IEnumerable<T> list)
+        {
+            if (!list.Any()) return default(T);
+
+            T[] array = list.ToArray();
+            if (array.Length == 1) return array[0];
+
+            return array[WebAgent.GetRandom(0, array.Length)];
         }
     }
 }

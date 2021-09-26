@@ -205,7 +205,19 @@ namespace SP.StudioCore.Web
                 }
             }
             return true;
+        }
 
+        /// <summary>
+        /// 判断是否是中国大陆地区IP
+        /// </summary>
+        /// <param name="ip"></param>
+        /// <returns></returns>
+        public static bool IsChina(string ip)
+        {
+            string info = GetAddress(ip);
+            if (!info.Contains("中国")) return false;
+            if (info.Contains("香港") || info.Contains("澳门") || info.Contains("台湾")) return false;
+            return true;
         }
     }
 }

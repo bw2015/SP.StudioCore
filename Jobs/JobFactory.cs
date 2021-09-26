@@ -62,11 +62,11 @@ namespace SP.StudioCore.Jobs
                      {
                          if (isRun)
                          {
-                             ConsoleHelper.WriteLine($"[{DateTime.Now}]\tJob:{jobName} => 执行完毕", ConsoleColor.Green);
+                             ConsoleHelper.WriteLine($"[{DateTime.Now}]\tJob:{jobName} => 执行完毕\t{sw.ElapsedMilliseconds}ms", ConsoleColor.Green);
                          }
                          else
                          {
-                             ConsoleHelper.WriteLine($"[{DateTime.Now}]\tJob:{jobName} => 跳过执行", ConsoleColor.DarkYellow);
+                             ConsoleHelper.WriteLine($"[{DateTime.Now}]\tJob:{jobName} => 跳过执行\t{sw.ElapsedMilliseconds}ms", ConsoleColor.DarkYellow);
                          }
                          //if (!job.IsTheard)
                          //{

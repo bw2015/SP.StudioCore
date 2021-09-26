@@ -1,4 +1,5 @@
 ﻿using Aliyun.OSS;
+using SP.StudioCore.Array;
 using SP.StudioCore.Model;
 using System;
 using System.Collections.Generic;
@@ -62,6 +63,77 @@ namespace SP.StudioCore.API
                 message = "OSS错误:" + ex.Message;
                 return false;
             }
+        }
+
+        private static Dictionary<string, string> uploadTokenId = new Dictionary<string, string>();
+
+        private static Dictionary<string, List<PartETag>> uploadETags = new Dictionary<string, List<PartETag>>();
+
+        /// <summary>
+        /// 分片断点续传
+        /// </summary>
+        /// <param name="setting"></param>
+        /// <param name="objectName"></param>
+        /// <param name="binaryData"></param>
+        /// <param name="index">第多少个分片（从1开始）</param>
+        /// <param name="total">总分片数量</param>
+        /// <returns></returns>
+        public static bool Upload(this OSSSetting setting, string objectName, byte[] binaryData, int index, int total, string uploadToken)
+        {
+            OssClient client = new OssClient(setting.endpoint, setting.accessKeyId, setting.accessKeySecret);
+
+            string uploadId = uploadTokenId.Get(uploadToken);
+            List<PartETag> partETags = uploadETags.Get(uploadToken);
+            if (index == 1)
+            {
+                var request = new InitiateMultipartUploadRequest(setting.bucketName, objectName);
+                var result = client.InitiateMultipartUpload(request);
+                uploadId = result.UploadId;
+                partETags = new List<PartETag>();
+
+                if (uploadTokenId.ContainsKey(uploadToken))
+                {
+                    uploadTokenId[uploadToken] = uploadId;
+                }
+                else
+                {
+                    uploadTokenId.Add(uploadToken, uploadId);
+                }
+                if (uploadETags.ContainsKey(uploadToken))
+                {
+                    uploadETags[uploadToken] = partETags;
+                }
+                else
+                {
+                    uploadETags.Add(uploadToken, partETags);
+                }
+            }
+
+            using (MemoryStream requestContent = new MemoryStream(binaryData))
+            {
+                var result = client.UploadPart(new UploadPartRequest(setting.bucketName, objectName, uploadId)
+                {
+                    InputStream = requestContent,
+                    PartSize = binaryData.Length,
+                    PartNumber = index
+                });
+                partETags.Add(result.PartETag);
+            }
+
+            if (index == total)
+            {
+                var completeMultipartUploadRequest = new CompleteMultipartUploadRequest(setting.bucketName, objectName, uploadId);
+                foreach (var partETag in partETags)
+                {
+                    completeMultipartUploadRequest.PartETags.Add(partETag);
+                }
+                client.CompleteMultipartUpload(completeMultipartUploadRequest);
+
+                if (uploadTokenId.ContainsKey(uploadToken)) uploadTokenId.Remove(uploadToken);
+                if (uploadETags.ContainsKey(uploadToken)) uploadETags.Remove(uploadToken);
+            }
+
+            return true;
         }
 
         /// <summary>

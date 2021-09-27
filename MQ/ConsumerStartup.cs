@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -40,7 +41,8 @@ namespace SP.StudioCore.MQ
                     {
                         if (!consumers.Contains(consumer.Name)) continue;
                     }
-                    RunConsumer(consumer, logger);
+                    string log = string.Join('\t', RunConsumer(consumer, logger));
+                    Console.WriteLine(log);
                 }
 
                 logger.LogInformation("全部消费启动完成!");
@@ -55,11 +57,15 @@ namespace SP.StudioCore.MQ
         /// 启动消费程序
         /// </summary>
         /// <param name="consumer"></param>
-        public static void RunConsumer(Type consumer, ILogger<ConsumerStartup> logger)
+        public static List<string> RunConsumer(Type consumer, ILogger<ConsumerStartup> logger)
         {
+            List<string> logs = new List<string>();
+            Stopwatch sw = Stopwatch.StartNew();
+
+            logs.Add(consumer.Name);
             // 没有使用consumerAttribute特性的，不启用
             var consumerAttribute = consumer.GetCustomAttribute<ConsumerAttribute>();
-            if (consumerAttribute == null || !consumerAttribute.Enable) return;
+            if (consumerAttribute == null || !consumerAttribute.Enable) return logs;
 
             // 不指定消费者名字，则随机创建一个
             if (string.IsNullOrEmpty(consumerAttribute.QueueName))
@@ -70,7 +76,9 @@ namespace SP.StudioCore.MQ
             var consumerInstance = RabbitBoot.GetConsumerInstance(consumerAttribute.Name, consumerAttribute.QueueName,
                 consumerAttribute.ConsumeThreadNums, consumerAttribute.LastAckTimeoutRestart);
 
-            logger?.LogInformation($"正在初始化：{consumer.Name}");
+            logs.Add($"初始化{sw.ElapsedMilliseconds}ms");
+            sw.Restart();
+
             // 启用启动绑定时，要创建交换器、队列，并绑定
             if (consumerAttribute.AutoCreateAndBind)
             {
@@ -84,8 +92,10 @@ namespace SP.StudioCore.MQ
                     arguments: arguments, autoDelete: consumerAttribute.AutoDelete);
             }
 
-            logger?.LogInformation($"正在启动：{consumer.Name}");
             consumerInstance.Consumer.Start((IListenerMessage)Activator.CreateInstance(consumer));
+            logs.Add($"启动{sw.ElapsedMilliseconds}ms");
+
+            return logs;
         }
     }
 }

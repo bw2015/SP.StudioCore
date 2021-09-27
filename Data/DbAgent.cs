@@ -29,7 +29,7 @@ namespace SP.StudioCore.Data
     /// <typeparam name="T"></typeparam>
     public abstract class DbAgent<T> : IDisposable where T : class, new()
     {
-        private readonly string ConnectionString;
+        protected readonly string ConnectionString;
 
         /// <summary>
         /// 只读操作对象

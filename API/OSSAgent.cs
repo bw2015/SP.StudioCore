@@ -86,7 +86,10 @@ namespace SP.StudioCore.API
             List<PartETag> partETags = uploadETags.Get(uploadToken);
             if (index == 1)
             {
-                var request = new InitiateMultipartUploadRequest(setting.bucketName, objectName);
+                var request = new InitiateMultipartUploadRequest(setting.bucketName, objectName, new ObjectMetadata
+                {
+                    ExpirationTime = DateTime.Now.AddDays(1)
+                });
                 var result = client.InitiateMultipartUpload(request);
                 uploadId = result.UploadId;
                 partETags = new List<PartETag>();
@@ -133,6 +136,24 @@ namespace SP.StudioCore.API
                 if (uploadETags.ContainsKey(uploadToken)) uploadETags.Remove(uploadToken);
             }
 
+            return true;
+        }
+
+        /// <summary>
+        /// 设定文件的过期时间
+        /// </summary>
+        /// <param name="setting"></param>
+        /// <param name="objectName"></param>
+        /// <param name="expireTime">为null是永不过期</param>
+        /// <returns></returns>
+        public static bool SetExpirationTime(this OSSSetting setting, string objectName, DateTime? expireTime = null)
+        {
+            expireTime ??= DateTime.MaxValue;
+            OssClient client = new OssClient(setting.endpoint, setting.accessKeyId, setting.accessKeySecret);
+            client.ModifyObjectMeta(setting.bucketName, objectName, new ObjectMetadata
+            {
+                ExpirationTime = expireTime.Value
+            });
             return true;
         }
 

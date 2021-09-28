@@ -66,6 +66,10 @@ namespace SP.StudioCore.ElasticSearch
             {
                 elasticsearch.SetIndexTime(indexDateTime.Value);
             }
+            else
+            {
+                elasticsearch.SetIndexTime(DateTime.Now);
+            }
             client.WhenNotExistsAddIndex<TDocument>(elasticsearch);
             return client.Index(new IndexRequest<TDocument>(document, elasticsearch.IndexName)).IsValid;
         }
@@ -85,6 +89,10 @@ namespace SP.StudioCore.ElasticSearch
             if (indexDateTime.HasValue)
             {
                 elasticsearch.SetIndexTime(indexDateTime.Value);
+            }
+            else
+            {
+                elasticsearch.SetIndexTime(DateTime.Now);
             }
             //检查是否已经创建索引
             client.WhenNotExistsAddIndex<TDocument>(elasticsearch);

@@ -17,6 +17,10 @@ namespace SP.StudioCore.ElasticSearch
     public static class ElasticSearchExtension
     {
         /// <summary>
+        /// 索引缓存
+        /// </summary>
+        private static readonly Dictionary<string, bool> IndexCache = new();
+        /// <summary>
         /// 生成更新脚本
         /// </summary>
         /// <param name="desc">ES对象</param>
@@ -50,89 +54,84 @@ namespace SP.StudioCore.ElasticSearch
         /// </summary>
         /// <typeparam name="TDocument"></typeparam>
         /// <param name="client"></param>
-        /// <param name="entity"></param>
+        /// <param name="document"></param>
         /// <returns></returns>
-        public static bool Insert<TDocument>(this IElasticClient client, TDocument entity) where TDocument : class, IDocument<int>
+        /// <exception cref="ArgumentNullException"></exception>
+        public static bool Insert<TDocument>(this IElasticClient client, TDocument document) where TDocument : class
         {
-            return Insert<TDocument, int>(client, entity);
-        }
-        public static bool Insert<TDocument, TKey>(this IElasticClient client, TDocument entity) where TDocument : class, IDocument<TKey> where TKey : struct
-        {
-            string indexname = typeof(TDocument).GetIndexName();
-            Id id = new Id(entity.ID);
-            return client.Index(entity, c => c.Index(indexname).Id(id).Refresh(Refresh.False)).IsValid;
+            ElasticSearchIndexAttribute elasticsearch = typeof(TDocument).GetAttribute<ElasticSearchIndexAttribute>();
+            if (elasticsearch == null) throw new ArgumentNullException("缺失ElasticSearchIndex特性");
+            //检查是否已经创建索引
+            client.WhenNotExistsAddIndex<TDocument>(elasticsearch);
+            return client.Index(new IndexRequest<TDocument>(document, elasticsearch.IndexName)).IsValid;
         }
 
         /// <summary>
-        /// 根据ID修改所有字段
+        /// 批量插入
         /// </summary>
         /// <typeparam name="TDocument"></typeparam>
         /// <param name="client"></param>
-        /// <param name="entity"></param>
+        /// <param name="documents"></param>
         /// <returns></returns>
-        public static bool Update<TDocument>(this IElasticClient client, TDocument entity) where TDocument : class, IDocument<int>
+        /// <exception cref="ArgumentNullException"></exception>
+        public static bool Insert<TDocument>(this IElasticClient client, IEnumerable<TDocument> documents) where TDocument : class
         {
-            return client.Update<TDocument, int>(entity);
-        }
-        public static bool Update<TDocument, TKey>(this IElasticClient client, TDocument entity) where TDocument : class, IDocument<TKey> where TKey : struct
-        {
-            string indexname = typeof(TDocument).GetIndexName();
-            string key = string.Empty;//主键
-            Dictionary<string, object> param = new Dictionary<string, object>();
-            List<string> source = new List<string>();
-            foreach (PropertyInfo property in typeof(TDocument).GetProperties())
-            {
-                string field = property.GetFieldName();
-                if (property.Name == "ID")
-                {
-                    key = field;
-                    continue;
-                }
-                source.Add($"ctx._source.{field}=params.{field}");
-                param.Add(field, property.GetValue(entity));
-            }
-            return client.UpdateByQuery<TDocument>(c => c.Index(indexname).Query(q => q.Term(t => t.Field(key).Value(entity.ID)))
-                                                         .Script(s => s.Source(string.Join(";", source)).Params(param))).IsValid;
+            ElasticSearchIndexAttribute elasticsearch = typeof(TDocument).GetAttribute<ElasticSearchIndexAttribute>();
+            if (elasticsearch == null) throw new ArgumentNullException("缺失ElasticSearchIndex特性");
+            //检查是否已经创建索引
+            client.WhenNotExistsAddIndex<TDocument>(elasticsearch);
+            return client.IndexMany(documents, elasticsearch.IndexName).IsValid;
         }
 
-        /// <summary>
-        /// 通过主键ID删除
-        /// </summary>
-        /// <typeparam name="TDocument"></typeparam>
-        /// <param name="client"></param>
-        /// <param name="value"></param>
-        /// <returns></returns>
-        public static bool Delete<TDocument>(this IElasticClient client, int value) where TDocument : class, IDocument<int>
-        {
-            return client.Delete<TDocument, int>(value);
-        }
-        public static bool Delete<TDocument, TKey>(this IElasticClient client, TKey value) where TDocument : class, IDocument<TKey> where TKey : struct
-        {
-            string indexname = typeof(TDocument).GetIndexName();
-            string fieldname = typeof(TDocument).GetProperty("ID").GetFieldName();
-            return client.DeleteByQuery<TDocument>(c => c.Index(indexname).Query(q => q.Term(t => t.Field(fieldname).Value(value)))).IsValid;
-        }
 
-        public static bool Delete<TDocument>(this IElasticClient client, Func<DeleteByQueryDescriptor<TDocument>, IDeleteByQueryRequest> selector = null) where TDocument : class
-        {
-            string indexname = typeof(TDocument).GetIndexName();
-            Func<DeleteByQueryDescriptor<TDocument>, IDeleteByQueryRequest> action = null;
-            if (selector == null)
-            {
-                action = (s) =>
-                {
-                    return s.Index(indexname);
-                };
-            }
-            else
-            {
-                action = (s) =>
-                {
-                    return selector.Invoke(s.Index(indexname));
-                };
-            }
-            return client.DeleteByQuery(action).IsValid;
-        }
+        //public static bool Update<TDocument>(this IElasticClient client, TDocument entity) where TDocument : class
+        //{
+        //    string indexname = typeof(TDocument).GetIndexName();
+        //    string key = string.Empty;//主键
+        //    Dictionary<string, object> param = new Dictionary<string, object>();
+        //    List<string> source = new List<string>();
+        //    foreach (PropertyInfo property in typeof(TDocument).GetProperties())
+        //    {
+        //        string field = property.GetFieldName();
+        //        if (property.Name == "ID")
+        //        {
+        //            key = field;
+        //            continue;
+        //        }
+        //        source.Add($"ctx._source.{field}=params.{field}");
+        //        param.Add(field, property.GetValue(entity));
+        //    }
+        //    return client.UpdateByQuery<TDocument>(c => c.Index(indexname).Query(q => q.Term(t => t.Field(key).Value(entity.ID)))
+        //                                                 .Script(s => s.Source(string.Join(";", source)).Params(param))).IsValid;
+        //}
+
+        //public static bool Delete<TDocument, TKey>(this IElasticClient client, TKey value) where TDocument : class
+        //{
+        //    string indexname = typeof(TDocument).GetIndexName();
+        //    string fieldname = typeof(TDocument).GetProperty("ID").GetFieldName();
+        //    return client.DeleteByQuery<TDocument>(c => c.Index(indexname).Query(q => q.Term(t => t.Field(fieldname).Value(value)))).IsValid;
+        //}
+
+        //public static bool Delete<TDocument>(this IElasticClient client, Func<DeleteByQueryDescriptor<TDocument>, IDeleteByQueryRequest> selector = null) where TDocument : class
+        //{
+        //    string indexname = typeof(TDocument).GetIndexName();
+        //    Func<DeleteByQueryDescriptor<TDocument>, IDeleteByQueryRequest> action = null;
+        //    if (selector == null)
+        //    {
+        //        action = (s) =>
+        //        {
+        //            return s.Index(indexname);
+        //        };
+        //    }
+        //    else
+        //    {
+        //        action = (s) =>
+        //        {
+        //            return selector.Invoke(s.Index(indexname));
+        //        };
+        //    }
+        //    return client.DeleteByQuery(action).IsValid;
+        //}
 
         /// <summary>
         /// 获取表总记录数
@@ -1212,6 +1211,7 @@ namespace SP.StudioCore.ElasticSearch
             if (elasticsearch == null) throw new Exception("not index name");
             return elasticsearch.IndexName;
         }
+
         /// <summary>
         /// 获取字段名称
         /// </summary>
@@ -1222,6 +1222,39 @@ namespace SP.StudioCore.ElasticSearch
         public static string GetFieldName<TDocument, TValue>(this Expression<Func<TDocument, TValue>> field) where TDocument : class
         {
             return field.ToPropertyInfo().GetFieldName();
+        }
+        /// <summary>
+        /// 索引不存在时，创建索引
+        /// </summary>
+        private static void WhenNotExistsAddIndex<TDocument>(this IElasticClient client, ElasticSearchIndexAttribute elasticsearch) where TDocument : class
+        {
+            if (!IndexCache.ContainsKey(elasticsearch.IndexName) || !IndexCache[elasticsearch.IndexName])
+            {
+                if (!client.Indices.Exists(elasticsearch.IndexName).Exists)
+                {
+                    IndexCache[elasticsearch.IndexName] = client.CreateIndex<TDocument>(elasticsearch);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 创建索引
+        /// </summary>
+        private static bool CreateIndex<TDocument>(this IElasticClient client, ElasticSearchIndexAttribute elasticsearch) where TDocument : class
+        {
+            var rsp = client.Indices.Create(elasticsearch.IndexName, c => c
+                .Map<TDocument>(m => m.AutoMap())
+                .Aliases(des =>
+                {
+                    foreach (var aliasName in elasticsearch.AliasNames)
+                    {
+                        des.Alias(aliasName);
+                    }
+
+                    return des;
+                }).Settings(s => s.NumberOfReplicas(elasticsearch.ReplicasCount).NumberOfShards(elasticsearch.ShardsCount))
+            );
+            return rsp.IsValid;
         }
         /// <summary>
         /// 获取ES实体字段名

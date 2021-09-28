@@ -11,5 +11,9 @@ namespace SP.StudioCore.MQ
     /// </summary>
     public interface IMessageQueue
     {
+        /// <summary>
+        /// 错误次数
+        /// </summary>
+        public int ErrorCount { get; set; }
     }
 }

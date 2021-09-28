@@ -20,20 +20,21 @@ namespace SP.StudioCore.ElasticSearch
         private readonly string _splitIndexDateFormat;
 
         //protected static readonly IElasticClient           Client     = IocCollection.GetService<IElasticClient>();
-        protected static readonly IElasticClient           Client;
+        protected static readonly IElasticClient Client;
+
         //protected readonly        ILogger<TAgent>          Logger     = IocCollection.GetService<ILoggerFactory>().CreateLogger<TAgent>();
-        private static readonly   Dictionary<string, bool> IndexCache = new();
-        protected                 string                   IndexName => $"{_prefixIndexName}_{_indexDateTime.ToString(_splitIndexDateFormat)}";
-        protected readonly        string[]                 AliasNames;
-        private readonly          DateTime                 _indexDateTime;
+        private static readonly Dictionary<string, bool> IndexCache = new();
+        protected               string                   IndexName => $"{_prefixIndexName}_{_indexDateTime.ToString(_splitIndexDateFormat)}";
+        protected readonly      string[]                 AliasNames;
+        private readonly        DateTime                 _indexDateTime;
 
         // 这里不知道为什么取不到IocCollection.GetService<IElasticClient>();先暂时这么用
         static EsBase()
         {
-            IConfigurationRoot configuration = Config.GetConfig();
-            var                esConnection  = configuration.GetConnectionString("ESConnection");
-            var urls                 = esConnection.Split(';').Select(http => new Uri(http));
-            var staticConnectionPool = new StaticConnectionPool(urls);
+            IConfigurationRoot configuration        = Config.GetConfig();
+            var                esConnection         = configuration.GetConnectionString("ESConnection");
+            var                urls                 = esConnection.Split(';').Select(http => new Uri(http));
+            var                staticConnectionPool = new StaticConnectionPool(urls);
             Client = new ElasticClient(new ConnectionSettings(staticConnectionPool));
         }
 
@@ -63,7 +64,7 @@ namespace SP.StudioCore.ElasticSearch
         /// <param name="shardsCount">分片数量</param>
         /// <param name="splitIndexDateFormat">按时间分索引</param>
         /// <param name="replicasCount">副本数量</param>
-        public EsBase(string prefixIndexName, string aliasName, int replicasCount = 0, int shardsCount = 3, DateTime? indexDateTime = null, string splitIndexDateFormat = "yyyy_MM") : this(prefixIndexName, new[] {aliasName}, replicasCount, shardsCount, indexDateTime, splitIndexDateFormat)
+        public EsBase(string prefixIndexName, string aliasName, int replicasCount = 0, int shardsCount = 3, DateTime? indexDateTime = null, string splitIndexDateFormat = "yyyy_MM") : this(prefixIndexName, new[] { aliasName }, replicasCount, shardsCount, indexDateTime, splitIndexDateFormat)
         {
         }
 
@@ -119,17 +120,20 @@ namespace SP.StudioCore.ElasticSearch
         protected bool CreateIndex()
         {
             var rsp = Client.Indices.Create(IndexName, c => c
-                .Map<TModel>(m => m.AutoMap())
-                .Aliases(des =>
-                {
-                    foreach (var aliasName in AliasNames)
-                    {
-                        des.Alias(aliasName);
-                    }
+                                                            .Map<TModel>(m => m.AutoMap())
+                                                            .Aliases(des =>
+                                                            {
+                                                                foreach (var aliasName in AliasNames)
+                                                                {
+                                                                    des.Alias(aliasName);
+                                                                }
 
-                    return des;
-                }).Settings(s => s.NumberOfReplicas(_replicasCount).NumberOfShards(_shardsCount))
-            );
+                                                                return des;
+                                                            })
+                                                            .Settings(s => s.NumberOfReplicas(_replicasCount)
+                                                                            .NumberOfShards(_shardsCount)
+                                                                            .RefreshInterval(new Time(TimeSpan.FromSeconds(1))))
+                                           );
             return rsp.IsValid;
         }
 

@@ -11,7 +11,7 @@ namespace SP.StudioCore.ElasticSearch
         /// <summary>
         /// 索引名称
         /// </summary>
-        public string IndexName { get; }
+        public string IndexName { get; private set; }
         /// <summary>
         /// 别名
         /// </summary>
@@ -47,11 +47,19 @@ namespace SP.StudioCore.ElasticSearch
         /// <param name="fomat">格式</param>
         public ElasticSearchIndexAttribute(string indexname, string[] aliasnams, int replicascount = 0, int shardscount = 3, string fomat = "yyyyMM")
         {
+            this.IndexName = indexname;
             this.AliasNames = aliasnams;
             this.ReplicasCount = replicascount;
             this.ShardsCount = shardscount;
             this.Format = fomat;
-            this.IndexName = $"{indexname}_{DateTime.Now.ToString(fomat)}";
+        }
+        /// <summary>
+        /// 设置索引，根据自定义时间组装
+        /// </summary>
+        /// <param name="datetime"></param>
+        public void SetIndexTime(DateTime datetime)
+        {
+            this.IndexName = $"{this.IndexName}_{datetime.ToString(this.Format)}";
         }
     }
 }

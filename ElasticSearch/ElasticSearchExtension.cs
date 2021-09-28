@@ -57,11 +57,15 @@ namespace SP.StudioCore.ElasticSearch
         /// <param name="document"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public static bool Insert<TDocument>(this IElasticClient client, TDocument document) where TDocument : class
+        public static bool Insert<TDocument>(this IElasticClient client, TDocument document, DateTime? indexDateTime = null) where TDocument : class
         {
             ElasticSearchIndexAttribute elasticsearch = typeof(TDocument).GetAttribute<ElasticSearchIndexAttribute>();
             if (elasticsearch == null) throw new ArgumentNullException("缺失ElasticSearchIndex特性");
             //检查是否已经创建索引
+            if (indexDateTime.HasValue)
+            {
+                elasticsearch.SetIndexTime(indexDateTime.Value);
+            }
             client.WhenNotExistsAddIndex<TDocument>(elasticsearch);
             return client.Index(new IndexRequest<TDocument>(document, elasticsearch.IndexName)).IsValid;
         }
@@ -74,10 +78,14 @@ namespace SP.StudioCore.ElasticSearch
         /// <param name="documents"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public static bool Insert<TDocument>(this IElasticClient client, IEnumerable<TDocument> documents) where TDocument : class
+        public static bool Insert<TDocument>(this IElasticClient client, IEnumerable<TDocument> documents, DateTime? indexDateTime = null) where TDocument : class
         {
             ElasticSearchIndexAttribute elasticsearch = typeof(TDocument).GetAttribute<ElasticSearchIndexAttribute>();
             if (elasticsearch == null) throw new ArgumentNullException("缺失ElasticSearchIndex特性");
+            if (indexDateTime.HasValue)
+            {
+                elasticsearch.SetIndexTime(indexDateTime.Value);
+            }
             //检查是否已经创建索引
             client.WhenNotExistsAddIndex<TDocument>(elasticsearch);
             return client.IndexMany(documents, elasticsearch.IndexName).IsValid;

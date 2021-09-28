@@ -11,5 +11,9 @@ namespace SP.StudioCore.MQ
     /// </summary>
     public interface IMessageQueue
     {
+        /// <summary>
+        /// 消息的唯一编号（用于消息重试）
+        /// </summary>
+        //public Guid MessageID { get; set; }
     }
 }

@@ -286,6 +286,38 @@ namespace SP.StudioCore.ElasticSearch
             string indexname = typeof(TDocument).GetIndexName();
             return client.Search<TDocument>(s => s.Index(indexname).Query(q => q.Bool(b => b.Must(queries))).Size(1)).Documents?.FirstOrDefault();
         }
+
+        /// <summary>
+        /// 获取一条数据，取某个字段
+        /// </summary>
+        /// <typeparam name="TDocument"></typeparam>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="client"></param>
+        /// <param name="field"></param>
+        /// <param name="queries"></param>
+        /// <returns></returns>
+        /// <exception cref="NullReferenceException"></exception>
+        public static TDocument? FirstOrDefault<TDocument>(this IElasticClient client, Expression<Func<TDocument, object>> field, params Func<QueryContainerDescriptor<TDocument>, QueryContainer>[] queries) where TDocument : class
+        {
+            if (client == null) throw new NullReferenceException();
+            string indexname = typeof(TDocument).GetIndexName();
+            return client.Search<TDocument>(s => s.Index(indexname).Query(q => q.Bool(b => b.Must(queries))).Size(1).Select(field)).Documents?.FirstOrDefault();
+        }
+        /// <summary>
+        /// 获取所有数据
+        /// </summary>
+        /// <typeparam name="TDocument"></typeparam>
+        /// <param name="client"></param>
+        /// <param name="queries"></param>
+        /// <returns></returns>
+        public static IEnumerable<TDocument> GetAll<TDocument>(this IElasticClient client, params Func<QueryContainerDescriptor<TDocument>, QueryContainer>[] queries) where TDocument : class
+        {
+            var scrollTime = new Time(TimeSpan.FromSeconds(30));
+            string indexname = typeof(TDocument).GetIndexName();
+            int size = 1000;
+            var searchResponse = client.Search<TDocument>(s => s.Index(indexname).Size(size).Scroll(scrollTime).Query(q => q.Bool(b => b.Must(queries))));
+            return client.Scroll(searchResponse, size, scrollTime);
+        }
         /// <summary>
         /// 查询条件（仅拼接查询条件，非真实查询）
         /// </summary>
@@ -758,7 +790,28 @@ namespace SP.StudioCore.ElasticSearch
             if (query == null) throw new NullReferenceException();
             return query.Sort(c => c.Descending(field));
         }
+        /// <summary>
+        /// 降序，根据字段排序
+        /// </summary>
+        /// <typeparam name="TDocument"></typeparam>
+        /// <param name="query"></param>
+        /// <param name="field"></param>
+        /// <returns></returns>
+        /// <exception cref="NullReferenceException"></exception>
+        public static SearchDescriptor<TDocument> OrderByDescending<TDocument>(this SearchDescriptor<TDocument> query, string field) where TDocument : class
+        {
+            if (query == null) throw new NullReferenceException();
+            return query.Sort(c => c.Descending(field));
+        }
         public static Func<SearchDescriptor<TDocument>, ISearchRequest> OrderByDescending<TDocument, TValue>(this Func<SearchDescriptor<TDocument>, ISearchRequest> search, Expression<Func<TDocument, TValue>> field) where TDocument : class
+        {
+            return (s) =>
+            {
+                return search.Invoke(s.OrderByDescending(field));
+            };
+        }
+
+        public static Func<SearchDescriptor<TDocument>, ISearchRequest> OrderByDescending<TDocument>(this Func<SearchDescriptor<TDocument>, ISearchRequest> search, string field) where TDocument : class
         {
             return (s) =>
             {
@@ -1271,6 +1324,44 @@ namespace SP.StudioCore.ElasticSearch
                 }).Settings(s => s.NumberOfReplicas(elasticsearch.ReplicasCount).NumberOfShards(elasticsearch.ShardsCount).RefreshInterval(new Time(TimeSpan.FromSeconds(1))))
             );
             return rsp.IsValid;
+        }
+
+
+        /// <summary>
+        /// Scroll
+        /// </summary>
+        /// <typeparam name="TDocument"></typeparam>
+        /// <param name="client"></param>
+        /// <param name="response"></param>
+        /// <param name="size"></param>
+        /// <param name="scrollTime"></param>
+        /// <returns></returns>
+        private static IEnumerable<TDocument> Scroll<TDocument>(this IElasticClient client, ISearchResponse<TDocument> response, int size, Time scrollTime) where TDocument : class
+        {
+            if (!response.IsValid)
+            {
+                if (response.ServerError.Error.Type == "index_not_found_exception") yield break;
+                throw response.OriginalException;
+            }
+
+            foreach (var item in response.Documents)
+            {
+                yield return item;
+            }
+
+            // 数量相等，说明还没有读完全部数据
+            while (response.Documents.Count == size)
+            {
+                response = client.Scroll<TDocument>(scrollTime, response.ScrollId);
+                if (response.Documents.Count > 0)
+                {
+                    foreach (var item in response.Documents)
+                    {
+                        yield return item;
+                    }
+                }
+            }
+            client.ClearScroll(s => s.ScrollId(response.ScrollId));
         }
         /// <summary>
         /// 获取ES实体字段名

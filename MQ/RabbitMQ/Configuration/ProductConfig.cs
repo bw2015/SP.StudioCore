@@ -4,6 +4,10 @@ namespace SP.StudioCore.MQ.RabbitMQ.Configuration
 {
     public class ProductConfig : ISetting
     {
+        public ProductConfig()
+        {
+        }
+        
         public ProductConfig(string config) : base(config)
         {
         }

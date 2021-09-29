@@ -12,8 +12,8 @@ namespace SP.StudioCore.MQ
     public interface IMessageQueue
     {
         /// <summary>
-        /// 消息的唯一编号（用于消息重试）
+        /// 错误次数
         /// </summary>
-        //public Guid MessageID { get; set; }
+        public int ErrorCount { get; set; }
     }
 }

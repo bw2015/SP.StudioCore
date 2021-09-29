@@ -1,13 +1,18 @@
 using System;
+using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
 using SP.StudioCore.Ioc;
 using SP.StudioCore.Log;
+using SP.StudioCore.MQ.RabbitMQ.Configuration;
 
 
 namespace SP.StudioCore.MQ.RabbitMQ
@@ -68,14 +73,14 @@ namespace SP.StudioCore.MQ.RabbitMQ
         /// <param name="consumeThreadNums">线程数（默认8）</param>
         public RabbitConsumer(RabbitConnect connect, string queueName, int lastAckTimeoutRestart, int consumeThreadNums)
         {
-            this._connect = connect;
+            this._connect               = connect;
             this._lastAckTimeoutRestart = lastAckTimeoutRestart;
-            this._consumeThreadNums = consumeThreadNums;
-            this._queueName = queueName;
-            this._lastAckAt = DateTime.Now;
+            this._consumeThreadNums     = consumeThreadNums;
+            this._queueName             = queueName;
+            this._lastAckAt             = DateTime.Now;
 
             if (_lastAckTimeoutRestart == 0) _lastAckTimeoutRestart = 5 * 60;
-            if (_consumeThreadNums == 0) _consumeThreadNums = 8;
+            if (_consumeThreadNums     == 0) _consumeThreadNums     = 8;
         }
 
         /// <summary>
@@ -86,7 +91,7 @@ namespace SP.StudioCore.MQ.RabbitMQ
         public void Start(IListenerMessage listener, bool autoAck = false)
         {
             _listener = listener;
-            _autoAck = autoAck;
+            _autoAck  = autoAck;
             Connect(_listener, _autoAck);
             CheckStatsAndConnect();
         }
@@ -149,7 +154,7 @@ namespace SP.StudioCore.MQ.RabbitMQ
             // 只获取一次
             var resp = _channel.BasicGet(_queueName, autoAck);
 
-            var result = false;
+            var result  = false;
             var message = Encoding.UTF8.GetString(resp.Body.ToArray());
             try
             {
@@ -165,8 +170,9 @@ namespace SP.StudioCore.MQ.RabbitMQ
                 }
                 catch (Exception exception)
                 {
-                    IocCollection.GetService<ILoggerFactory>().CreateLogger(listener.GetType())
-                        .LogError(exception, "失败处理出现异常：" + listener.GetType().FullName);
+                    IocCollection.GetService<ILoggerFactory>()
+                                 .CreateLogger(listener.GetType())
+                                 .LogError(exception, "失败处理出现异常：" + listener.GetType().FullName);
                     result = false;
                 }
             }
@@ -174,8 +180,10 @@ namespace SP.StudioCore.MQ.RabbitMQ
             {
                 if (!autoAck)
                 {
-                    if (result) _channel.BasicAck(resp.DeliveryTag, false);
-                    else _channel.BasicReject(resp.DeliveryTag, true);
+                    if (result)
+                        _channel.BasicAck(resp.DeliveryTag, false);
+                    else
+                        _channel.BasicReject(resp.DeliveryTag, true);
                 }
 
                 Close();
@@ -188,7 +196,7 @@ namespace SP.StudioCore.MQ.RabbitMQ
         private void Connect()
         {
             if (_connect.Connection == null || !_connect.Connection.IsOpen) _connect.Open();
-            if (_channel == null || _channel.IsClosed) _channel = _connect.Connection.CreateModel();
+            if (_channel            == null || _channel.IsClosed) _channel = _connect.Connection.CreateModel();
             _lastAckAt = DateTime.Now;
         }
 
@@ -203,43 +211,67 @@ namespace SP.StudioCore.MQ.RabbitMQ
             var consumer = new EventingBasicConsumer(_channel);
             consumer.Received += (model, ea) =>
             {
-                var result = false;
+                var result  = false;
                 var message = Encoding.UTF8.GetString(ea.Body.ToArray());
                 try
                 {
-                    result = listener.Consumer(message, model, ea);
+                    result     = listener.Consumer(message, model, ea);
                     _lastAckAt = DateTime.Now;
                 }
                 catch (AlreadyClosedException e) // rabbit被关闭了，重新打开链接
                 {
                     ReStart();
-                    IocCollection.GetService<ILoggerFactory>().CreateLogger(listener.GetType())
-                        .LogError(e, e.ToString());
+                    IocCollection.GetService<ILoggerFactory>()
+                                 .CreateLogger(listener.GetType())
+                                 .LogError(e, e.ToString());
                 }
                 catch (Exception e)
                 {
                     // 全局异常处理
                     IocCollection.GetService<IGlobalException>()?.Handle(e);
                     // 消费失败后处理
-                    IocCollection.GetService<ILoggerFactory>().CreateLogger(listener.GetType())
-                        .LogError(e, e.ToString());
+                    IocCollection.GetService<ILoggerFactory>()
+                                 .CreateLogger(listener.GetType())
+                                 .LogError(e, e.ToString());
                     try
                     {
                         result = listener.FailureHandling(message, model, ea);
                     }
                     catch (Exception exception)
                     {
-                        IocCollection.GetService<ILoggerFactory>().CreateLogger(listener.GetType())
-                            .LogError(exception, "失败处理出现异常：" + listener.GetType().FullName);
+                        IocCollection.GetService<ILoggerFactory>()
+                                     .CreateLogger(listener.GetType())
+                                     .LogError(exception, "失败处理出现异常：" + listener.GetType().FullName);
                         result = false;
+                    }
+                    finally
+                    {
+                        // 消息仍然失败，则对消息累加ErrorCount。
+                        if (!result)
+                        {
+                            var json = JsonConvert.DeserializeObject<Dictionary<string, object>>(message);
+                            if (json.ContainsKey("ErrorCount"))
+                            {
+                                int.TryParse(json["ErrorCount"].ToString(), out var errorCount);
+                                json["ErrorCount"] = errorCount + 1;
+                                message            = JsonConvert.SerializeObject(json);
+                            }
+
+                            // 重新发消息
+                            var consumerAttribute = listener.GetType().GetCustomAttribute<ConsumerAttribute>();
+                            var rabbitProduct     = new RabbitProduct(_connect, new ProductConfig() { UseConfirmModel = true, ExchangeType = consumerAttribute.ExchangeType });
+                            result = rabbitProduct.Send(message, consumerAttribute.RoutingKey, consumerAttribute.ExchangeName);
+                        }
                     }
                 }
                 finally
                 {
                     if (!autoAck)
                     {
-                        if (result) _channel.BasicAck(ea.DeliveryTag, false);
-                        else _channel.BasicReject(ea.DeliveryTag, true);
+                        if (result)
+                            _channel.BasicAck(ea.DeliveryTag, false);
+                        else
+                            _channel.BasicReject(ea.DeliveryTag, true);
                     }
                 }
             };

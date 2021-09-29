@@ -244,25 +244,6 @@ namespace SP.StudioCore.MQ.RabbitMQ
                                      .LogError(exception, "失败处理出现异常：" + listener.GetType().FullName);
                         result = false;
                     }
-                    finally
-                    {
-                        // 消息仍然失败，则对消息累加ErrorCount。
-                        if (!result)
-                        {
-                            var json = JsonConvert.DeserializeObject<Dictionary<string, object>>(message);
-                            if (json.ContainsKey("ErrorCount"))
-                            {
-                                int.TryParse(json["ErrorCount"].ToString(), out var errorCount);
-                                json["ErrorCount"] = errorCount + 1;
-                                message            = JsonConvert.SerializeObject(json);
-                            }
-
-                            // 重新发消息
-                            var consumerAttribute = listener.GetType().GetCustomAttribute<ConsumerAttribute>();
-                            var rabbitProduct     = new RabbitProduct(_connect, new ProductConfig() { UseConfirmModel = true, ExchangeType = consumerAttribute.ExchangeType });
-                            result = rabbitProduct.Send(message, consumerAttribute.RoutingKey, consumerAttribute.ExchangeName);
-                        }
-                    }
                 }
                 finally
                 {

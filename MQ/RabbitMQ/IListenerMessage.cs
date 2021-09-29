@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using RabbitMQ.Client.Events;
 
 namespace SP.StudioCore.MQ.RabbitMQ
@@ -21,10 +22,19 @@ namespace SP.StudioCore.MQ.RabbitMQ
     }
 
 
-    public interface IListenerMessage<TModel> where TModel : IMessageQueue
+    public abstract class IListenerMessage<TModel> : IListenerMessage where TModel : IMessageQueue
     {
-        bool Consumer(TModel model, object sender, BasicDeliverEventArgs ea);
+        public bool Consumer(string message, object sender, BasicDeliverEventArgs ea)
+        {
+            if (message == null) return false;
+            TModel? model = JsonConvert.DeserializeObject<TModel>(message);
+            if (model == null) return false;
+            return this.Consumer(model, sender, ea);
+        }
 
-        bool FailureHandling(string message, object sender, BasicDeliverEventArgs ea);
+        public abstract bool Consumer(TModel model, object sender, BasicDeliverEventArgs ea);
+
+        public abstract bool FailureHandling(string message, object sender, BasicDeliverEventArgs ea);
+
     }
 }

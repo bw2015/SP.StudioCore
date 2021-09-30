@@ -143,8 +143,6 @@ namespace SP.StudioCore.Utils
             return Convert(num, targetSize);
         }
 
-
-
         /// <summary>
         /// 十进制转换成为任意进制
         /// </summary>

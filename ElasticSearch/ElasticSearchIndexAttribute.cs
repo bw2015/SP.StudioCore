@@ -45,7 +45,7 @@ namespace SP.StudioCore.ElasticSearch
         /// <param name="replicascount">副本数量</param>
         /// <param name="shardscount">分片数量</param>
         /// <param name="fomat">格式</param>
-        public ElasticSearchIndexAttribute(string indexname, string[] aliasnams, int replicascount = 0, int shardscount = 3, string fomat = "yyyyMM")
+        public ElasticSearchIndexAttribute(string indexname, string[] aliasnams, int replicascount = 0, int shardscount = 3, string fomat = "yyyy_MM")
         {
             this.IndexName = indexname;
             this.AliasNames = aliasnams;

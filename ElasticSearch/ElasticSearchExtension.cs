@@ -57,7 +57,7 @@ namespace SP.StudioCore.ElasticSearch
         /// <param name="document"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public static bool Insert<TDocument>(this IElasticClient client, TDocument document, DateTime? indexDateTime = null) where TDocument : class
+        public static bool Insert<TDocument>(this IElasticClient client, TDocument document, DateTime? indexDateTime = null) where TDocument : class, IDocument
         {
             ElasticSearchIndexAttribute elasticsearch = typeof(TDocument).GetAttribute<ElasticSearchIndexAttribute>();
             if (elasticsearch == null) throw new ArgumentNullException("缺失ElasticSearchIndex特性");
@@ -82,7 +82,7 @@ namespace SP.StudioCore.ElasticSearch
         /// <param name="documents"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public static bool Insert<TDocument>(this IElasticClient client, IEnumerable<TDocument> documents, DateTime? indexDateTime = null) where TDocument : class
+        public static bool Insert<TDocument>(this IElasticClient client, IEnumerable<TDocument> documents, DateTime? indexDateTime = null) where TDocument : class, IDocument
         {
             ElasticSearchIndexAttribute elasticsearch = typeof(TDocument).GetAttribute<ElasticSearchIndexAttribute>();
             if (elasticsearch == null) throw new ArgumentNullException("缺失ElasticSearchIndex特性");
@@ -155,7 +155,7 @@ namespace SP.StudioCore.ElasticSearch
         /// <typeparam name="TDocument"></typeparam>
         /// <param name="client"></param>
         /// <returns></returns>
-        public static int Count<TDocument>(this IElasticClient client) where TDocument : class
+        public static int Count<TDocument>(this IElasticClient client) where TDocument : class, IDocument
         {
             if (client == null) throw new NullReferenceException();
             string indexname = typeof(TDocument).GetIndexName();
@@ -167,7 +167,7 @@ namespace SP.StudioCore.ElasticSearch
         /// <typeparam name="TDocument"></typeparam>
         /// <param name="client"></param>
         /// <returns></returns>
-        public static int Count<TDocument, TValue>(this IElasticClient client, TValue value, Expression<Func<TDocument, TValue>> field) where TDocument : class
+        public static int Count<TDocument, TValue>(this IElasticClient client, TValue value, Expression<Func<TDocument, TValue>> field) where TDocument : class, IDocument
         {
             if (client == null) throw new NullReferenceException();
             if (value == null) throw new NullReferenceException();
@@ -182,7 +182,7 @@ namespace SP.StudioCore.ElasticSearch
         /// <param name="client"></param>
         /// <param name="queries"></param>
         /// <returns></returns>
-        public static int Count<TDocument>(this IElasticClient client, params Func<QueryContainerDescriptor<TDocument>, QueryContainer>[] queries) where TDocument : class
+        public static int Count<TDocument>(this IElasticClient client, params Func<QueryContainerDescriptor<TDocument>, QueryContainer>[] queries) where TDocument : class, IDocument
         {
             if (client == null) throw new NullReferenceException();
             string indexname = typeof(TDocument).GetIndexName();
@@ -195,7 +195,7 @@ namespace SP.StudioCore.ElasticSearch
         /// <param name="client"></param>
         /// <param name="search"></param>
         /// <returns></returns>
-        public static int Count<TDocument>(this IElasticClient client, Func<SearchDescriptor<TDocument>, ISearchRequest> search) where TDocument : class
+        public static int Count<TDocument>(this IElasticClient client, Func<SearchDescriptor<TDocument>, ISearchRequest> search) where TDocument : class, IDocument
         {
             if (client == null) throw new NullReferenceException();
             if (search == null) throw new NullReferenceException();
@@ -226,7 +226,7 @@ namespace SP.StudioCore.ElasticSearch
         /// <typeparam name="TDocument"></typeparam>
         /// <param name="queries"></param>
         /// <returns></returns>
-        public static bool Any<TDocument>(this IElasticClient client, params Func<QueryContainerDescriptor<TDocument>, QueryContainer>[] queries) where TDocument : class
+        public static bool Any<TDocument>(this IElasticClient client, params Func<QueryContainerDescriptor<TDocument>, QueryContainer>[] queries) where TDocument : class, IDocument
         {
             return client.Count(queries) > 0;
         }
@@ -237,7 +237,7 @@ namespace SP.StudioCore.ElasticSearch
         /// <param name="client"></param>
         /// <param name="search"></param>
         /// <returns></returns>
-        public static bool Any<TDocument>(this IElasticClient client, Func<SearchDescriptor<TDocument>, ISearchRequest> search) where TDocument : class
+        public static bool Any<TDocument>(this IElasticClient client, Func<SearchDescriptor<TDocument>, ISearchRequest> search) where TDocument : class, IDocument
         {
             return client.Count(search) > 0;
         }
@@ -250,7 +250,7 @@ namespace SP.StudioCore.ElasticSearch
         /// <param name="client"></param>
         /// <param name="value"></param>
         /// <returns></returns>
-        public static bool Any<TDocument, TValue>(this IElasticClient client, TValue value, Expression<Func<TDocument, TValue>> field) where TDocument : class
+        public static bool Any<TDocument, TValue>(this IElasticClient client, TValue value, Expression<Func<TDocument, TValue>> field) where TDocument : class, IDocument
         {
             return client.Count(value, field) > 0;
         }
@@ -263,7 +263,7 @@ namespace SP.StudioCore.ElasticSearch
         /// <param name="value"></param>
         /// <param name="field"></param>
         /// <returns>没有则为null</returns>
-        public static TDocument? FirstOrDefault<TDocument, TValue>(this IElasticClient client, TValue value, Expression<Func<TDocument, TValue>> field) where TDocument : class
+        public static TDocument? FirstOrDefault<TDocument, TValue>(this IElasticClient client, TValue value, Expression<Func<TDocument, TValue>> field) where TDocument : class, IDocument
         {
             if (client == null) throw new NullReferenceException();
             if (value == null) throw new NullReferenceException();
@@ -280,7 +280,7 @@ namespace SP.StudioCore.ElasticSearch
         /// <param name="value"></param>
         /// <param name="field"></param>
         /// <returns>没有则为null</returns>
-        public static TDocument? FirstOrDefault<TDocument, TValue>(this IElasticClient client, params Func<QueryContainerDescriptor<TDocument>, QueryContainer>[] queries) where TDocument : class
+        public static TDocument? FirstOrDefault<TDocument, TValue>(this IElasticClient client, params Func<QueryContainerDescriptor<TDocument>, QueryContainer>[] queries) where TDocument : class, IDocument
         {
             if (client == null) throw new NullReferenceException();
             string indexname = typeof(TDocument).GetIndexName();
@@ -297,7 +297,7 @@ namespace SP.StudioCore.ElasticSearch
         /// <param name="queries"></param>
         /// <returns></returns>
         /// <exception cref="NullReferenceException"></exception>
-        public static TDocument? FirstOrDefault<TDocument>(this IElasticClient client, Expression<Func<TDocument, object>> field, params Func<QueryContainerDescriptor<TDocument>, QueryContainer>[] queries) where TDocument : class
+        public static TDocument? FirstOrDefault<TDocument>(this IElasticClient client, Expression<Func<TDocument, object>> field, params Func<QueryContainerDescriptor<TDocument>, QueryContainer>[] queries) where TDocument : class, IDocument
         {
             if (client == null) throw new NullReferenceException();
             string indexname = typeof(TDocument).GetIndexName();
@@ -325,7 +325,7 @@ namespace SP.StudioCore.ElasticSearch
         /// <param name="client"></param>
         /// <param name="queries"></param>
         /// <returns></returns>
-        public static Func<SearchDescriptor<TDocument>, ISearchRequest> Query<TDocument>(this IElasticClient client, params Func<QueryContainerDescriptor<TDocument>, QueryContainer>[] queries) where TDocument : class
+        public static Func<SearchDescriptor<TDocument>, ISearchRequest> Query<TDocument>(this IElasticClient client, params Func<QueryContainerDescriptor<TDocument>, QueryContainer>[] queries) where TDocument : class, IDocument
         {
             string indexname = typeof(TDocument).GetIndexName();
             ISearchRequest query(SearchDescriptor<TDocument> q)
@@ -342,7 +342,7 @@ namespace SP.StudioCore.ElasticSearch
         /// <param name="musts">查询条件</param>
         /// <param name="must_nots">过滤条件</param>
         /// <returns></returns>
-        public static Func<SearchDescriptor<TDocument>, ISearchRequest> Query<TDocument>(this IElasticClient client, IEnumerable<Func<QueryContainerDescriptor<TDocument>, QueryContainer>> musts, IEnumerable<Func<QueryContainerDescriptor<TDocument>, QueryContainer>> mustnots) where TDocument : class
+        public static Func<SearchDescriptor<TDocument>, ISearchRequest> Query<TDocument>(this IElasticClient client, IEnumerable<Func<QueryContainerDescriptor<TDocument>, QueryContainer>> musts, IEnumerable<Func<QueryContainerDescriptor<TDocument>, QueryContainer>> mustnots) where TDocument : class, IDocument
         {
             string indexname = typeof(TDocument).GetIndexName();
             ISearchRequest query(SearchDescriptor<TDocument> q)
@@ -359,7 +359,7 @@ namespace SP.StudioCore.ElasticSearch
         /// <param name="indexname"></param>
         /// <param name="queries"></param>
         /// <returns></returns>
-        public static Func<SearchDescriptor<TDocument>, ISearchRequest> Query<TDocument>(this IElasticClient client, string indexname, params Func<QueryContainerDescriptor<TDocument>, QueryContainer>[] queries) where TDocument : class
+        public static Func<SearchDescriptor<TDocument>, ISearchRequest> Query<TDocument>(this IElasticClient client, string indexname, params Func<QueryContainerDescriptor<TDocument>, QueryContainer>[] queries) where TDocument : class, IDocument
         {
             ISearchRequest query(SearchDescriptor<TDocument> q)
             {
@@ -376,7 +376,7 @@ namespace SP.StudioCore.ElasticSearch
         /// <param name="musts"></param>
         /// <param name="mustnots"></param>
         /// <returns></returns>
-        public static Func<SearchDescriptor<TDocument>, ISearchRequest> Query<TDocument>(this IElasticClient client, string indexname, IEnumerable<Func<QueryContainerDescriptor<TDocument>, QueryContainer>> musts, IEnumerable<Func<QueryContainerDescriptor<TDocument>, QueryContainer>> mustnots) where TDocument : class
+        public static Func<SearchDescriptor<TDocument>, ISearchRequest> Query<TDocument>(this IElasticClient client, string indexname, IEnumerable<Func<QueryContainerDescriptor<TDocument>, QueryContainer>> musts, IEnumerable<Func<QueryContainerDescriptor<TDocument>, QueryContainer>> mustnots) where TDocument : class, IDocument
         {
             ISearchRequest query(SearchDescriptor<TDocument> q)
             {
@@ -392,7 +392,7 @@ namespace SP.StudioCore.ElasticSearch
         /// <param name="client"></param>
         /// <param name="selector">检索条件</param>
         /// <returns></returns>
-        public static List<TDocument> Search<TDocument>(this IElasticClient client, Func<QueryContainerDescriptor<TDocument>, QueryContainer> selector, params Expression<Func<TDocument, object>>[] fields) where TDocument : class
+        public static List<TDocument> Search<TDocument>(this IElasticClient client, Func<QueryContainerDescriptor<TDocument>, QueryContainer> selector, params Expression<Func<TDocument, object>>[] fields) where TDocument : class, IDocument
         {
             if (client == null) throw new NullReferenceException();
             string indexname = typeof(TDocument).GetIndexName();
@@ -409,7 +409,7 @@ namespace SP.StudioCore.ElasticSearch
         /// <param name="client"></param>
         /// <param name="queries">查询条件</param>
         /// <returns></returns>
-        public static List<TDocument> Search<TDocument>(this IElasticClient client, params Func<QueryContainerDescriptor<TDocument>, QueryContainer>[] queries) where TDocument : class
+        public static List<TDocument> Search<TDocument>(this IElasticClient client, params Func<QueryContainerDescriptor<TDocument>, QueryContainer>[] queries) where TDocument : class, IDocument
         {
             if (client == null) throw new NullReferenceException();
             string indexname = typeof(TDocument).GetIndexName();
@@ -426,7 +426,7 @@ namespace SP.StudioCore.ElasticSearch
         /// <param name="client"></param>
         /// <param name="fields">过滤字段</param>
         /// <returns></returns>
-        public static List<TDocument> Search<TDocument>(this IElasticClient client, params Expression<Func<TDocument, object>>[] fields) where TDocument : class
+        public static List<TDocument> Search<TDocument>(this IElasticClient client, params Expression<Func<TDocument, object>>[] fields) where TDocument : class, IDocument
         {
             if (client == null) throw new NullReferenceException();
             string indexname = typeof(TDocument).GetIndexName();
@@ -446,7 +446,7 @@ namespace SP.StudioCore.ElasticSearch
         /// <param name="value"></param>
         /// <param name="field"></param>
         /// <returns></returns>
-        public static QueryContainerDescriptor<TDocument> Where<TDocument, TValue>(this QueryContainerDescriptor<TDocument> query, TValue? value, Expression<Func<TDocument, TValue>> field) where TDocument : class
+        public static QueryContainerDescriptor<TDocument> Where<TDocument, TValue>(this QueryContainerDescriptor<TDocument> query, TValue? value, Expression<Func<TDocument, TValue>> field) where TDocument : class, IDocument
         {
             if (value == null) return query;
             if (query == null) throw new NullReferenceException();
@@ -463,7 +463,7 @@ namespace SP.StudioCore.ElasticSearch
         /// <param name="value"></param>
         /// <param name="script">脚本（查询数组中的字段）</param>
         /// <returns></returns>
-        public static QueryContainerDescriptor<TDocument> Where<TDocument, TValue>(this QueryContainerDescriptor<TDocument> query, TValue? value, string script) where TDocument : class
+        public static QueryContainerDescriptor<TDocument> Where<TDocument, TValue>(this QueryContainerDescriptor<TDocument> query, TValue? value, string script) where TDocument : class, IDocument
         {
             if (value == null) return query;
             if (query == null) throw new NullReferenceException();
@@ -480,7 +480,7 @@ namespace SP.StudioCore.ElasticSearch
         /// <param name="value"></param>
         /// <param name="field"></param>
         /// <returns></returns>
-        public static QueryContainerDescriptor<TDocument> Where<TDocument, TValue>(this QueryContainerDescriptor<TDocument> query, TValue[] value, Expression<Func<TDocument, TValue>> field) where TDocument : class
+        public static QueryContainerDescriptor<TDocument> Where<TDocument, TValue>(this QueryContainerDescriptor<TDocument> query, TValue[] value, Expression<Func<TDocument, TValue>> field) where TDocument : class, IDocument
         {
             if (value == null) return query;
             if (query == null) throw new NullReferenceException();
@@ -508,7 +508,7 @@ namespace SP.StudioCore.ElasticSearch
             query.Terms(t => t.Field(field).Terms(value));
             return query;
         }
-        public static QueryContainerDescriptor<TDocument> Where<TDocument, TValue>(this QueryContainerDescriptor<TDocument> query, TValue[] value, string script) where TDocument : class
+        public static QueryContainerDescriptor<TDocument> Where<TDocument, TValue>(this QueryContainerDescriptor<TDocument> query, TValue[] value, string script) where TDocument : class, IDocument
         {
             if (value == null) return query;
             if (query == null) throw new NullReferenceException();
@@ -546,7 +546,7 @@ namespace SP.StudioCore.ElasticSearch
         /// <param name="field"></param>
         /// <param name="type"></param>
         /// <returns></returns>
-        public static QueryContainerDescriptor<TDocument> Where<TDocument, TValue>(this QueryContainerDescriptor<TDocument> query, TValue? value, Expression<Func<TDocument, TValue>> field, ExpressionType type) where TDocument : class where TValue : struct
+        public static QueryContainerDescriptor<TDocument> Where<TDocument, TValue>(this QueryContainerDescriptor<TDocument> query, TValue? value, Expression<Func<TDocument, TValue>> field, ExpressionType type) where TDocument : class, IDocument where TValue : struct
         {
             if (value == null) return query;
             if (query == null) throw new NullReferenceException();
@@ -628,7 +628,8 @@ namespace SP.StudioCore.ElasticSearch
             }
             return query;
         }
-        public static QueryContainerDescriptor<TDocument> Where<TDocument, TValue>(this QueryContainerDescriptor<TDocument> query, TValue? value, string script, ExpressionType type) where TDocument : class where TValue : struct
+
+        public static QueryContainerDescriptor<TDocument> Where<TDocument, TValue>(this QueryContainerDescriptor<TDocument> query, TValue? value, string script, ExpressionType type) where TDocument : class, IDocument where TValue : struct
         {
             if (value == null) return query;
             if (query == null) throw new NullReferenceException();
@@ -711,7 +712,7 @@ namespace SP.StudioCore.ElasticSearch
             }
             return query;
         }
-        public static DeleteByQueryDescriptor<TDocument> Where<TDocument, TValue>(this DeleteByQueryDescriptor<TDocument> query, object value, Expression<Func<TDocument, TValue>> field) where TDocument : class
+        public static DeleteByQueryDescriptor<TDocument> Where<TDocument, TValue>(this DeleteByQueryDescriptor<TDocument> query, object value, Expression<Func<TDocument, TValue>> field) where TDocument : class, IDocument
         {
             if (value == null) return query;
             if (query == null) throw new NullReferenceException();
@@ -727,7 +728,7 @@ namespace SP.StudioCore.ElasticSearch
             }
             return query;
         }
-        public static DeleteByQueryDescriptor<TDocument> Where<TDocument, TValue>(this DeleteByQueryDescriptor<TDocument> query, TValue value, Expression<Func<TDocument, TValue>> field, ExpressionType type) where TDocument : class where TValue : struct
+        public static DeleteByQueryDescriptor<TDocument> Where<TDocument, TValue>(this DeleteByQueryDescriptor<TDocument> query, TValue value, Expression<Func<TDocument, TValue>> field, ExpressionType type) where TDocument : class where TValue : struct, IDocument
         {
             if (query == null) throw new NullReferenceException();
             object v = value;
@@ -785,7 +786,7 @@ namespace SP.StudioCore.ElasticSearch
         /// <param name="query"></param>
         /// <param name="field"></param>
         /// <returns></returns>
-        public static SearchDescriptor<TDocument> OrderByDescending<TDocument, TValue>(this SearchDescriptor<TDocument> query, Expression<Func<TDocument, TValue>> field) where TDocument : class
+        public static SearchDescriptor<TDocument> OrderByDescending<TDocument, TValue>(this SearchDescriptor<TDocument> query, Expression<Func<TDocument, TValue>> field) where TDocument : class, IDocument
         {
             if (query == null) throw new NullReferenceException();
             return query.Sort(c => c.Descending(field));
@@ -798,12 +799,12 @@ namespace SP.StudioCore.ElasticSearch
         /// <param name="field"></param>
         /// <returns></returns>
         /// <exception cref="NullReferenceException"></exception>
-        public static SearchDescriptor<TDocument> OrderByDescending<TDocument>(this SearchDescriptor<TDocument> query, string field) where TDocument : class
+        public static SearchDescriptor<TDocument> OrderByDescending<TDocument>(this SearchDescriptor<TDocument> query, string field) where TDocument : class, IDocument
         {
             if (query == null) throw new NullReferenceException();
             return query.Sort(c => c.Descending(field));
         }
-        public static Func<SearchDescriptor<TDocument>, ISearchRequest> OrderByDescending<TDocument, TValue>(this Func<SearchDescriptor<TDocument>, ISearchRequest> search, Expression<Func<TDocument, TValue>> field) where TDocument : class
+        public static Func<SearchDescriptor<TDocument>, ISearchRequest> OrderByDescending<TDocument, TValue>(this Func<SearchDescriptor<TDocument>, ISearchRequest> search, Expression<Func<TDocument, TValue>> field) where TDocument : class, IDocument
         {
             return (s) =>
             {
@@ -811,7 +812,7 @@ namespace SP.StudioCore.ElasticSearch
             };
         }
 
-        public static Func<SearchDescriptor<TDocument>, ISearchRequest> OrderByDescending<TDocument>(this Func<SearchDescriptor<TDocument>, ISearchRequest> search, string field) where TDocument : class
+        public static Func<SearchDescriptor<TDocument>, ISearchRequest> OrderByDescending<TDocument>(this Func<SearchDescriptor<TDocument>, ISearchRequest> search, string field) where TDocument : class, IDocument
         {
             return (s) =>
             {
@@ -828,12 +829,12 @@ namespace SP.StudioCore.ElasticSearch
         /// <param name="page"></param>
         /// <param name="limit"></param>
         /// <returns></returns>
-        public static SearchDescriptor<TDocument> OrderBy<TDocument, TValue>(this SearchDescriptor<TDocument> query, Expression<Func<TDocument, TValue>> field) where TDocument : class
+        public static SearchDescriptor<TDocument> OrderBy<TDocument, TValue>(this SearchDescriptor<TDocument> query, Expression<Func<TDocument, TValue>> field) where TDocument : class, IDocument
         {
             if (query == null) throw new NullReferenceException();
             return query.Sort(c => c.Ascending(field));
         }
-        public static Func<SearchDescriptor<TDocument>, ISearchRequest> OrderBy<TDocument, TValue>(this Func<SearchDescriptor<TDocument>, ISearchRequest> search, Expression<Func<TDocument, TValue>> field) where TDocument : class
+        public static Func<SearchDescriptor<TDocument>, ISearchRequest> OrderBy<TDocument, TValue>(this Func<SearchDescriptor<TDocument>, ISearchRequest> search, Expression<Func<TDocument, TValue>> field) where TDocument : class, IDocument
         {
             return (s) =>
             {
@@ -848,7 +849,7 @@ namespace SP.StudioCore.ElasticSearch
         /// <param name="page"></param>
         /// <param name="limit"></param>
         /// <returns></returns>
-        public static SearchDescriptor<TDocument> Paged<TDocument>(this SearchDescriptor<TDocument> query, int page, int limit) where TDocument : class
+        public static SearchDescriptor<TDocument> Paged<TDocument>(this SearchDescriptor<TDocument> query, int page, int limit) where TDocument : class, IDocument
         {
             if (query == null) throw new NullReferenceException();
             if (page == 1)
@@ -868,7 +869,7 @@ namespace SP.StudioCore.ElasticSearch
         /// <param name="page"></param>
         /// <param name="limit"></param>
         /// <returns></returns>
-        public static Func<SearchDescriptor<TDocument>, ISearchRequest> Paged<TDocument>(this Func<SearchDescriptor<TDocument>, ISearchRequest> search, int page, int limit) where TDocument : class
+        public static Func<SearchDescriptor<TDocument>, ISearchRequest> Paged<TDocument>(this Func<SearchDescriptor<TDocument>, ISearchRequest> search, int page, int limit) where TDocument : class, IDocument
         {
             return (s) =>
             {
@@ -883,7 +884,7 @@ namespace SP.StudioCore.ElasticSearch
         /// <param name="search"></param>
         /// <param name="field"></param>
         /// <returns></returns>
-        public static Func<SearchDescriptor<TDocument>, ISearchRequest> GroupBy<TDocument, TValue>(this Func<SearchDescriptor<TDocument>, ISearchRequest> search, Expression<Func<TDocument, TValue>> field) where TDocument : class
+        public static Func<SearchDescriptor<TDocument>, ISearchRequest> GroupBy<TDocument, TValue>(this Func<SearchDescriptor<TDocument>, ISearchRequest> search, Expression<Func<TDocument, TValue>> field) where TDocument : class, IDocument
         {
             return (s) =>
             {
@@ -899,7 +900,7 @@ namespace SP.StudioCore.ElasticSearch
         /// <param name="search"></param>
         /// <param name="field"></param>
         /// <returns></returns>
-        public static Func<SearchDescriptor<TDocument>, ISearchRequest> GroupBy<TDocument>(this Func<SearchDescriptor<TDocument>, ISearchRequest> search, string field) where TDocument : class
+        public static Func<SearchDescriptor<TDocument>, ISearchRequest> GroupBy<TDocument>(this Func<SearchDescriptor<TDocument>, ISearchRequest> search, string field) where TDocument : class, IDocument
         {
             return (s) =>
             {
@@ -917,7 +918,7 @@ namespace SP.StudioCore.ElasticSearch
         /// <param name="script"></param>
         /// <param name="fields"></param>
         /// <returns></returns>
-        public static Func<SearchDescriptor<TDocument>, ISearchRequest> GroupBy<TDocument, TValue>(this Func<SearchDescriptor<TDocument>, ISearchRequest> search, string script, params Expression<Func<TDocument, TValue>>[] fields) where TDocument : class
+        public static Func<SearchDescriptor<TDocument>, ISearchRequest> GroupBy<TDocument, TValue>(this Func<SearchDescriptor<TDocument>, ISearchRequest> search, string script, params Expression<Func<TDocument, TValue>>[] fields) where TDocument : class, IDocument
         {
             IAggregationContainer group(AggregationContainerDescriptor<TDocument> aggs)
             {
@@ -947,7 +948,7 @@ namespace SP.StudioCore.ElasticSearch
         /// <typeparam name="TDocument"></typeparam>
         /// <param name="search"></param>
         /// <returns></returns>
-        public static Func<SearchDescriptor<TDocument>, ISearchRequest> GroupBy<TDocument, TValue>(this Func<SearchDescriptor<TDocument>, ISearchRequest> search, params Expression<Func<TDocument, TValue>>[] fields) where TDocument : class
+        public static Func<SearchDescriptor<TDocument>, ISearchRequest> GroupBy<TDocument, TValue>(this Func<SearchDescriptor<TDocument>, ISearchRequest> search, params Expression<Func<TDocument, TValue>>[] fields) where TDocument : class, IDocument
         {
             return (s) =>
             {
@@ -963,7 +964,7 @@ namespace SP.StudioCore.ElasticSearch
         /// <typeparam name="TValue"></typeparam>
         /// <param name="fields"></param>
         /// <returns></returns>
-        private static Func<AggregationContainerDescriptor<TDocument>, IAggregationContainer> GroupBy<TDocument, TValue>(params Expression<Func<TDocument, TValue>>[] fields) where TDocument : class
+        private static Func<AggregationContainerDescriptor<TDocument>, IAggregationContainer> GroupBy<TDocument, TValue>(params Expression<Func<TDocument, TValue>>[] fields) where TDocument : class, IDocument
         {
             return (s) =>
             {
@@ -1008,7 +1009,7 @@ namespace SP.StudioCore.ElasticSearch
         /// <param name="script">聚合条件字段，多字段逗号分隔</param>
         /// <param name="fields">聚合内容字段</param>
         /// <returns></returns>
-        public static Func<SearchDescriptor<TDocument>, ISearchRequest> GroupByDate<TDocument, TValue>(this Func<SearchDescriptor<TDocument>, ISearchRequest> search, DateInterval interval, Expression<Func<TDocument, DateTime>> condition, string script, params Expression<Func<TDocument, TValue>>[] fields) where TDocument : class
+        public static Func<SearchDescriptor<TDocument>, ISearchRequest> GroupByDate<TDocument, TValue>(this Func<SearchDescriptor<TDocument>, ISearchRequest> search, DateInterval interval, Expression<Func<TDocument, DateTime>> condition, string script, params Expression<Func<TDocument, TValue>>[] fields) where TDocument : class, IDocument
         {
             string fieldName = condition.GetFieldName();
             if (string.IsNullOrWhiteSpace(fieldName)) throw new NullReferenceException("Group By FieldName IS NULL");
@@ -1040,7 +1041,7 @@ namespace SP.StudioCore.ElasticSearch
         /// <param name="query"></param>
         /// <param name="fields"></param>
         /// <returns></returns>
-        public static SearchDescriptor<TDocument> Select<TDocument>(this SearchDescriptor<TDocument> query, params Expression<Func<TDocument, object>>[] fields) where TDocument : class
+        public static SearchDescriptor<TDocument> Select<TDocument>(this SearchDescriptor<TDocument> query, params Expression<Func<TDocument, object>>[] fields) where TDocument : class, IDocument
         {
             if (query == null) throw new NullReferenceException();
             return query.Source(sc => sc.Includes(ic => ic.Fields(fields)));
@@ -1052,7 +1053,7 @@ namespace SP.StudioCore.ElasticSearch
         /// <param name="query"></param>
         /// <param name="fields"></param>
         /// <returns></returns>
-        public static Func<SearchDescriptor<TDocument>, ISearchRequest> Select<TDocument>(this Func<SearchDescriptor<TDocument>, ISearchRequest> query, params Expression<Func<TDocument, object>>[] fields) where TDocument : class
+        public static Func<SearchDescriptor<TDocument>, ISearchRequest> Select<TDocument>(this Func<SearchDescriptor<TDocument>, ISearchRequest> query, params Expression<Func<TDocument, object>>[] fields) where TDocument : class, IDocument
         {
             if (query == null) throw new NullReferenceException();
             return (s) =>
@@ -1066,7 +1067,7 @@ namespace SP.StudioCore.ElasticSearch
         /// <typeparam name="TDocument"></typeparam>
         /// <param name="response"></param>
         /// <returns></returns>
-        public static TDocument ToAggregate<TDocument>(this ISearchResponse<TDocument> response) where TDocument : class
+        public static TDocument ToAggregate<TDocument>(this ISearchResponse<TDocument> response) where TDocument : class, IDocument
         {
             TDocument document = Activator.CreateInstance<TDocument>();
             IEnumerable<PropertyInfo> properties = typeof(TDocument).GetProperties().Where(c => c.HasAttribute<AggregateAttribute>());
@@ -1108,7 +1109,7 @@ namespace SP.StudioCore.ElasticSearch
         /// <param name="response"></param>
         /// <param name="script"></param>
         /// <returns></returns>
-        public static IEnumerable<TDocument> ToAggregate<TDocument>(this ISearchResponse<TDocument> response, string script) where TDocument : class
+        public static IEnumerable<TDocument> ToAggregate<TDocument>(this ISearchResponse<TDocument> response, string script) where TDocument : class, IDocument
         {
             if (response == null) throw new NullReferenceException();
             IEnumerable<PropertyInfo> properties = typeof(TDocument).GetProperties();
@@ -1176,7 +1177,7 @@ namespace SP.StudioCore.ElasticSearch
         /// <param name="field">日期聚合的条件</param>
         /// <param name="script">聚合条件脚本，多字段逗号分隔，注意（顺序跟Group中的script一致）</param>
         /// <returns></returns>
-        public static IEnumerable<TDocument> ToDateAggregate<TDocument>(this ISearchResponse<TDocument> response, Expression<Func<TDocument, DateTime>> field, string script) where TDocument : class
+        public static IEnumerable<TDocument> ToDateAggregate<TDocument>(this ISearchResponse<TDocument> response, Expression<Func<TDocument, DateTime>> field, string script) where TDocument : class, IDocument
         {
             if (response == null) throw new NullReferenceException();
             string condition = field.GetFieldName();

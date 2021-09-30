@@ -4,12 +4,12 @@ using System.Text;
 
 namespace SP.StudioCore.ElasticSearch
 {
-    public interface IDocument : IDocument<int>
+    /// <summary>
+    /// ES实体类约束
+    /// </summary>
+    public interface IDocument
     {
 
     }
-    public interface IDocument<TKey> where TKey : struct
-    {
-        public TKey ID { get; set; }
-    }
+
 }

@@ -397,7 +397,7 @@ namespace SP.StudioCore.Mvc
         /// <param name="data"></param>
         /// <param name="action"></param>
         /// <returns></returns>
-        protected virtual Result GetResultList<T, TOutput>(Func<SearchDescriptor<T>, ISearchRequest> search, Func<T, TOutput> convert = null, object data = null) where T : class where TOutput : class
+        protected virtual Result GetResultList<T, TOutput>(Func<SearchDescriptor<T>, ISearchRequest> search, Func<T, TOutput> convert = null, object data = null) where T : class, IDocument where TOutput : class
         {
             if (convert == null) convert = t => t as TOutput;
             StringBuilder sb = new StringBuilder();

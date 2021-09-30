@@ -1,6 +1,9 @@
 ﻿using Aliyun.OSS;
+using Microsoft.AspNetCore.Http;
 using SP.StudioCore.Array;
+using SP.StudioCore.Http;
 using SP.StudioCore.Model;
+using SP.StudioCore.Security;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -165,6 +168,31 @@ namespace SP.StudioCore.API
             OssClient client = new OssClient(setting.endpoint, setting.accessKeyId, setting.accessKeySecret);
             DeleteObjectResult result = client.DeleteObject(setting.bucketName, objectName);
             return true;
+        }
+
+        /// <summary>
+        /// 封装的上传图片到OSS的方法
+        /// 固定上传到 /upload/{year}{month}/{md5}.{type}
+        /// </summary>
+        /// <param name="setting"></param>
+        /// <param name="file"></param>
+        /// <returns></returns>
+        public static string UploadImage(this OSSSetting setting, IFormFile file)
+        {
+            if (file == null)
+            {
+                throw new NullReferenceException();
+            }
+            string fix = file.FileName[file.FileName.LastIndexOf('.')..][1..];
+            byte[] data = file.ToArray();
+            string md5 = Encryption.toMD5Short(Encryption.toMD5(data));
+            string path = $"upload/{DateTime.Now.ToString("yyyyMM")}/{md5}.{fix}";
+
+            if (setting.Upload(path, data, new ObjectMetadata(), out string message))
+            {
+                return $"/{path}";
+            }
+            throw new Exception(message);
         }
     }
 

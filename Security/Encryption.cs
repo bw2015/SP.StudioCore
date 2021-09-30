@@ -60,7 +60,7 @@ namespace SP.StudioCore.Security
                 int num = 0;
                 for (int n = 0; n < str.Length; n++)
                 {
-                    int charIndex = MD5CHAR.IndexOf(str[n]);
+                    int charIndex = MD5CHAR.IndexOf(str[n]) * (int)Math.Pow(MD5CHAR.Length, str.Length - n - 1);
                     num += charIndex;
                 }
                 value.Push(MathHelper.HEX_62[num % MathHelper.HEX_62.Length]);

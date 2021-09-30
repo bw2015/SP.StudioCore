@@ -41,7 +41,7 @@ namespace SP.StudioCore.MQ
         /// </summary>
         public string RoutingKey { get; set; } = "";
 
-        /// <summary> 线程数 </summary>
+        /// <summary> 一次读取的消息数量 </summary>
         public int ConsumeThreadNums { get; set; } = 8;
 
         /// <summary> 最后ACK多少秒超时则重连（默认5分钟） </summary>

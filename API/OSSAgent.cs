@@ -194,6 +194,21 @@ namespace SP.StudioCore.API
             }
             throw new Exception(message);
         }
+        public static string UploadFile(this OSSSetting setting, byte[] data, string fix)
+        {
+            if (data == null)
+            {
+                throw new NullReferenceException();
+            }
+            string md5 = Encryption.toMD5Short(Encryption.toMD5(data));
+            string path = $"upload/{DateTime.Now.ToString("yyyyMM")}/{md5}.{fix}";
+
+            if (setting.Upload(path, data, new ObjectMetadata(), out string message))
+            {
+                return $"/{path}";
+            }
+            throw new Exception(message);
+        }
     }
 
     /// <summary>

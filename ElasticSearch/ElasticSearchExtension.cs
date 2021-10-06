@@ -968,9 +968,12 @@ namespace SP.StudioCore.ElasticSearch
         {
             return (s) =>
             {
+                Type type = typeof(TDocument);
                 foreach (var field in fields)
                 {
                     PropertyInfo property = field.ToPropertyInfo();
+                    if (property == null) continue;
+                    property = type.GetProperty(property.Name);
                     AggregateAttribute aggregate = property.GetAttribute<AggregateAttribute>();
                     string fieldname = property.GetFieldName();
                     if (aggregate == null) { continue; }

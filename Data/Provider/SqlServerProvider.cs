@@ -145,6 +145,24 @@ namespace SP.StudioCore.Data.Provider
                 return db.ReadData(CommandType.Text, sql, parameters);
             }
         }
+        /// <summary>
+        /// 获取指定条数
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="condition"></param>
+        /// <param name="count"></param>
+        /// <param name="fields"></param>
+        /// <returns></returns>
+        public IDataReader ReadData<T>(Expression<Func<T, bool>> condition, int count, params Expression<Func<T, object>>[] fields) where T : class, new()
+        {
+            string field = string.Join(",", SchemaCache.GetColumns(fields).Select(t => $"[{t.Name}]"));
+            using (IExpressionCondition expression = db.GetExpressionCondition(condition))
+            {
+                string conditionSql = expression.ToCondition(out DynamicParameters parameters);
+                string sql = $"SELECT TOP {count} {field} FROM [{typeof(T).GetTableName()}] {conditionSql}";
+                return db.ReadData(CommandType.Text, sql, parameters);
+            }
+        }
 
         public IDataReader ReadData<T>(params Expression<Func<T, object>>[] fields) where T : class, new()
         {
@@ -199,7 +217,7 @@ namespace SP.StudioCore.Data.Provider
         /// </summary>
         public T ReadInfo<T>(Expression<Func<T, bool>> condition, params Expression<Func<T, object>>[] fields) where T : class, new()
         {
-            using (IDataReader reader = this.ReadData(condition, fields))
+            using (IDataReader reader = this.ReadData(condition, 1, fields))
             {
                 try
                 {

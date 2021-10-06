@@ -62,6 +62,41 @@ namespace SP.StudioCore.Web
         }
 
         /// <summary>
+        /// 生成校验位
+        /// </summary>
+        public static int GetValidNumber(string input)
+        {
+            int[] cardArr = new int[input.Length];
+            for (int i = 0; i < cardArr.Length; i++)
+            {
+                cardArr[i] = int.Parse(input[i].ToString());
+            }
+
+            for (int i = cardArr.Length - 2; i >= 0; i -= 2)
+            {
+                cardArr[i] <<= 1;
+                cardArr[i] = cardArr[i] / 10 + cardArr[i] % 10;
+            }
+
+            int sum = 0;
+            for (int i = 0; i < cardArr.Length; i++)
+            {
+                sum += cardArr[i];
+            }
+            return sum % 10;
+        }
+
+        /// <summary>
+        /// 验证校验位
+        /// </summary>
+        public static bool IsValidNumver(string input)
+        {
+            var orderPre17 = input.Substring(0, input.Length - 1);
+            int validNumber = GetValidNumber(orderPre17);
+            return input.Last() == validNumber.ToString().First();
+        }
+
+        /// <summary>
         /// 判断用户名是否符合规则
         /// 只允许数字、字母、下划线
         /// </summary>

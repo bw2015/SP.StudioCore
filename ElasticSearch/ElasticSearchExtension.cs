@@ -1322,7 +1322,11 @@ namespace SP.StudioCore.ElasticSearch
                     }
 
                     return des;
-                }).Settings(s => s.NumberOfReplicas(elasticsearch.ReplicasCount).NumberOfShards(elasticsearch.ShardsCount).RefreshInterval(new Time(TimeSpan.FromSeconds(1))))
+                }).Settings(s => s
+                    .NumberOfReplicas(elasticsearch.ReplicasCount)
+                    .NumberOfShards(elasticsearch.ShardsCount)
+                    .RefreshInterval(new Time(TimeSpan.FromSeconds(1)))
+                    )
             );
             return rsp.IsValid;
         }

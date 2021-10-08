@@ -440,7 +440,7 @@ namespace SP.StudioCore.Web
 
         #region ========  域名处理  ========
 
-        private static string[] _domain;
+        private static string[]? _domain;
         /// <summary>
         /// 顶级域名的类型（从资源文件读取）
         /// </summary>
@@ -461,7 +461,7 @@ namespace SP.StudioCore.Web
         /// </summary>
         /// <param name="domain">传入的域名（小写）</param>
         /// <returns>返回null表示无法识别</returns>
-        public static string GetTopDomain(string domain)
+        public static string? GetTopDomain(string domain)
         {
             if (string.IsNullOrEmpty(domain)) return null;
             foreach (string name in TopDomain)

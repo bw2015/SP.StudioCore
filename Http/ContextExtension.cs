@@ -354,7 +354,7 @@ namespace SP.StudioCore.Http
         /// 顺序："X-Forwarded-Site", "Ali-Swift-LOG-Host", "Referer", "Host"
         /// </summary>
         /// <returns></returns>
-        public static string GetDomain(this HttpContext context)
+        public static string? GetDomain(this HttpContext context)
         {
             if (context == null) return null;
             string domain = string.Empty;

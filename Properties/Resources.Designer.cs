@@ -19,7 +19,7 @@ namespace SP.StudioCore.Properties {
     // 类通过类似于 ResGen 或 Visual Studio 的工具自动生成的。
     // 若要添加或移除成员，请编辑 .ResX 文件，然后重新运行 ResGen
     // (以 /str 作为命令选项)，或重新生成 VS 项目。
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -47,8 +47,8 @@ namespace SP.StudioCore.Properties {
         }
         
         /// <summary>
-        ///   重写当前线程的 CurrentUICulture 属性
-        ///   重写当前线程的 CurrentUICulture 属性。
+        ///   重写当前线程的 CurrentUICulture 属性，对
+        ///   使用此强类型资源类的所有资源查找执行重写。
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
         internal static global::System.Globalization.CultureInfo Culture {
@@ -82,28 +82,29 @@ namespace SP.StudioCore.Properties {
         ///   查找类似 &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
         ///&lt;!--顶级域名列表--&gt;
         ///&lt;root&gt;
-        ///  &lt;item&gt;.app&lt;/item&gt;
-        ///  &lt;item&gt;.art&lt;/item&gt;
-        ///  &lt;item&gt;.bid&lt;/item&gt;
-        ///  &lt;item&gt;.bio&lt;/item&gt;
-        ///  &lt;item&gt;.biz&lt;/item&gt;
-        ///  &lt;item&gt;.cab&lt;/item&gt;
-        ///  &lt;item&gt;.cam&lt;/item&gt;
-        ///  &lt;item&gt;.ceo&lt;/item&gt;
-        ///  &lt;item&gt;.com&lt;/item&gt;
-        ///  &lt;item&gt;.dev&lt;/item&gt;
-        ///  &lt;item&gt;.dog&lt;/item&gt;
-        ///  &lt;item&gt;.fyi&lt;/item&gt;
-        ///  &lt;item&gt;.how&lt;/item&gt;
-        ///  &lt;item&gt;.ink&lt;/item&gt;
-        ///  &lt;item&gt;.ist&lt;/item&gt;
-        ///  &lt;item&gt;.law&lt;/item&gt;
-        ///  &lt;item&gt;.lol&lt;/item&gt;
-        ///  &lt;item&gt;.ltd&lt;/item&gt;
-        ///  &lt;item&gt;.mba&lt;/item&gt;
-        ///  &lt;item&gt;.men&lt;/item&gt;
-        ///  &lt;item&gt;.moe&lt;/item&gt;
-        ///  &lt;item&gt; [字符串的其余部分被截断]&quot;; 的本地化字符串。
+        ///	&lt;item&gt;.app&lt;/item&gt;
+        ///	&lt;item&gt;.art&lt;/item&gt;
+        ///	&lt;item&gt;.bid&lt;/item&gt;
+        ///	&lt;item&gt;.bio&lt;/item&gt;
+        ///	&lt;item&gt;.biz&lt;/item&gt;
+        ///	&lt;item&gt;.cab&lt;/item&gt;
+        ///	&lt;item&gt;.cam&lt;/item&gt;
+        ///	&lt;item&gt;.ceo&lt;/item&gt;
+        ///	&lt;item&gt;.com&lt;/item&gt;
+        ///	&lt;item&gt;.dev&lt;/item&gt;
+        ///	&lt;item&gt;.dog&lt;/item&gt;
+        ///	&lt;item&gt;.fyi&lt;/item&gt;
+        ///	&lt;item&gt;.how&lt;/item&gt;
+        ///	&lt;item&gt;.ink&lt;/item&gt;
+        ///	&lt;item&gt;.ist&lt;/item&gt;
+        ///	&lt;item&gt;.law&lt;/item&gt;
+        ///	&lt;item&gt;.lol&lt;/item&gt;
+        ///	&lt;item&gt;.ltd&lt;/item&gt;
+        ///	&lt;item&gt;.mba&lt;/item&gt;
+        ///	&lt;item&gt;.men&lt;/item&gt;
+        ///	&lt;item&gt;.moe&lt;/item&gt;
+        ///	&lt;item&gt;.mom&lt;/item&gt;
+        ///	&lt;item&gt;.n [字符串的其余部分被截断]&quot;; 的本地化字符串。
         /// </summary>
         internal static string Domain {
             get {

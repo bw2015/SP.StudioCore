@@ -21,24 +21,24 @@ namespace SP.StudioCore.LinkTrack
         /// <param name="remainCount">队列中当前剩余多少要处理</param>
         protected override void OnDequeue(List<LinkTrackContext> lst, int remainCount)
         {
-            var result = new LinkTrackEs().Insert(lst.Select(o => new LinkTrackContextPO
-            {
-                Id           = $"{o.AppId}_{o.ContextId}",
-                AppId        = o.AppId,
-                ParentAppId  = o.ParentAppId,
-                ContextId    = o.ContextId,
-                List         = o.List,
-                StartTs      = o.StartTs,
-                EndTs        = o.EndTs,
-                Domain       = o.Domain,
-                Path         = o.Path,
-                Method       = o.Method,
-                Headers      = o.Headers,
-                ContentType  = o.ContentType,
-                RequestBody  = o.RequestBody,
-                ResponseBody = o.ResponseBody,
-                RequestIp    = o.RequestIp
-            }).ToList());
+            //var result = new LinkTrackEs().Insert(lst.Select(o => new LinkTrackContextPO
+            //{
+            //    Id           = $"{o.AppId}_{o.ContextId}",
+            //    AppId        = o.AppId,
+            //    ParentAppId  = o.ParentAppId,
+            //    ContextId    = o.ContextId,
+            //    List         = o.List,
+            //    StartTs      = o.StartTs,
+            //    EndTs        = o.EndTs,
+            //    Domain       = o.Domain,
+            //    Path         = o.Path,
+            //    Method       = o.Method,
+            //    Headers      = o.Headers,
+            //    ContentType  = o.ContentType,
+            //    RequestBody  = o.RequestBody,
+            //    ResponseBody = o.ResponseBody,
+            //    RequestIp    = o.RequestIp
+            //}).ToList());
         }
 
         /// <summary>

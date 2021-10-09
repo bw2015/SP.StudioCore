@@ -20,7 +20,7 @@ using Nest;
 using Result = SP.StudioCore.Model.Result;
 using Language = SP.StudioCore.Enums.Language;
 using System.Linq.Expressions;
-using SP.StudioCore.ElasticSearch;
+using Simple.Elasticsearch;
 
 namespace SP.StudioCore.Mvc
 {

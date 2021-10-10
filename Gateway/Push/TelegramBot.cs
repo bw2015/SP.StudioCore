@@ -29,16 +29,17 @@ namespace SP.StudioCore.Gateway.Push
         /// 密钥
         /// </summary>
         [Description("密钥")]
-        public string Token { get; set; }
+        public string? Token { get; set; }
 
         /// <summary>
         /// 默认频道配置
         /// </summary>
         [Description("频道")]
-        public string Channel { get; set; }
+        public string? Channel { get; set; }
 
-        public bool sendPhoto(string photo, params string[] channel)
+        public bool sendPhoto(string? photo, params string[] channel)
         {
+            if (photo == null) return false;
             string url = $"{this.Url}bot{this.Token}/sendPhoto";
             foreach (string id in this.GetChannels(channel))
             {
@@ -54,8 +55,9 @@ namespace SP.StudioCore.Gateway.Push
         /// <param name="message"></param>
         /// <param name="channel"></param>
         /// <returns></returns>
-        public bool sendMessage(string message, params string[] channel)
+        public bool sendMessage(string? message, params string[] channel)
         {
+            if(message == null) return false;
             string url = $"{this.Url}bot{this.Token}/sendMessage";
             foreach (string id in this.GetChannels(channel))
             {
@@ -72,8 +74,8 @@ namespace SP.StudioCore.Gateway.Push
         /// <returns></returns>
         public Task SendMessageAsync(string message, params string[] channel)
         {
-            string url     = $"{this.Url}bot{this.Token}/sendMessage";
-            var    lstTask = new List<Task>();
+            string url = $"{this.Url}bot{this.Token}/sendMessage";
+            var lstTask = new List<Task>();
             foreach (string id in this.GetChannels(channel))
             {
                 string data = $"chat_id={id}&text={HttpUtility.UrlEncode(message)}&parse_mode=HTML";
@@ -107,7 +109,7 @@ namespace SP.StudioCore.Gateway.Push
         /// <returns></returns>
         private IEnumerable<string> GetChannels(string[] channel)
         {
-            if (channel == null || !channel.Any()) return this.Channel.Split(',');
+            if (channel == null || !channel.Any()) return this.Channel?.Split(',') ?? Enumerable.Empty<string>();
             return channel;
         }
     }

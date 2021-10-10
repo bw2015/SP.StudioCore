@@ -24,20 +24,24 @@ namespace SP.StudioCore.Xml
             return element == null ? defaultValue : element.Value;
         }
 
-        public static T GetValue<T>(this XElement element, string xPath, T defaultValue)
+        public static T GetValue<T>(this XElement? element, string xPath, T defaultValue)
         {
+            if (element == null) return defaultValue;
             if (!string.IsNullOrEmpty(xPath))
             {
                 element = element.GetElement(xPath);
             }
-            if (element == null) return defaultValue;
-            return (T)element.Value.GetValue(typeof(T));
+            Type type = typeof(T);
+            string? value = element.Value;
+            object? obj = value.GetValue(type);
+            if (obj == null) return defaultValue;
+            return (T)obj;
         }
 
         /// <summary>
         /// 获取属性值 如果不存在则返回defaultValue
         /// </summary>
-        public static string GetAttributeValue(this XElement element, string name)
+        public static string? GetAttributeValue(this XElement element, string name)
         {
             return element.GetAttributeValue<string>(name, null);
         }
@@ -45,7 +49,8 @@ namespace SP.StudioCore.Xml
         public static T GetAttributeValue<T>(this XElement element, string name, T t)
         {
             if (element.Attribute(name) == null) return t;
-            string value = element.Attribute(name).Value;
+            string? value = element.Attribute(name)?.Value;
+            if (value == null) return t;
             if (!value.IsType<T>()) return t;
             return value.GetValue<T>();
         }
@@ -54,7 +59,7 @@ namespace SP.StudioCore.Xml
         /// 获取路径的节点。如果不存在则返回defaultValue 路径用/隔开
         /// 支持获取同名同级节点中的某个，格式： elementName[index] 从0开始
         /// </summary>
-        public static XElement GetElement(this XElement element, string xPath)
+        public static XElement? GetElement(this XElement? element, string xPath)
         {
             Regex regex = new Regex(@"(?<Name>.*)\[(?<Index>\d+)\]", RegexOptions.IgnoreCase);
             try
@@ -65,11 +70,11 @@ namespace SP.StudioCore.Xml
                     {
                         string tagName = regex.Match(tag).Groups["Name"].Value;
                         int index = int.Parse(regex.Match(tag).Groups["Index"].Value);
-                        element = element.Elements(tagName).ToArray()[index];
+                        element = element?.Elements(tagName).ToArray()[index];
                     }
                     else
                     {
-                        element = element.Element(tag);
+                        element = element?.Element(tag);
                     }
                     if (element == null) return null;
                 }

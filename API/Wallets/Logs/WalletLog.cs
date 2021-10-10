@@ -61,6 +61,6 @@ namespace SP.StudioCore.API.Wallets.Logs
         /// <summary>
         /// 扩展信息
         /// </summary>
-        public object ExtendData;
+        public object? ExtendData;
     }
 }

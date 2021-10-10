@@ -277,7 +277,7 @@ namespace SP.StudioCore.Cache.Redis
         /// <typeparam name="T"></typeparam>
         /// <param name="fields"></param>
         /// <returns></returns>
-        public static T GetRedisValue<T>(this IEnumerable<HashEntry> fields) where T : class, new()
+        public static T? GetRedisValue<T>(this IEnumerable<HashEntry> fields) where T : class, new()
         {
             if (!fields.Any()) return null;
             T t = new T();
@@ -285,7 +285,7 @@ namespace SP.StudioCore.Cache.Redis
             {
                 string name = (string)item.Name;
                 if (name.Contains('.')) continue;
-                PropertyInfo property = typeof(T).GetProperty(name, BindingFlags.Public | BindingFlags.Instance);
+                PropertyInfo? property = typeof(T).GetProperty(name, BindingFlags.Public | BindingFlags.Instance);
                 if (property == null || !property.CanWrite) continue;
                 property.SetValue(t, item.Value.GetRedisValue(property.PropertyType));
             }
@@ -300,7 +300,7 @@ namespace SP.StudioCore.Cache.Redis
             {
                 string name = (string)item.Name;
                 if (name.Contains('.')) continue;
-                FieldInfo field = typeof(T).GetField(name, BindingFlags.Public | BindingFlags.Instance);
+                FieldInfo? field = typeof(T).GetField(name, BindingFlags.Public | BindingFlags.Instance);
                 if (field == null) continue;
                 field.SetValue(t, item.Value.GetRedisValue(field.FieldType));
             }

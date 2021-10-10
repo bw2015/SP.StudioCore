@@ -10,8 +10,8 @@ namespace SP.StudioCore.Ioc
     /// </summary>
     public static class IocCollection
     {
-        private static IServiceCollection _services;
-        private static IServiceProvider _provider;
+        private static IServiceCollection? _services;
+        private static IServiceProvider? _provider;
 
         /// <summary>
         /// 加入到自定义的IOC容器中
@@ -22,30 +22,30 @@ namespace SP.StudioCore.Ioc
             _services = services;
         }
 
-        public static IServiceCollection AddService<TService>(ServiceLifetime contextLifetime) where TService : class
+        public static IServiceCollection? AddService<TService>(ServiceLifetime contextLifetime) where TService : class
         {
             return contextLifetime switch
             {
-                ServiceLifetime.Singleton => _services.AddSingleton<TService>(),
-                ServiceLifetime.Scoped => _services.AddScoped<TService>(),
-                ServiceLifetime.Transient => _services.AddTransient<TService>(),
+                ServiceLifetime.Singleton => _services?.AddSingleton<TService>(),
+                ServiceLifetime.Scoped => _services?.AddScoped<TService>(),
+                ServiceLifetime.Transient => _services?.AddTransient<TService>(),
                 _ => throw new NotSupportedException()
             };
         }
 
-        public static IServiceCollection AddService<TService>(TService service, ServiceLifetime contextLifetime) where TService : class
+        public static IServiceCollection? AddService<TService>(TService service, ServiceLifetime contextLifetime) where TService : class
         {
             return contextLifetime switch
             {
-                ServiceLifetime.Singleton => _services.AddSingleton(service),
-                ServiceLifetime.Scoped => _services.AddScoped(t => service),
-                ServiceLifetime.Transient => _services.AddTransient(t => service),
+                ServiceLifetime.Singleton => _services?.AddSingleton(service),
+                ServiceLifetime.Scoped => _services?.AddScoped(t => service),
+                ServiceLifetime.Transient => _services?.AddTransient(t => service),
                 _ => throw new NotSupportedException()
             };
         }
 
 
-        private static IServiceProvider Provider
+        private static IServiceProvider? Provider
         {
             get
             {
@@ -65,17 +65,18 @@ namespace SP.StudioCore.Ioc
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public static T GetService<T>()
+        public static T? GetService<T>()
         {
-            return Provider == null ? default : Provider.GetService<T>();
+            if (Provider == null) return default(T);
+            return Provider.GetService<T>();
         }
 
-        public static object GetService(Type serviceType)
+        public static object? GetService(Type serviceType)
         {
             return Provider == null ? default : Provider.GetService(serviceType);
         }
 
-        public static IEnumerable<T> GetServices<T>()
+        public static IEnumerable<T>? GetServices<T>()
         {
             return Provider == null ? default : Provider.GetServices<T>();
         }

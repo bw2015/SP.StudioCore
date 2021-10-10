@@ -52,14 +52,16 @@ namespace SP.StudioCore.Array
         /// <summary>
         /// 字符串转字典
         /// </summary>
-        public static Dictionary<TKey, TValue> ToDictionary<TKey, TValue>(this string queryString)
+        public static Dictionary<TKey, TValue> ToDictionary<TKey, TValue>(this string queryString) where TKey : notnull
         {
-            NameValueCollection request = HttpUtility.ParseQueryString(queryString ?? string.Empty);
+            NameValueCollection? request = HttpUtility.ParseQueryString(queryString ?? string.Empty);
             Dictionary<TKey, TValue> data = new Dictionary<TKey, TValue>();
-            foreach (string key in request.AllKeys)
+            if (request == null) return data;
+            foreach (string? key in request.AllKeys)
             {
+                if (key == null) continue;
                 TKey tKey = key.GetValue<TKey>();
-                string value = request[key];
+                string value = request?[key] ?? String.Empty;
                 if (!data.ContainsKey(tKey)) data.Add(tKey, value.GetValue<TValue>());
             }
             return data;

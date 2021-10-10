@@ -14,7 +14,7 @@ namespace SP.StudioCore.Tools
     /// </summary>
     public abstract class WebSocketHandlerBase
     {
-        private List<WebSocketClient> _clients;
+        private List<WebSocketClient>? _clients;
 
         /// <summary>
         /// 所有的客户端

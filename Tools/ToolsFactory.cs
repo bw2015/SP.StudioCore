@@ -40,7 +40,7 @@ namespace SP.StudioCore.Tools
             string controller = regex.Match(path).Groups["Controller"].Value;
             string methodName = regex.Match(path).Groups["Method"].Value;
 
-            Assembly assembly = Assembly.Load($"Tools.{controller}");
+            Assembly? assembly = Assembly.Load($"Tools.{controller}");
             if (assembly == null) return context.ShowError(HttpStatusCode.BadRequest, controller);
 
             Result? staticFile = GetStaticFile(assembly, path);
@@ -117,7 +117,7 @@ namespace SP.StudioCore.Tools
         }
 
 
-        internal static WebSocketHandlerBase GetWebSocket(HttpContext context)
+        internal static WebSocketHandlerBase? GetWebSocket(HttpContext context)
         {
             string path = context.Request.Path.ToString();
             Regex regex = new(@"^/(?<Controller>\w+)", RegexOptions.IgnoreCase);
@@ -129,12 +129,13 @@ namespace SP.StudioCore.Tools
             string assemblyName = $"Tools.{controller}";
             if (WebSocketHandlerCache.ContainsKey(assemblyName)) return WebSocketHandlerCache[assemblyName];
 
-            Assembly assembly = Assembly.Load(assemblyName);
+            Assembly? assembly = Assembly.Load(assemblyName);
             if (assembly == null) return null;
-            Type handlerType = assembly.GetType($"{assemblyName}.WebSocketHandler");
+            Type? handlerType = assembly.GetType($"{assemblyName}.WebSocketHandler");
             if (handlerType == null) return null;
 
-            WebSocketHandlerBase ws = (WebSocketHandlerBase)Activator.CreateInstance(handlerType);
+            WebSocketHandlerBase? ws = (WebSocketHandlerBase?)Activator.CreateInstance(handlerType);
+            if(ws == null) return null;
             WebSocketHandlerCache.Add(assemblyName, ws);
             return ws;
         }

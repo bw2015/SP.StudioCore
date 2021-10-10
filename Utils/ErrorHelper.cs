@@ -6,6 +6,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 
 namespace SP.StudioCore.Utils
@@ -20,7 +21,7 @@ namespace SP.StudioCore.Utils
         /// </summary>
         /// <param name="ex"></param>
         /// <returns></returns>
-        public static string GetExceptionContent(Exception ex, HttpContext context = null)
+        public static string GetExceptionContent(Exception ex, HttpContext? context = null)
         {
             Dictionary<string, object> data = new Dictionary<string, object>
             {
@@ -30,11 +31,12 @@ namespace SP.StudioCore.Utils
 
             if (context != null)
             {
-                HttpRequest request = context.Request;
+                HttpRequest? request = context.Request;
+                IPAddress? iPAddress = context.Connection.RemoteIpAddress;
                 Dictionary<string, object> RequestData = new Dictionary<string, object>
                 {
                     { "RawUrl", request.Host + request.Path },
-                    { "IP", context.Connection.RemoteIpAddress.ToString() },
+                    { "IP", iPAddress == null ? string.Empty : iPAddress.ToString() },
                     { "Method", request.Method },
                     { "Headers", request.Headers.Keys.ToDictionary(t => t, t => request.Headers[t].ToString()) }
                 };
@@ -62,22 +64,22 @@ namespace SP.StudioCore.Utils
             {
                 var Exception = new Dictionary<string, object>()
                 {
-                    {"Type",ex.GetType().FullName },
-                    {"Source",ex.Source },
-                    {"StackTrace",ex.StackTrace.Split('\n') }
+                    {"Type",ex.GetType().FullName ?? string.Empty },
+                    {"Source",ex.Source??string.Empty },
+                    {"StackTrace",ex.StackTrace?.Split('\n') ?? System.Array.Empty<string>() }
                 };
                 if (ex.TargetSite != null)
                 {
                     Exception.Add("TargetSite", new
                     {
                         Method = ex.TargetSite.Name,
-                        Class = ex.TargetSite.DeclaringType.FullName
+                        Class = ex.TargetSite.DeclaringType?.FullName
                     });
                 }
                 Dictionary<object, object> exData = new Dictionary<object, object>();
                 foreach (DictionaryEntry item in ex.Data)
                 {
-                    exData.Add(item.Key, item.Value);
+                    exData.Add(item.Key, item.Value ?? string.Empty);
                 }
                 Exception.Add("Data", exData);
                 data.Add("Exception", Exception);

@@ -180,11 +180,19 @@ namespace SP.StudioCore.Web
         /// <param name="converter"></param>
         /// <param name="data"></param>
         /// <returns></returns>
-        protected virtual string ShowResult<T, TOutput>(IOrderedQueryable<T> list, Func<T, TOutput> converter = null, Object data = null) where TOutput : class
+        protected virtual string ShowResult<T, TOutput>(IOrderedQueryable<T> list, Func<T, TOutput>? converter = null, object? data = null) where TOutput : class
         {
-            if (converter == null) converter = t => t as TOutput;
+            if (converter == null)
+            {
+                converter = input =>
+                {
+                    TOutput? output = input as TOutput;
+                    if (output == null) throw new NullReferenceException();
+                    return output;
+                };
+            }
             StringBuilder sb = new StringBuilder();
-            string json = null;
+            string? json = null;
             IEnumerable<T> query;
             int pageIndex = this.PageIndex;
             int pageSize = this.PageSize;

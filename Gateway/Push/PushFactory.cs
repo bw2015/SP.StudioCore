@@ -12,14 +12,11 @@ namespace SP.StudioCore.Gateway.Push
         /// <param name="type"></param>
         /// <param name="setting"></param>
         /// <returns></returns>
-        public static IPush CreatePushObject(PushType type, string setting)
+        public static IPush? CreatePushObject(PushType type, string setting)
         {
-            IPush push = null;
+            IPush? push = null;
             switch (type)
             {
-                case PushType.PushMan:
-                    push = new PushMan(setting);
-                    break;
                 case PushType.GoEasy:
                     push = new GoEasy(setting);
                     break;

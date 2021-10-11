@@ -1,12 +1,9 @@
-﻿using SP.StudioCore.API;
-using SP.StudioCore.API.Translates;
-using SP.StudioCore.Enums;
+﻿using SP.StudioCore.Enums;
 using SP.StudioCore.Xml;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
 
 

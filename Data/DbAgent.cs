@@ -1,25 +1,16 @@
-﻿using Dapper;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using SP.StudioCore.API;
-using SP.StudioCore.API.Translates;
 using SP.StudioCore.Data.Repository;
 using SP.StudioCore.Data.Schema;
 using SP.StudioCore.Enums;
 using SP.StudioCore.Http;
 using SP.StudioCore.Ioc;
 using SP.StudioCore.Model;
-using SP.StudioCore.Utils;
 using SP.StudioCore.Web;
 using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Linq.Expressions;
-using System.Text;
 
 namespace SP.StudioCore.Data
 {
@@ -34,12 +25,12 @@ namespace SP.StudioCore.Data
         /// <summary>
         /// 只读操作对象
         /// </summary>
-        protected virtual IReadRepository ReadDB => IocCollection.GetService<IReadRepository>();
+        protected virtual IReadRepository? ReadDB => IocCollection.GetService<IReadRepository>();
 
         /// <summary>
         /// 可写可读操作对象
         /// </summary>
-        protected virtual IWriteRepository WriteDB => IocCollection.GetService<IWriteRepository>();
+        protected virtual IWriteRepository? WriteDB => IocCollection.GetService<IWriteRepository>();
 
         /// <summary>
         /// 数据库类型
@@ -118,7 +109,7 @@ namespace SP.StudioCore.Data
         /// <returns></returns>
         protected virtual bool FaildMessage(string msg, Language language, params object[] args)
         {
-            return this.FaildMessage(msg.Get(language), false);
+            return this.FaildMessage(msg, false);
         }
 
         protected virtual TFaild FaildMessage<TFaild>(string msg)
@@ -133,7 +124,7 @@ namespace SP.StudioCore.Data
 
         protected virtual TFaild FaildMessage<TFaild>(string msg, Language language, TFaild faildValue, params object[] args)
         {
-            this.Message(string.Format(language == Language.CHN ? msg : msg.Get(language), args));
+            this.Message(string.Format(msg, args));
             return faildValue;
         }
 

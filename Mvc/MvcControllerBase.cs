@@ -13,9 +13,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Http;
 using SP.StudioCore.Ioc;
 using SP.StudioCore.Data.Repository;
-using Microsoft.EntityFrameworkCore;
-using System.Transactions;
-using SP.StudioCore.API.Translates;
 using Nest;
 using Result = SP.StudioCore.Model.Result;
 using Language = SP.StudioCore.Enums.Language;
@@ -586,10 +583,6 @@ namespace SP.StudioCore.Mvc
         /// <returns></returns>
         protected virtual Result GetResultError(string message)
         {
-            if (this.Language != Language.CHN)
-            {
-                message = message.Get(this.Language);
-            }
             return new Result(false, message);
         }
 

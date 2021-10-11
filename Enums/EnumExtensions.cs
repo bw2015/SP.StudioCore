@@ -1,14 +1,10 @@
-﻿using SP.StudioCore.API;
-using SP.StudioCore.API.Translates;
-using SP.StudioCore.Types;
+﻿using SP.StudioCore.Types;
 using SP.StudioCore.Utils;
-using SP.StudioCore.Web;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 
 namespace SP.StudioCore.Enums
 {

@@ -121,23 +121,15 @@ namespace SP.StudioCore.IO
         /// <param name="filePath">文件的绝对路径</param> 
         public static void CreateFile(string filePath)
         {
-            try
+            //如果文件不存在则创建该文件 
+            if (!IsExistFile(filePath))
             {
-                //如果文件不存在则创建该文件 
-                if (!IsExistFile(filePath))
-                {
-                    //创建一个FileInfo对象 
-                    FileInfo file = new FileInfo(filePath);
-                    //创建文件 
-                    FileStream fs = file.Create();
-                    //关闭文件流 
-                    fs.Close();
-                }
-            }
-            catch (Exception ex)
-            {
-                //  LogHelper.WriteTraceLog(TraceLogLevel.Error, ex.Message);
-                throw ex;
+                //创建一个FileInfo对象 
+                FileInfo file = new FileInfo(filePath);
+                //创建文件 
+                FileStream fs = file.Create();
+                //关闭文件流 
+                fs.Close();
             }
         }
         /// <summary> 

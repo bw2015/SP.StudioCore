@@ -323,7 +323,7 @@ namespace SP.StudioCore.Mvc
         protected virtual Result GetResultContent(bool success, string successMessage = "处理成功", object info = null)
         {
             if (success) return new Result(success, successMessage, info);
-            string message = this.context.RequestServices.GetService<MessageResult>();
+            string? message = this.context.RequestServices.GetService<MessageResult>();
             if (string.IsNullOrEmpty(message)) message = "发生不可描述的错误";
             return new Result(false, message);
         }
@@ -401,7 +401,7 @@ namespace SP.StudioCore.Mvc
         {
             if (convert == null) convert = t => t as TOutput;
             StringBuilder sb = new StringBuilder();
-            string json = null;
+            string? json = null;
             Func<SearchDescriptor<T>, ISearchRequest> action = (s) =>
             {
                 return search.Invoke(s.Select(field).Paged(this.PageIndex, this.PageSize));
@@ -445,7 +445,7 @@ namespace SP.StudioCore.Mvc
         {
             if (converter == null) converter = t => t as TOutput;
             StringBuilder sb = new StringBuilder();
-            string json = null;
+            string? json = null;
             IEnumerable<T> query;
             if (pageindex == 1)
             {
@@ -491,9 +491,12 @@ namespace SP.StudioCore.Mvc
         /// <param name="data"></param>
         /// <param name="action">提前对分页内内容的处理方法</param>
         /// <returns></returns>
-        protected virtual string GetResultContent<T, TOutput>(IOrderedQueryable<T> list, Func<T, TOutput> converter = null, object data = null, Action<IEnumerable<T>> action = null) where TOutput : class
+        protected virtual string GetResultContent<T, TOutput>(IOrderedQueryable<T> list, Func<T, TOutput>? converter = null, object? data = null, Action<IEnumerable<T>>? action = null) where TOutput : class
         {
-            if (converter == null) converter = t => t as TOutput;
+            if (converter == null)
+            {
+                converter = t =>  t as TOutput;
+            }
             string json = string.Empty;
             IEnumerable<T> query;
             int recordCount = list.Count();
@@ -536,7 +539,7 @@ namespace SP.StudioCore.Mvc
         /// </summary>
         /// <param name="action">提前对分页内内容的处理方法</param>
         /// <returns>返回内容JSON</returns>
-        protected virtual Result GetResultList<T, TOutput>(IOrderedQueryable<T> list, Func<T, TOutput> converter = null, object data = null, Action<IEnumerable<T>> action = null) where TOutput : class
+        protected virtual Result GetResultList<T, TOutput>(IOrderedQueryable<T> list, Func<T, TOutput>? converter = null, object? data = null, Action<IEnumerable<T>>? action = null) where TOutput : class
         {
             string resultData = this.GetResultContent(list, converter, data, action);
             return this.GetResultContent(resultData);

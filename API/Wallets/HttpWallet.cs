@@ -23,7 +23,6 @@ namespace SP.StudioCore.API.Wallets
             sw.Start();
             try
             {
-                request.RequestAt = DateTime.Now;
                 var result = NetAgent.UploadData(request.Url, request.PostData, Encoding.UTF8, null, new Dictionary<string, string>()
                 {
                     {"Content-Type", "application/json"},
@@ -46,7 +45,6 @@ namespace SP.StudioCore.API.Wallets
             sw.Start();
             try
             {
-                request.RequestAt = DateTime.Now;
                 var result = NetAgent.UploadData(request.Url, request.PostData, Encoding.UTF8, null, new Dictionary<string, string>()
                 {
                     {"Content-Type", "application/json"},
@@ -70,7 +68,6 @@ namespace SP.StudioCore.API.Wallets
 
             try
             {
-                request.RequestAt = DateTime.Now;
                 var result = NetAgent.UploadData(request.Url, request.PostData, Encoding.UTF8, null, new Dictionary<string, string>()
                 {
                     {"Content-Type", "application/json"},

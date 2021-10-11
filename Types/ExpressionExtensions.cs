@@ -13,9 +13,9 @@ namespace SP.StudioCore.Types
     /// </summary>
     public static class ExpressionExtensions
     {
-        public static PropertyInfo ToPropertyInfo<T, TKey>(this Expression<Func<T, TKey>> expression) where T : class
+        public static PropertyInfo? ToPropertyInfo<T, TKey>(this Expression<Func<T, TKey>> expression) where T : class
         {
-            PropertyInfo property = null;
+            PropertyInfo? property = null;
             switch (expression.Body.NodeType)
             {
                 case ExpressionType.Convert:
@@ -35,9 +35,9 @@ namespace SP.StudioCore.Types
         /// <typeparam name="TKey"></typeparam>
         /// <param name="expression"></param>
         /// <returns></returns>
-        public static FieldInfo ToFieldInfo<T, TKey>(this Expression<Func<T, TKey>> expression) where T : struct
+        public static FieldInfo? ToFieldInfo<T, TKey>(this Expression<Func<T, TKey>> expression) where T : struct
         {
-            FieldInfo field = null;
+            FieldInfo? field = null;
             switch (expression.Body.NodeType)
             {
                 case ExpressionType.Convert:
@@ -60,8 +60,7 @@ namespace SP.StudioCore.Types
         public static string GetFieldName<T, TKey>(this Expression<Func<T, TKey>> expression) where T : class, new()
         {
             PropertyInfo property = expression.ToPropertyInfo();
-            return property.HasAttribute<ColumnAttribute>() ?
-                property.GetAttribute<ColumnAttribute>().Name : property.Name;
+            return property.GetAttribute<ColumnAttribute>()?.Name ?? property.Name;
         }
 
         /// <summary>
@@ -71,7 +70,7 @@ namespace SP.StudioCore.Types
         /// <typeparam name="TKey"></typeparam>
         /// <param name="fun"></param>
         /// <returns></returns>
-        public static string GetName<T, TKey>(this Expression<Func<T, TKey>> fun)
+        public static string? GetName<T, TKey>(this Expression<Func<T, TKey>> fun)
         {
             //t => t.Title
             string title = fun.ToString();

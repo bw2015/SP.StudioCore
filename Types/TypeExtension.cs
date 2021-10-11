@@ -34,11 +34,12 @@ namespace SP.StudioCore.Types
         /// <param name="value"></param>
         /// <param name="type"></param>
         /// <returns></returns>
-        public static object GetValue(this object value, Type type = null)
+        public static object? GetValue(this object? value, Type? type = null)
         {
-            if (type == null) type = value.GetType();
-            if (value == null || value == DBNull.Value) return type.GetDefaultValue();
-            object obj = null;
+            if (value == null && type == null) throw new NullReferenceException();
+            if (type == null) type = value?.GetType();
+            if (value == null || value == DBNull.Value) return type?.GetDefaultValue();
+            object? obj = null;
             switch (value.GetType().Name)
             {
                 case "DateTime":
@@ -127,8 +128,9 @@ namespace SP.StudioCore.Types
             return obj == null ? value : obj;
         }
 
-        internal static object GetDefaultValue(this Type type)
+        internal static object? GetDefaultValue(this Type? type)
         {
+            if (type == null) return null;
             if (type == typeof(string)) return string.Empty;
             if (type == typeof(Guid)) return Guid.Empty;
             if (type == typeof(object[]) || type == typeof(int[])) return null;
@@ -228,8 +230,9 @@ namespace SP.StudioCore.Types
         /// <typeparam name="T"></typeparam>
         /// <param name="type"></param>
         /// <returns></returns>
-        public static bool IsBaseType<T>(this Type type)
+        public static bool IsBaseType<T>(this Type? type)
         {
+            if (type == null) return false;
             if (typeof(T).IsInterface)
             {
                 return type.GetInterface(typeof(T).Name) != null;
@@ -252,15 +255,15 @@ namespace SP.StudioCore.Types
             return false;
         }
 
-        public static T GetAttribute<T>(this object obj)
+        public static T? GetAttribute<T>(this object obj) where T : Attribute
         {
             if (obj == null) return default;
-            ICustomAttributeProvider custom = obj is ICustomAttributeProvider ? (ICustomAttributeProvider)obj : (ICustomAttributeProvider)obj.GetType();
+            ICustomAttributeProvider custom = obj is ICustomAttributeProvider provider ? provider : obj.GetType();
             foreach (object t in custom.GetCustomAttributes(true))
             {
                 if (t.GetType().Equals(typeof(T))) return (T)t;
             }
-            return default(T);
+            return default;
         }
 
         /// <summary>
@@ -268,7 +271,7 @@ namespace SP.StudioCore.Types
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        public static string GetDescription(this Type type)
+        public static string? GetDescription(this Type type)
         {
             foreach (object t in type.GetCustomAttributes(true))
             {
@@ -297,9 +300,10 @@ namespace SP.StudioCore.Types
         /// </summary>
         /// <param name="dic"></param>
         /// <param name="assembly">指定资源，默认为T所在的资源文件</param>
-        public static void Add<T>(this Dictionary<string, Dictionary<string, string>> dic, Assembly assembly = null)
+        public static void Add<T>(this Dictionary<string, Dictionary<string, string>> dic, Assembly? assembly = null)
         {
-            string key = typeof(T).FullName;
+            string? key = typeof(T).FullName;
+            if (key == null) return;
             if (assembly == null) assembly = typeof(T).Assembly;
             if (dic.ContainsKey(key))
             {

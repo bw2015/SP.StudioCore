@@ -19,9 +19,9 @@ namespace SP.StudioCore.Mvc.Exceptions
             Message = message;
         }
 
-        public LoginException(Language language)
+        public LoginException()
         {
-            this.Message = ErrorType.Login.GetDescription(language);
+            this.Message = ErrorType.Login.GetDescription();
         }
 
         /// <summary>

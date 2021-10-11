@@ -71,9 +71,9 @@ namespace SP.StudioCore.Enums
             return result;
         }
 
-        public static object ToEnum(this string value, Type type)
+        public static object? ToEnum(this string value, Type type)
         {
-            MethodInfo mi = typeof(EnumExtensions).GetMethods().FirstOrDefault(t => t.Name == "ToEnum" && t.IsGenericMethod);
+            MethodInfo? mi = typeof(EnumExtensions).GetMethods().FirstOrDefault(t => t.Name == "ToEnum" && t.IsGenericMethod);
             MethodInfo gmi = mi.MakeGenericMethod(type);
             return gmi.Invoke(null, new object[] { value });
         }
@@ -87,11 +87,11 @@ namespace SP.StudioCore.Enums
         /// <summary>
         /// 获取枚举的备注信息（可读取语言包）
         /// </summary>
-        public static string GetDescription(this Enum em, Language language = Language.CHN)
+        public static string GetDescription(this Enum em)
         {
             string fullName = $"{em.GetType().FullName}";
             string key = $"{fullName}.{em}";
-            string enumKey = $"{key}.{language}";
+            string enumKey = $"{key}";
 
             if (_enumDescription.ContainsKey(enumKey)) return _enumDescription[enumKey];
 
@@ -100,7 +100,7 @@ namespace SP.StudioCore.Enums
                 foreach (FieldInfo field in em.GetType().GetFields())
                 {
                     if (field.IsSpecialName) continue;
-                    DescriptionAttribute description = field.GetAttribute<DescriptionAttribute>();
+                    DescriptionAttribute? description = field.GetAttribute<DescriptionAttribute>();
                     string value = string.Empty;
                     if (description == null)
                     {
@@ -109,14 +109,10 @@ namespace SP.StudioCore.Enums
                     else
                     {
                         value = description.Description;
-                        if (language != Language.CHN)
-                        {
-                            value = value.Get(language);
-                        }
                     }
-                    if (!_enumDescription.ContainsKey($"{fullName}.{field.Name}.{language}"))
+                    if (!_enumDescription.ContainsKey($"{fullName}.{field.Name}"))
                     {
-                        _enumDescription.Add($"{fullName}.{field.Name}.{language}", value);
+                        _enumDescription.Add($"{fullName}.{field.Name}", value);
                     }
                 }
                 if (_enumDescription.ContainsKey(enumKey)) return _enumDescription[enumKey];
@@ -145,7 +141,7 @@ namespace SP.StudioCore.Enums
         /// </summary>
         /// <param name="ass"></param>
         /// <returns></returns>
-        public static Dictionary<string, Dictionary<string, string>> GetEnums(this Assembly ass, Language language = Language.CHN)
+        public static Dictionary<string, Dictionary<string, string>> GetEnums(this Assembly ass)
         {
             var dic = new Dictionary<string, Dictionary<string, string>>();
             foreach (Type type in ass.GetTypes().Where(t => t.IsEnum))
@@ -154,7 +150,7 @@ namespace SP.StudioCore.Enums
                 dic.Add(enumName, new Dictionary<string, string>());
                 foreach (Enum item in Enum.GetValues(type))
                 {
-                    dic[enumName].Add(item.ToString(), item.GetDescription(language));
+                    dic[enumName].Add(item.ToString(), item.GetDescription());
                 }
             }
             return dic;
@@ -167,17 +163,21 @@ namespace SP.StudioCore.Enums
         /// <param name="language"></param>
         /// <param name="isFullName">是否使用全路径</param>
         /// <returns></returns>
-        public static Dictionary<string, Dictionary<string, string>> GetEnums(this Type[] enums, Language language, bool isFullName = false)
+        public static Dictionary<string, Dictionary<string, string>> GetEnums(this Type[] enums, bool isFullName = false)
         {
             var dic = new Dictionary<string, Dictionary<string, string>>();
             foreach (Type type in enums)
             {
-                string name = isFullName ? type.FullName : type.Name;
-                if (dic.ContainsKey(name)) continue;
+                string? name = isFullName ? type.FullName : type.Name;
+                if (name == null || dic.ContainsKey(name)) continue;
                 dic.Add(name, new Dictionary<string, string>());
                 foreach (object item in Enum.GetValues(type))
                 {
-                    dic[name].Add(item.ToString(), ((Enum)item).GetDescription(language));
+                    if (item == null) continue;
+                    string? key = item.ToString();
+                    string? description = ((Enum)item).GetDescription();
+                    if(key == null || description == null) continue;
+                    dic[name].Add(key, description);
                 }
             }
             return dic;
@@ -189,10 +189,10 @@ namespace SP.StudioCore.Enums
         /// <param name="enumType"></param>
         /// <param name="value"></param>
         /// <returns></returns>
-        public static object GetValue(this Type enumType, long value)
+        public static object? GetValue(this Type enumType, long value)
         {
             if (!enumType.IsEnum) return null;
-            object res = null;
+            object? res = null;
             switch (Enum.GetUnderlyingType(enumType).Name)
             {
                 case "Int64":

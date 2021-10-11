@@ -473,7 +473,7 @@ namespace SP.StudioCore.Http
 
         public static Result ShowError(this HttpContext context, ErrorType type, string? error = null, Dictionary<string, object>? output = null)
         {
-            if (string.IsNullOrEmpty(error)) error = type.GetDescription(context.GetLanguage());
+            if (string.IsNullOrEmpty(error)) error = type.GetDescription();
             if (output == null)
             {
                 output = new Dictionary<string, object>();

@@ -13,7 +13,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using SP.StudioCore.LinkTrack.Core;
 
 namespace SP.StudioCore.Net
 {
@@ -24,7 +23,7 @@ namespace SP.StudioCore.Net
     {
         private static readonly HttpClient httpClient = new(new HttpClientHandler()
         {
-            UseProxy                                  = true,
+            UseProxy = true,
             ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true
         });
 
@@ -33,17 +32,15 @@ namespace SP.StudioCore.Net
             httpClient.DefaultRequestHeaders.ExpectContinue = false;
             //httpClient.DefaultRequestHeaders.Add("Connection", "keep-alive");
         }
-        
+
         public static void AddTraceInfoToHeader(this HttpWebRequest httpWebRequest)
         {
-            httpWebRequest.Headers.Add("FsContextId", FsLinkTrack.Current.Get().ContextId);
-            httpWebRequest.Headers.Add("FsAppId",     FsLinkTrack.Current.Get().AppId);
+
         }
 
         public static void AddTraceInfoToHeader(this HttpContentHeaders httpWebRequest)
         {
-            httpWebRequest.Add("FsContextId", FsLinkTrack.Current.Get().ContextId);
-            httpWebRequest.Add("FsAppId",     FsLinkTrack.Current.Get().AppId);
+
         }
 
         /// <summary>
@@ -54,7 +51,7 @@ namespace SP.StudioCore.Net
         /// <param name="requestTimeout">超时时间</param>
         /// <param name="encoding">编码格式</param>
         /// <param name="cookie">是否需要cookie</param>
-        public static Task<string> GetAsync(string url, Dictionary<string, string> postData, Encoding encoding = null, int requestTimeout = 0, CookieContainer cookie = null) 
+        public static Task<string> GetAsync(string url, Dictionary<string, string> postData, Encoding encoding = null, int requestTimeout = 0, CookieContainer cookie = null)
             => GetAsync(url, String.Join("&", postData.Select(keyVal => $"{keyVal.Key}={keyVal.Value}")), null, encoding, requestTimeout, cookie);
 
         /// <summary>
@@ -68,36 +65,33 @@ namespace SP.StudioCore.Net
         /// <param name="cookie">是否需要cookie</param>
         public static async Task<string> GetAsync(string url, string postData = null, Dictionary<string, string> headerData = null, Encoding encoding = null, int requestTimeout = 0, CookieContainer cookie = null)
         {
-            using (var trackEnd = FsLinkTrack.TrackHttp(url, "GET", headerData, postData))
+
+            encoding ??= Encoding.UTF8;
+
+            var httpContent = new StringContent("", encoding); // 内容体
+            httpContent.Headers.AddTraceInfoToHeader();        // 添加头部
+            if (headerData != null)
             {
-                encoding ??= Encoding.UTF8;
-
-                var httpContent = new StringContent("", encoding); // 内容体
-                httpContent.Headers.AddTraceInfoToHeader();        // 添加头部
-                if (headerData != null)
+                foreach (var header in headerData)
                 {
-                    foreach (var header in headerData)
-                    {
-                        if (httpContent.Headers.Contains(header.Key)) continue;
-                        httpContent.Headers.TryAddWithoutValidation(header.Key, header.Value);
-                    }
+                    if (httpContent.Headers.Contains(header.Key)) continue;
+                    httpContent.Headers.TryAddWithoutValidation(header.Key, header.Value);
                 }
-
-                var cancellationTokenSource = new CancellationTokenSource();
-                if (requestTimeout > 0) cancellationTokenSource.CancelAfter(requestTimeout);
-
-                var httpRspMessage = await httpClient.SendAsync(new HttpRequestMessage
-                {
-                    Content    = httpContent,
-                    Method     = HttpMethod.Get,
-                    RequestUri = new Uri(string.IsNullOrWhiteSpace(postData) ? url : $"{url}?{postData}"),
-                }, cancellationTokenSource.Token);
-
-                var bytes  = await httpRspMessage.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
-                var result = encoding.GetString(bytes);
-                trackEnd.SetHttpResponseBody(result);
-                return result;
             }
+
+            var cancellationTokenSource = new CancellationTokenSource();
+            if (requestTimeout > 0) cancellationTokenSource.CancelAfter(requestTimeout);
+
+            var httpRspMessage = await httpClient.SendAsync(new HttpRequestMessage
+            {
+                Content = httpContent,
+                Method = HttpMethod.Get,
+                RequestUri = new Uri(string.IsNullOrWhiteSpace(postData) ? url : $"{url}?{postData}"),
+            }, cancellationTokenSource.Token);
+
+            var bytes = await httpRspMessage.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
+            var result = encoding.GetString(bytes);
+            return result;
         }
 
         /// <summary>
@@ -123,30 +117,27 @@ namespace SP.StudioCore.Net
         /// <param name="cookie">是否需要cookie</param>
         public static async Task<string> PostAsync(string url, string postData, Dictionary<string, string> headerData, Encoding encoding = null, string contentType = "application/x-www-form-urlencoded", int requestTimeout = 0, CookieContainer cookie = null)
         {
-            using (var trackEnd = FsLinkTrack.TrackHttp(url, "POST", headerData, postData))
+
+            encoding ??= Encoding.UTF8;
+
+            var httpContent = new StringContent(postData, encoding, contentType); // 内容体
+            httpContent.Headers.AddTraceInfoToHeader();                           // 添加头部
+            if (headerData != null)
             {
-                encoding ??= Encoding.UTF8;
-
-                var httpContent = new StringContent(postData, encoding, contentType); // 内容体
-                httpContent.Headers.AddTraceInfoToHeader();                           // 添加头部
-                if (headerData != null)
+                foreach (var header in headerData)
                 {
-                    foreach (var header in headerData)
-                    {
-                        if (httpContent.Headers.Contains(header.Key)) continue;
-                        httpContent.Headers.Add(header.Key, header.Value);
-                    }
+                    if (httpContent.Headers.Contains(header.Key)) continue;
+                    httpContent.Headers.Add(header.Key, header.Value);
                 }
-
-                var cancellationTokenSource = new CancellationTokenSource();
-                if (requestTimeout > 0) cancellationTokenSource.CancelAfter(requestTimeout);
-                var httpRspMessage = httpClient.PostAsync(url, httpContent, cancellationTokenSource.Token);
-
-                var bytes  = await (await httpRspMessage.ConfigureAwait(false)).Content.ReadAsByteArrayAsync().ConfigureAwait(false);
-                var result = encoding.GetString(bytes);
-                trackEnd.SetHttpResponseBody(result);
-                return result;
             }
+
+            var cancellationTokenSource = new CancellationTokenSource();
+            if (requestTimeout > 0) cancellationTokenSource.CancelAfter(requestTimeout);
+            var httpRspMessage = httpClient.PostAsync(url, httpContent, cancellationTokenSource.Token);
+
+            var bytes = await (await httpRspMessage.ConfigureAwait(false)).Content.ReadAsByteArrayAsync().ConfigureAwait(false);
+            var result = encoding.GetString(bytes);
+            return result;
         }
 
         /// <summary>
@@ -211,31 +202,28 @@ namespace SP.StudioCore.Net
         /// <param name="cookie">是否需要cookie</param>
         public static async Task<string> PutAsync(string url, string postData, Dictionary<string, string> headerData, Encoding encoding = null, string contentType = "application/x-www-form-urlencoded", int requestTimeout = 0, CookieContainer cookie = null)
         {
-            using (var trackEnd = FsLinkTrack.TrackHttp(url, "POST", headerData, postData))
+
+            encoding ??= Encoding.UTF8;
+
+            var httpContent = new StringContent(postData, encoding, contentType); // 内容体
+            httpContent.Headers.AddTraceInfoToHeader();                           // 添加头部
+            if (headerData != null)
             {
-                encoding ??= Encoding.UTF8;
-
-                var httpContent = new StringContent(postData, encoding, contentType); // 内容体
-                httpContent.Headers.AddTraceInfoToHeader();                           // 添加头部
-                if (headerData != null)
+                foreach (var header in headerData)
                 {
-                    foreach (var header in headerData)
-                    {
-                        if (httpContent.Headers.Contains(header.Key)) continue;
-                        httpContent.Headers.Add(header.Key, header.Value);
-                    }
+                    if (httpContent.Headers.Contains(header.Key)) continue;
+                    httpContent.Headers.Add(header.Key, header.Value);
                 }
-
-                //httpContent.Headers.Add("Cookie", "bid=\"YObnALe98pw\"");
-                var cancellationTokenSource = new CancellationTokenSource();
-                if (requestTimeout > 0) cancellationTokenSource.CancelAfter(requestTimeout);
-                var httpRspMessage = httpClient.PutAsync(url, httpContent, cancellationTokenSource.Token);
-
-                var bytes  = await (await httpRspMessage.ConfigureAwait(false)).Content.ReadAsByteArrayAsync().ConfigureAwait(false);
-                var result = encoding.GetString(bytes);
-                trackEnd.SetHttpResponseBody(result);
-                return result;
             }
+
+            //httpContent.Headers.Add("Cookie", "bid=\"YObnALe98pw\"");
+            var cancellationTokenSource = new CancellationTokenSource();
+            if (requestTimeout > 0) cancellationTokenSource.CancelAfter(requestTimeout);
+            var httpRspMessage = httpClient.PutAsync(url, httpContent, cancellationTokenSource.Token);
+
+            var bytes = await (await httpRspMessage.ConfigureAwait(false)).Content.ReadAsByteArrayAsync().ConfigureAwait(false);
+            var result = encoding.GetString(bytes);
+            return result;
         }
 
         /// <summary>

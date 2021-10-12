@@ -15,7 +15,7 @@ namespace SP.StudioCore.Mapper
         /// <typeparam name="TSource">目标</typeparam>
         /// <param name="source"></param>
         /// <returns></returns>
-        public static Target Map<Target>(this object source) where Target : class, new()
+        public static Target? Map<Target>(this object source) where Target : class, new()
         {
             if (source == null) return default;
             Type type = typeof(Target);
@@ -23,10 +23,11 @@ namespace SP.StudioCore.Mapper
             PropertyInfo[] properties = source.GetProperties();
             foreach (PropertyInfo property in properties)
             {
-                object value = property.GetValue(source);
+                object? value = property.GetValue(source);
                 if (value == null) continue;
-                PropertyInfo resultProperty = type.GetProperty(property.Name);
+                PropertyInfo? resultProperty = type.GetProperty(property.Name);
                 if (resultProperty == null) continue;
+                if (resultProperty.PropertyType == property.PropertyType) continue;
                 resultProperty.SetValue(result, Convert.ChangeType(value, property.PropertyType), null);
             }
 
@@ -39,13 +40,15 @@ namespace SP.StudioCore.Mapper
         /// <typeparam name="Target"></typeparam>
         /// <param name="sources"></param>
         /// <returns></returns>
-        public static List<Target> Map<Target>(this IEnumerable<object> sources) where Target : class, new()
+        public static List<Target>? Map<Target>(this IEnumerable<object> sources) where Target : class, new()
         {
             if (sources == null) return null;
             List<Target> targets = new List<Target>();
             foreach (object source in sources)
             {
-                targets.Add(Map<Target>(source));
+                Target? target = Map<Target>(source);
+                if (target == null) continue;
+                targets.Add(target);
             }
             return targets;
         }

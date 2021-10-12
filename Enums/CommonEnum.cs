@@ -53,7 +53,8 @@ namespace SP.StudioCore.Enums
         /// </summary>
         [Description("不支持")]
         NoSupport,
-        Maintain
+        Maintain,
+        USERLOCK
     }
 
     /// <summary>

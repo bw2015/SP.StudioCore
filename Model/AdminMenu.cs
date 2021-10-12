@@ -103,13 +103,20 @@ namespace SP.StudioCore.Model
         {
             return this.menu;
         }
-        public static IEnumerable<string> GetPermissions(XElement root)
+        /// <summary>
+        /// 获取权限
+        /// </summary>
+        /// <param name="root"></param>
+        /// <param name="filterPermission">过滤那些权限</param>
+        /// <returns></returns>
+        public static IEnumerable<string> GetPermissions(XElement root, params string[] filterPermission)
         {
             foreach (XElement item in root.Elements())
             {
                 string id = item.GetAttributeValue("ID");
+                if (filterPermission != null) if (filterPermission.Any(c => c == id)) continue;
                 if (!string.IsNullOrEmpty(id)) yield return id;
-                foreach (string itemId in GetPermissions(item))
+                foreach (string itemId in GetPermissions(item, filterPermission))
                 {
                     yield return itemId;
                 }

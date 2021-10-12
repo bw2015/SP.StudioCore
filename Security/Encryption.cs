@@ -188,12 +188,12 @@ namespace SP.StudioCore.Security
         }
 
         /// <summary>
-        ///  AES 解密
+        ///  AES 解密（如果解密失败则返回null）
         /// </summary>
         /// <param name="str">明文（待解密）</param>
         /// <param name="key">密文</param>
         /// <returns></returns>
-        public static string AesDecrypt(string str, string key)
+        public static string? AesDecrypt(string str, string key)
         {
             if (string.IsNullOrEmpty(str)) return null;
             try

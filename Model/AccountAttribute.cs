@@ -48,4 +48,13 @@ namespace SP.StudioCore.Model
             return permission.Value;
         }
     }
+
+    /// <summary>
+    /// 忽略在线统计标记
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
+    public sealed class IgnoreOnlineAttribute : Attribute
+    {
+
+    }
 }

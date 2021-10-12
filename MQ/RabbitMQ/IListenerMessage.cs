@@ -1,6 +1,7 @@
 using Newtonsoft.Json;
 using RabbitMQ.Client.Events;
 using System;
+using System.Diagnostics;
 
 namespace SP.StudioCore.MQ.RabbitMQ
 {
@@ -25,9 +26,11 @@ namespace SP.StudioCore.MQ.RabbitMQ
 
     public abstract class IListenerMessage<TModel> : IListenerMessage where TModel : IMessageQueue
     {
+        protected Stopwatch sw;
+
         public void Consumer(string message, object sender, BasicDeliverEventArgs ea)
         {
-            Console.WriteLine($"{this.GetType()} => {message}");
+            sw = Stopwatch.StartNew();
             if (string.IsNullOrEmpty(message)) return;
             TModel? model = JsonConvert.DeserializeObject<TModel>(message);
             if (model == null) return;
@@ -37,5 +40,6 @@ namespace SP.StudioCore.MQ.RabbitMQ
         public abstract void Consumer(TModel model, object sender, BasicDeliverEventArgs ea);
 
         public abstract bool FailureHandling(string message, object sender, BasicDeliverEventArgs ea);
+
     }
 }

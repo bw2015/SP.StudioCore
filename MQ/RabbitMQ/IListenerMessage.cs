@@ -34,7 +34,7 @@ namespace SP.StudioCore.MQ.RabbitMQ
             this.Consumer(model, sender, ea);
         }
 
-        public abstract bool Consumer(TModel model, object sender, BasicDeliverEventArgs ea);
+        public abstract void Consumer(TModel model, object sender, BasicDeliverEventArgs ea);
 
         public abstract bool FailureHandling(string message, object sender, BasicDeliverEventArgs ea);
     }

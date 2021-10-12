@@ -1,5 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Net.Http.Headers;
+using Newtonsoft.Json;
+using SP.StudioCore.Cache.Memory;
+using SP.StudioCore.Enums;
 using SP.StudioCore.Model;
 using SP.StudioCore.Properties;
 using SP.StudioCore.Types;
@@ -350,6 +353,20 @@ namespace SP.StudioCore.Web
         {
             string pattern = @"^[_a-z][_a-z0-9]+$";
             return Regex.IsMatch(input, pattern, RegexOptions.IgnoreCase);
+        }
+
+        /// <summary>
+        /// 创建一个随机的昵称
+        /// </summary>
+        /// <returns></returns>
+        public static string? GenerateNickName(Language language)
+        {
+            NickNameModel? model = MemoryUtils.Get("GenerateNickName", TimeSpan.FromMinutes(10), () =>
+            {
+                return JsonConvert.DeserializeObject<NickNameModel>(Resources.nickname);
+            });
+            if (model == null) return null;
+            return model.Generate(language);
         }
 
         #region ========  时间戳  ========

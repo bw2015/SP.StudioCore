@@ -111,5 +111,16 @@ namespace SP.StudioCore.Properties {
                 return ResourceManager.GetString("Domain", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   查找类似 {
+        ///  &quot;Chinese&quot;: {
+        ///    &quot;FirstName&quot;: [ &quot;支&quot;, &quot;余&quot;, &quot;贲&quot;, &quot;赵&quot;, &quot;慕&quot;, &quot;巫&quot;, &quot;太叔&quot;, &quot;方&quot;, &quot;诸&quot;, &quot;元&quot;, &quot;邓&quot;, &quot;孙&quot;, &quot;萧&quot;, &quot;乔&quot;, &quot;尉迟&quot;, &quot;柳&quot;, &quot;朱&quot;, &quot;卜&quot;, &quot;单&quot;, &quot;李&quot;, &quot;姚&quot;, &quot;燕&quot;, &quot;东方&quot;, &quot;叶&quot;, &quot;尤&quot;, &quot;顾&quot;, &quot;杭&quot;, &quot;周&quot;, &quot;邵&quot;, &quot;牧&quot;, &quot;诸葛&quot;, &quot;唐&quot;, &quot;许&quot;, &quot;穆&quot;, &quot;洪&quot;, &quot;郑&quot;, &quot;狄&quot;, &quot;侯&quot;, &quot;夏侯&quot;, &quot;吕&quot;, &quot;尹&quot;, &quot;包&quot;, &quot;王&quot;, &quot;宋&quot;, &quot;秋&quot;, &quot;欧阳&quot;, &quot;曹&quot;, &quot;堪&quot;, &quot;诸&quot;, &quot;冯&quot;, &quot;庞&quot;, &quot;仲&quot;, &quot;皇甫&quot;, &quot;严&quot;, &quot;汪&quot;, &quot;左&quot;, &quot;陈&quot;, &quot;叶&quot;, &quot;宫&quot;, &quot;上官&quot;, &quot;华&quot;, &quot;祁&quot;, &quot;石&quot;, &quot;卫&qu... 的本地化字符串。
+        /// </summary>
+        internal static string nickname {
+            get {
+                return ResourceManager.GetString("nickname", resourceCulture);
+            }
+        }
     }
 }

@@ -26,8 +26,11 @@ namespace SP.StudioCore.Mapper
                 object? value = property.GetValue(source);
                 if (value == null) continue;
                 PropertyInfo? resultProperty = type.GetProperty(property.Name);
-                if (resultProperty == null) continue;
-                if (resultProperty.PropertyType != property.PropertyType) continue;
+                if (resultProperty == null
+                    ||
+                    resultProperty.PropertyType != property.PropertyType
+                    ||
+                    !resultProperty.CanWrite) continue;
                 resultProperty.SetValue(result, Convert.ChangeType(value, property.PropertyType), null);
             }
 

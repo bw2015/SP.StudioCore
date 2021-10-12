@@ -1,5 +1,6 @@
 using Newtonsoft.Json;
 using RabbitMQ.Client.Events;
+using System;
 
 namespace SP.StudioCore.MQ.RabbitMQ
 {
@@ -12,7 +13,7 @@ namespace SP.StudioCore.MQ.RabbitMQ
         /// 消费
         /// </summary>
         /// <returns>当开启手动确认时，返回true时，才会进行ACK确认</returns>
-        bool Consumer(string message, object sender, BasicDeliverEventArgs ea);
+        void Consumer(string message, object sender, BasicDeliverEventArgs ea);
 
         /// <summary>
         /// 当异常时处理
@@ -24,17 +25,17 @@ namespace SP.StudioCore.MQ.RabbitMQ
 
     public abstract class IListenerMessage<TModel> : IListenerMessage where TModel : IMessageQueue
     {
-        public bool Consumer(string message, object sender, BasicDeliverEventArgs ea)
+        public void Consumer(string message, object sender, BasicDeliverEventArgs ea)
         {
-            if (message == null) return false;
+            Console.WriteLine($"{this.GetType()} => {message}");
+            if (string.IsNullOrEmpty(message)) return;
             TModel? model = JsonConvert.DeserializeObject<TModel>(message);
-            if (model == null) return false;
-            return this.Consumer(model, sender, ea);
+            if (model == null) return;
+            this.Consumer(model, sender, ea);
         }
 
         public abstract bool Consumer(TModel model, object sender, BasicDeliverEventArgs ea);
 
         public abstract bool FailureHandling(string message, object sender, BasicDeliverEventArgs ea);
-
     }
 }

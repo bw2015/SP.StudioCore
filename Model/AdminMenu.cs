@@ -14,59 +14,53 @@ namespace SP.StudioCore.Model
     /// </summary>
     public class AdminMenu
     {
-        public AdminMenu(XElement root, bool menuOnly, params string[] permission) : this(Language.CHN, root, menuOnly, permission)
+        public AdminMenu(XElement root, bool menuOnly, params string[] permission) : this(root, menuOnly, null, permission)
         {
 
         }
 
-        public AdminMenu(Language language, XElement root, bool menuOnly, params string[] permission)
+        public AdminMenu(XElement root, bool menuOnly, Func<string, string>? getMenuName, params string[] permission)
         {
-            this.Name = root.GetAttributeValue("name");
-            string text = null;
-            switch (language)
-            {
-                case Language.CHN:
-                    break;
-                default:
-                    text = root.GetAttributeValue(language.ToString().ToLower());
-                    break;
-            }
-            if (!string.IsNullOrWhiteSpace(text))
-            {
-                this.Name = text;
-            }
             this.ID = root.GetAttributeValue("ID");
             this.Href = root.GetAttributeValue("href");
             this.Icon = root.GetAttributeValue("icon");
-            this.IsChecked = permission == null ? true : permission.Contains(this.ID);
+            if (this.ID == null || this.Href == null || this.Icon == null) return;
+            string? name = root.GetAttributeValue("name");
+            if (getMenuName != null)
+            {
+                name = getMenuName(this.ID);
+                if (name == this.ID) name = root.GetAttributeValue("name");
+            }
+            this.Name = name;
+            this.IsChecked = permission == null || permission.Contains(this.ID);
             this.menu = new List<AdminMenu>();
             foreach (XElement item in root.Elements())
             {
                 if (menuOnly && (item.Name.ToString() != "menu" ||
                       (permission != null && !permission.Contains(item.GetAttributeValue("ID"))))) continue;
-                this.menu.Add(new AdminMenu(language, item, menuOnly, permission));
+                this.menu.Add(new AdminMenu(item, menuOnly, getMenuName, permission ?? System.Array.Empty<string>()));
             }
         }
 
         /// <summary>
         /// 权限名字
         /// </summary>
-        public string Name { get; private set; }
+        public string? Name { get; private set; }
 
         /// <summary>
         /// 权限ID
         /// </summary>
-        public string ID { get; private set; }
+        public string? ID { get; private set; }
 
         /// <summary>
         /// 链接地址
         /// </summary>
-        public string Href { get; private set; }
+        public string? Href { get; private set; }
 
         /// <summary>
         /// 图标
         /// </summary>
-        public string Icon { get; private set; }
+        public string? Icon { get; private set; }
 
         /// <summary>
         /// 是否已经拥有该权限
@@ -76,7 +70,7 @@ namespace SP.StudioCore.Model
         /// <summary>
         /// 下级菜单
         /// </summary>
-        public List<AdminMenu> menu { get; private set; }
+        public List<AdminMenu>? menu { get; private set; }
 
 
         /// <summary>

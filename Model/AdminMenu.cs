@@ -24,12 +24,11 @@ namespace SP.StudioCore.Model
             this.ID = root.GetAttributeValue("ID");
             this.Href = root.GetAttributeValue("href");
             this.Icon = root.GetAttributeValue("icon");
-            if (this.ID == null || this.Href == null || this.Icon == null) return;
             string? name = root.GetAttributeValue("name");
             if (getMenuName != null)
             {
-                name = getMenuName(this.ID);
-                if (name == this.ID) name = root.GetAttributeValue("name");
+                name = getMenuName(this.ID ?? string.Empty);
+                if (string.IsNullOrEmpty(name)) name = root.GetAttributeValue("name");
             }
             this.Name = name;
             this.IsChecked = permission == null || permission.Contains(this.ID);

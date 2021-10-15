@@ -122,7 +122,7 @@ namespace SP.StudioCore.Enums
         /// <typeparam name="TAttributes"></typeparam>
         /// <param name="em"></param>
         /// <returns></returns>
-        public static TAttributes GetAttribute<TAttributes>(this Enum em) where TAttributes : Attribute
+        public static TAttributes? GetAttribute<TAttributes>(this Enum em) where TAttributes : Attribute
         {
             foreach (FieldInfo field in em.GetType().GetFields().Where(t => t.Name == em.ToString()))
             {
@@ -130,6 +130,16 @@ namespace SP.StudioCore.Enums
                 return field.GetAttribute<TAttributes>();
             }
             return default;
+        }
+
+        public static bool HasAttribute<TAttributes>(this Enum em) where TAttributes : Attribute
+        {
+            foreach (FieldInfo field in em.GetType().GetFields().Where(t => t.Name == em.ToString()))
+            {
+                if (field.IsSpecialName) continue;
+                return field.HasAttribute<TAttributes>();
+            }
+            return false;
         }
 
         /// <summary>
@@ -172,7 +182,7 @@ namespace SP.StudioCore.Enums
                     if (item == null) continue;
                     string? key = item.ToString();
                     string? description = ((Enum)item).GetDescription();
-                    if(key == null || description == null) continue;
+                    if (key == null || description == null) continue;
                     dic[name].Add(key, description);
                 }
             }

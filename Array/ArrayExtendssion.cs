@@ -50,6 +50,24 @@ namespace SP.StudioCore.Array
         }
 
         /// <summary>
+        /// 字典转化成为二维数组（方便前端转化成为Map对象）
+        /// </summary>
+        /// <typeparam name="TKey"></typeparam>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public static object[][] AsArray<TKey, TValue>(this IEnumerable<KeyValuePair<TKey, TValue>> data)
+        {
+            List<object[]> list = new();
+            foreach (KeyValuePair<TKey, TValue> item in data)
+            {
+                if (item.Key == null || item.Value == null) continue;
+                list.Add(new object[] { item.Key, item.Value });
+            }
+            return list.ToArray();
+        }
+
+        /// <summary>
         /// 字符串转字典
         /// </summary>
         public static Dictionary<TKey, TValue> ToDictionary<TKey, TValue>(this string queryString) where TKey : notnull

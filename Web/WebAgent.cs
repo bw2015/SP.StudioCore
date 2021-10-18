@@ -9,6 +9,8 @@ using SP.StudioCore.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
@@ -53,15 +55,22 @@ namespace SP.StudioCore.Web
         /// <param name="ip"></param>
         /// <param name="length">要隐藏的段数 =1 隐藏最后一位</param>
         /// <returns></returns>
-        public static string HiddenIP(string ip, int length)
+        public static string? HiddenIP(string ip, int length)
         {
-            if (!IPAgent.regex.IsMatch(ip)) return ip;
-            string[] ips = ip.Split('.');
+            if (!IPAddress.TryParse(ip, out IPAddress? address)) return null;
+            string[] ips = ip.Split('.', ':');
             for (int i = 1; i <= length; i++)
             {
                 ips[ips.Length - i] = "*";
             }
-            return string.Join(".", ips);
+            if (address.AddressFamily == AddressFamily.InterNetworkV6)
+            {
+                return string.Join(".", ips);
+            }
+            else
+            {
+                return string.Join(":", ips);
+            }
         }
 
         /// <summary>

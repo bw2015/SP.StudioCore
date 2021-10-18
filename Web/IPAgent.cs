@@ -11,6 +11,8 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Net;
 using Elasticsearch.Net;
+using System.Net.Sockets;
+using SP.StudioCore.Web.ipv6wry;
 
 namespace SP.StudioCore.Web
 {
@@ -20,7 +22,7 @@ namespace SP.StudioCore.Web
     public static class IPAgent
     {
 
-        private static IPHeader header = IocCollection.GetService<IPHeader>();
+        private static IPHeader? header = IocCollection.GetService<IPHeader>();
 
         /// <summary>
         /// 没有IP地址
@@ -28,17 +30,17 @@ namespace SP.StudioCore.Web
         private const string NO_IP = "0.0.0.0";
 
         /// <summary>
-        /// 不支持的IP（可能是IPv6）
-        /// </summary>
-        private const string ERROR_IP = "255.255.255.255";
-
-        /// <summary>
         /// IP库的路径
         /// </summary>
         private const string IPDATA_PATH = "ipipfree.ipdb";
 
         /// <summary>
-        /// 获取当前访问的IP
+        /// IPv6数据库
+        /// </summary>
+        private const string IPV6_PATH = "ipv6wry.db";
+
+        /// <summary>
+        /// 获取当前访问的IP（支持IPv6）
         /// </summary>
         public static string IP
         {
@@ -49,9 +51,22 @@ namespace SP.StudioCore.Web
         }
 
         /// <summary>
-        /// IPv4的正则验证
+        /// 用Guid表示的IP地址（支持IPv6）
         /// </summary>
-        public static readonly Regex regex = new Regex(@"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}");
+        public static Guid IPv6
+        {
+            get
+            {
+                return IP.ToGuid();
+            }
+        }
+
+
+        /// <summary>
+        /// 获取IP（支持IPV6）
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
         public static string GetIP(this HttpContext context)
         {
             if (context == null) return NO_IP;
@@ -65,25 +80,22 @@ namespace SP.StudioCore.Web
             foreach (string key in keys)
             {
                 if (key == null || !context.Request.Headers.ContainsKey(key)) continue;
-                string value = context.Request.Headers[key];
-                if (regex.IsMatch(value))
+                string values = context.Request.Headers[key];
+                if (string.IsNullOrEmpty(values)) continue;
+                foreach (string value in values.Split(','))
                 {
-                    ip = regex.Match(value).Value;
-                    break;
+                    if (IPAddress.TryParse(value, out IPAddress? address))
+                    {
+                        ip = address.ToString();
+                    }
                 }
             }
             if (string.IsNullOrEmpty(ip))
             {
-                ip = context.Features.Get<IHttpConnectionFeature>().RemoteIpAddress.MapToIPv4().ToString();
-            }
-            if (!regex.IsMatch(ip))
-            {
-                ip = ERROR_IP;
+                ip = context.Features.Get<IHttpConnectionFeature>()?.RemoteIpAddress?.ToString() ?? NO_IP;
             }
             return ip;
         }
-
-
 
         /// <summary>
         /// 本地缓存库
@@ -92,13 +104,25 @@ namespace SP.StudioCore.Web
 
         public static CityInfo GetAddress(string ip)
         {
-            if (!regex.IsMatch(ip) || ip == NO_IP) return ip ?? string.Empty;
+            if (!IPAddress.TryParse(ip, out IPAddress? address) || ip == NO_IP) return ip ?? string.Empty;
+            ip = address.ToString();
             if (addressCache.ContainsKey(ip)) return addressCache[ip];
             lock (addressCache)
             {
-                if (!File.Exists(IPDATA_PATH)) return new CityInfo(); ;
-                City db = new(IPDATA_PATH);
-                CityInfo info = db.findInfo(ip, "CN");
+                CityInfo info = new CityInfo();
+                // IPv6 查询
+                if (address.AddressFamily == AddressFamily.InterNetworkV6)
+                {
+                    if (!File.Exists(IPV6_PATH)) return info;
+                    AccessFile af = new(IPV6_PATH, "20210510");
+                    info = af.query(ip);
+                }
+                else
+                {
+                    if (!File.Exists(IPDATA_PATH)) return info;
+                    City db = new(IPDATA_PATH);
+                    info = db.findInfo(ip, "CN");
+                }
                 if (!addressCache.ContainsKey(ip)) addressCache.Add(ip, info);
                 return info;
             }
@@ -128,13 +152,13 @@ namespace SP.StudioCore.Web
         }
 
         /// <summary>
-        /// IP地址转化成为long型
+        /// IP地址转化成为long型（仅支持IPV4）
         /// </summary>
         /// <param name="ip"></param>
         /// <returns></returns>
         public static long IPToLong(this string ip)
         {
-            if (!regex.IsMatch(ip) || ip == NO_IP) return 0;
+            if (ip == NO_IP) return 0;
             byte[] ip_bytes = new byte[8];
             string[] strArr = ip.Split('.');
             for (int i = 0; i < 4; i++)
@@ -156,7 +180,7 @@ namespace SP.StudioCore.Web
         }
 
         /// <summary>
-        /// IP转化成为int32格式
+        /// IPv4转化成为int32格式
         /// </summary>
         /// <param name="ip"></param>
         /// <returns></returns>
@@ -193,7 +217,7 @@ namespace SP.StudioCore.Web
         /// <returns></returns>
         public static bool IsMask(this string ip, long mask)
         {
-            if (!regex.IsMatch(ip) || ip == NO_IP) return false;
+            if (ip == NO_IP) return false;
             byte[] mask_bytes = BitConverter.GetBytes(mask).Take(4).Reverse().ToArray();
             byte[] ip_bytes = ip.Split('.').Select(t => byte.Parse(t)).ToArray();
 
@@ -218,6 +242,49 @@ namespace SP.StudioCore.Web
             if (!info.Contains("中国")) return false;
             if (info.Contains("香港") || info.Contains("澳门") || info.Contains("台湾")) return false;
             return true;
+        }
+
+        /// <summary>
+        /// IP转换成为 Guid 格式（兼容ipv4 + ipv6)
+        /// </summary>
+        /// <param name="ip"></param>
+        /// <returns></returns>
+        public static Guid ToGuid(this string ip)
+        {
+            try
+            {
+                IPAddress ipAddress = IPAddress.Parse(ip);
+                byte[] data = ipAddress.GetAddressBytes();
+                if (data.Length == 4)
+                {
+                    data = new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, data[0], data[1], data[2], data[3] };
+                }
+                return new Guid(data);
+            }
+            catch
+            {
+                return Guid.Empty;
+            }
+        }
+
+        /// <summary>
+        /// Guid转化成为IP（兼容 ipv4+ipv6）
+        /// </summary>
+        /// <param name="guid"></param>
+        /// <returns></returns>
+        public static string ToIP(this Guid guid)
+        {
+            byte[] data = guid.ToByteArray();
+            IPAddress ipAddress = new IPAddress(data);
+
+            if (!data.Take(12).Any(t => t != 0))
+            {
+                return ipAddress.ToString();
+            }
+            else
+            {
+                return ipAddress.MapToIPv4().ToString();
+            }
         }
     }
 }

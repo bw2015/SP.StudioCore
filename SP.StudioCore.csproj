@@ -37,6 +37,9 @@
         <None Update="ipipfree.ipdb">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
+        <None Update="ipv6wry.db">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
         <None Update="Properties\domain.xml">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>

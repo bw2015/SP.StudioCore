@@ -53,7 +53,7 @@ namespace SP.StudioCore.Web
         /// <summary>
         /// 用Guid表示的IP地址（支持IPv6）
         /// </summary>
-        public static Guid IPv6
+        public static Guid IPGuid
         {
             get
             {

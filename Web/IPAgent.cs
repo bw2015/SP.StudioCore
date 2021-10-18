@@ -100,7 +100,7 @@ namespace SP.StudioCore.Web
         /// <summary>
         /// 本地缓存库
         /// </summary>
-        private static readonly Dictionary<string, CityInfo> addressCache = new Dictionary<string, CityInfo>();
+        private static readonly Dictionary<string, CityInfo> addressCache = new();
 
         public static CityInfo GetAddress(string ip)
         {
@@ -126,6 +126,12 @@ namespace SP.StudioCore.Web
                 if (!addressCache.ContainsKey(ip)) addressCache.Add(ip, info);
                 return info;
             }
+        }
+
+        public static CityInfo GetAddress(Guid ip)
+        {
+            string ipAddress = ip.ToIP();
+            return GetAddress(ipAddress);
         }
 
         /// <summary>

@@ -293,7 +293,7 @@ namespace SP.StudioCore.Web
             byte[] data = guid.ToByteArray();
             IPAddress ipAddress = new IPAddress(data);
 
-            if (!data.Take(12).Any(t => t != 0))
+            if (data.Take(12).Any(t => t != 0))
             {
                 return ipAddress.ToString();
             }

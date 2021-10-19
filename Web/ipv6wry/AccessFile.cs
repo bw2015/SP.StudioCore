@@ -238,7 +238,6 @@ namespace SP.StudioCore.Web.ipv6wry
             }
             UTF8Encoding utf8 = new UTF8Encoding();
             str = str.ToUpper();
-            Byte[] encodedBytes = utf8.GetBytes(str);
             string str_aa = Encoding.GetEncoding("UTF-8").GetString(this.HexStringToByteArray(str));
             return str_aa;
         }

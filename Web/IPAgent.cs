@@ -102,6 +102,16 @@ namespace SP.StudioCore.Web
         /// </summary>
         private static readonly Dictionary<string, CityInfo> addressCache = new();
 
+        /// <summary>
+        /// 验证 是否IP 兼容IPV4 IPV6
+        /// </summary>
+        /// <param name="ip"></param>
+        /// <returns></returns>
+        public static bool IsIP(string ip)
+        {
+            return IPAddress.TryParse(ip, out _);
+        }
+
         public static CityInfo GetAddress(string ip)
         {
             if (!IPAddress.TryParse(ip, out IPAddress? address) || ip == NO_IP) return ip ?? string.Empty;

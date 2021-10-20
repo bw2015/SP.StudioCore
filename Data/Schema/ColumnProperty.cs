@@ -16,11 +16,11 @@ namespace SP.StudioCore.Data.Schema
         public ColumnProperty(PropertyInfo property)
         {
             this.Property = property;
-            ColumnAttribute column = property.GetAttribute<ColumnAttribute>();
-            DatabaseGeneratedAttribute generate = property.GetAttribute<DatabaseGeneratedAttribute>();
-            KeyAttribute key = property.GetAttribute<KeyAttribute>();
+            ColumnAttribute? column = property.GetAttribute<ColumnAttribute>();
+            DatabaseGeneratedAttribute? generate = property.GetAttribute<DatabaseGeneratedAttribute>();
+            KeyAttribute? key = property.GetAttribute<KeyAttribute>();
 
-            this.Name = column.Name;
+            this.Name = column?.Name;
             this.Identity = generate == null ? false : generate.DatabaseGeneratedOption == DatabaseGeneratedOption.Identity;
             this.IsKey = key != null;
         }
@@ -33,7 +33,7 @@ namespace SP.StudioCore.Data.Schema
         /// <summary>
         /// 数据库的字段名
         /// </summary>
-        public string Name;
+        public string? Name;
 
         /// <summary>
         /// 是否自动编号

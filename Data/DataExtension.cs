@@ -26,15 +26,16 @@ namespace SP.StudioCore.Data
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public static string GetTableName<T>(this T obj) where T : class, new()
+        public static string? GetTableName<T>(this T obj) where T : class, new()
         {
             return typeof(T).GetTableName();
         }
 
-        public static string GetTableName(this Type type)
+        public static string? GetTableName(this Type? type)
         {
-            TableAttribute table = type.GetAttribute<TableAttribute>();
-            return table == null ? type.Name : table.Name;
+            if (type == null) return null;
+            TableAttribute? table = type?.GetAttribute<TableAttribute>();
+            return table == null ? type?.Name : table.Name;
         }
 
         private static DynamicParameters GetParameters<T>(this T obj, IEnumerable<ColumnProperty> fields) where T : class, new()
@@ -42,7 +43,7 @@ namespace SP.StudioCore.Data
             DynamicParameters param = new DynamicParameters();
             foreach (var item in fields)
             {
-                object value = item.Property.GetValue(obj);
+                object? value = item.Property.GetValue(obj);
                 param.Add(item.Property.Name, value.GetValue(item.Property.PropertyType));
             }
             return param;
@@ -123,7 +124,7 @@ namespace SP.StudioCore.Data
         /// <param name="db"></param>
         /// <param name="precate"></param>
         /// <returns></returns>
-        public static T Info<T>(this T obj, DbExecutor db, params Expression<Func<T, object>>[] precate) where T : class, new()
+        public static T? Info<T>(this T obj, DbExecutor db, params Expression<Func<T, object>>[] precate) where T : class, new()
         {
             SQLResult result = db.GetSqlProvider().Info<T>(obj, precate);
             DataSet ds = db.GetDataSet(CommandType.Text, result.CommandText, result.Prameters);
@@ -158,16 +159,18 @@ namespace SP.StudioCore.Data
         /// <param name="condition"></param>
         /// <param name="fields"></param>
         /// <returns></returns>
-        public static int Update<T>(this T obj, DbExecutor db, Dictionary<ColumnProperty, object> condition, params Expression<Func<T, object>>[] fields) where T : class, new()
+        public static int Update<T>(this T obj, DbExecutor db, Dictionary<ColumnProperty, object>? condition, params Expression<Func<T, object>>[] fields) where T : class, new()
         {
             if (condition == null) condition = obj.GetCondition();
-            string tableName = obj.GetTableName();
+            string? tableName = obj.GetTableName();
+            if (tableName == null) return 0;
+
             string sql = $"UPDATE [{tableName}] SET ";
 
             // 要更新的字段
             IEnumerable<ColumnProperty> updateFields =
                 (
-                fields.Length == 0 ? SchemaCache.GetColumns<T>(t => !t.IsKey) : SchemaCache.GetColumns<T>(t => fields.Any(p => p.ToPropertyInfo().Name == t.Property.Name))
+                fields.Length == 0 ? SchemaCache.GetColumns<T>(t => !t.IsKey) : SchemaCache.GetColumns<T>(t => fields.Any(p => p.ToPropertyInfo()?.Name == t.Property.Name))
                 ).Where(t => !condition.Select(p => p.Key).Any(p => p.Name == t.Name));
 
             sql += string.Join(",", updateFields.Select(t => $"[{t.Name}] = @{t.Property.Name}"));
@@ -177,7 +180,7 @@ namespace SP.StudioCore.Data
             }
             foreach (ColumnProperty property in updateFields)
             {
-                if (!condition.ContainsKey(property)) condition.Add(property, property.Property.GetValue(obj).GetValue(property.Property.PropertyType));
+                if (!condition.ContainsKey(property)) condition.Add(property, property.Property.GetValue(obj).GetValue(property.Property.PropertyType) ?? string.Empty);
             }
 
             DynamicParameters param = new DynamicParameters();
@@ -301,7 +304,7 @@ namespace SP.StudioCore.Data
         {
             // 要更新的字段
             IEnumerable<ColumnProperty> condition =
-                fields.Length == 0 ? SchemaCache.GetColumns<T>(t => t.IsKey) : SchemaCache.GetColumns<T>(t => fields.Any(p => p.ToPropertyInfo().Name == t.Property.Name));
+                fields.Length == 0 ? SchemaCache.GetColumns<T>(t => t.IsKey) : SchemaCache.GetColumns<T>(t => fields.Any(p => p.ToPropertyInfo()?.Name == t.Property.Name));
 
             string sql = $"SELECT 0 FROM [{obj.GetTableName()}] WHERE { string.Join(" AND ", condition.Select(t => string.Format("[{0}] = @{1}", t.Name, t.Property.Name))) }";
             Object result = db.ExecuteScalar(CommandType.Text, sql, obj.GetParameters(condition));
@@ -323,7 +326,7 @@ namespace SP.StudioCore.Data
         {
             // 条件字段
             IEnumerable<ColumnProperty> condition =
-                where.Length == 0 ? SchemaCache.GetColumns<T>(t => t.IsKey) : SchemaCache.GetColumns<T>(t => where.Any(p => p.ToPropertyInfo().Name == t.Property.Name));
+                where.Length == 0 ? SchemaCache.GetColumns<T>(t => t.IsKey) : SchemaCache.GetColumns<T>(t => where.Any(p => p.ToPropertyInfo()?.Name == t.Property.Name));
 
             string sql = $"SELECT TOP 1 [{ SchemaCache.GetColumnProperty(field).Name }] FROM [{obj.GetTableName()}] WHERE { string.Join(" AND ", condition.Select(t => string.Format("[{0}] = @{1}", t.Name, t.Property.Name))) }";
             object result = db.ExecuteScalar(CommandType.Text, sql, obj.GetParameters(condition));
@@ -337,7 +340,8 @@ namespace SP.StudioCore.Data
         /// </summary>
         public static T Fill<T>(this DataRow dr) where T : class, new()
         {
-            Dictionary<string, PropertyInfo> properties = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(t => t.HasAttribute<ColumnAttribute>()).ToDictionary(t => t.GetAttribute<ColumnAttribute>().Name, t => t);
+            Dictionary<string, PropertyInfo> properties = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(t => t.HasAttribute<ColumnAttribute>())
+                .ToDictionary(t => t.GetAttribute<ColumnAttribute>()?.Name ?? String.Empty, t => t);
             DataColumnCollection columns = dr.Table.Columns;
             T t = new T();
             foreach (DataColumn column in columns)
@@ -350,9 +354,9 @@ namespace SP.StudioCore.Data
             return t;
         }
 
-        public static T Fill<T>(this DataSet ds) where T : class, new()
+        public static T? Fill<T>(this DataSet ds) where T : class, new()
         {
-            if (ds.Tables.Count != 1 || ds.Tables[0].Rows.Count != 1) return default;
+            if (ds.Tables.Count != 1 || ds.Tables[0].Rows.Count != 1) return null;
             return ds.Tables[0].Rows[0].Fill<T>();
         }
 
@@ -366,7 +370,8 @@ namespace SP.StudioCore.Data
 
         public static T Fill<T>(this IDataReader reader) where T : class, new()
         {
-            Dictionary<string, PropertyInfo> properties = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(t => t.HasAttribute<ColumnAttribute>()).ToDictionary(t => t.GetAttribute<ColumnAttribute>().Name, t => t);
+            Dictionary<string, PropertyInfo> properties = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(t => t.HasAttribute<ColumnAttribute>())
+                .ToDictionary(t => t.GetAttribute<ColumnAttribute>()?.Name ?? string.Empty, t => t);
             string[] columns = new string[reader.FieldCount];
             for (int index = 0; index < columns.Length; index++)
             {

@@ -27,7 +27,33 @@ namespace SP.StudioCore.Types
             }
             return property;
         }
-
+        /// <summary>
+        /// 获取表达式对应sql运算类型
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public static string GetExpressionType(this ExpressionType type)
+        {
+            switch (type)
+            {
+                case ExpressionType.OrElse:
+                case ExpressionType.Or: return "OR";
+                case ExpressionType.AndAlso:
+                case ExpressionType.And: return "AND";
+                case ExpressionType.GreaterThan: return ">";
+                case ExpressionType.GreaterThanOrEqual: return ">=";
+                case ExpressionType.LessThan: return "<";
+                case ExpressionType.LessThanOrEqual: return "<=";
+                case ExpressionType.NotEqual: return "<>";
+                case ExpressionType.Add: return "+";
+                case ExpressionType.Subtract: return "-";
+                case ExpressionType.Multiply: return "*";
+                case ExpressionType.Divide: return "/";
+                case ExpressionType.Modulo: return "%";
+                case ExpressionType.Equal: return "=";
+            }
+            return string.Empty;
+        }
         /// <summary>
         /// 获取属性值
         /// </summary>

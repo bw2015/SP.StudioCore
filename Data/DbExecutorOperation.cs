@@ -4,6 +4,7 @@ using SP.StudioCore.Model;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 
@@ -120,5 +121,7 @@ namespace SP.StudioCore.Data
         public int Count<T>(Expression<Func<T, bool>> condition) where T : class, new() => provider.Count(condition);
 
         public int Count<T>() where T : class, new() => provider.Count<T>();
+
+        public IQueryable<TEntity> Query<TEntity>() where TEntity : class, new() => provider.Query<TEntity>();
     }
 }

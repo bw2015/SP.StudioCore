@@ -622,6 +622,9 @@ namespace SP.StudioCore.Data.Provider
             return this.db.ExecuteNonQuery(CommandType.Text, sb.ToString(), parameters) == 1;
         }
 
-
+        public IQueryable<TEntity> Query<TEntity>() where TEntity : class, new()
+        {
+            return new DapperQueryable<TEntity>(new SqlServerQueryProvider(db));
+        }
     }
 }

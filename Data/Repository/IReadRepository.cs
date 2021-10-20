@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq.Expressions;
 using System.Data;
+using System.Linq;
 
 namespace SP.StudioCore.Data.Repository
 {
@@ -113,6 +114,13 @@ namespace SP.StudioCore.Data.Repository
         /// <param name="condition"></param>
         /// <returns></returns>
         IEnumerable<TValue> ReadList<T, TValue>(Expression<Func<T, TValue>> field, Expression<Func<T, bool>> condition) where T : class, new();
+
+        /// <summary>
+        /// 查询（延迟执行）
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <returns></returns>
+        IQueryable<TEntity> Query<TEntity>() where TEntity : class, new();
 
         #endregion
 

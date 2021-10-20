@@ -181,6 +181,11 @@ namespace SP.StudioCore.Data.Provider
             throw new NotImplementedException();
         }
 
+        public IQueryable<TEntity> Query<TEntity>() where TEntity : class, new()
+        {
+            throw new NotImplementedException();
+        }
+
         public IDataReader ReadData<T>(T obj) where T : IProcedureModel
         {
             return db.ReadData(CommandType.StoredProcedure, typeof(T).GetTableName(), obj.ToParameters());

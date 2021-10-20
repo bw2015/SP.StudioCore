@@ -2,10 +2,12 @@
 using Newtonsoft.Json.Converters;
 using SP.StudioCore.Model;
 using SP.StudioCore.Types;
+using SP.StudioCore.Web;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace SP.StudioCore.Json
 {
@@ -101,14 +103,18 @@ namespace SP.StudioCore.Json
 
         public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
-            DateTime date = (DateTime)value;
-            if (date.Year <= 1900)
+            DateTime? date = (DateTime?)value;
+            if (date == null)
+            {
+                writer.WriteNull();
+            }
+            else if (date?.Year <= 1900)
             {
                 writer.WriteNull();
             }
             else
             {
-                writer.WriteValue(date.ToString("yyyy-MM-dd HH:mm:ss"));
+                writer.WriteValue(date?.ToString("yyyy-MM-dd HH:mm:ss"));
             }
         }
         public override bool CanRead => false;
@@ -158,7 +164,11 @@ namespace SP.StudioCore.Json
         {
             if (value == null) return;
             Guid obj = (Guid)value;
-            if (obj == Guid.Empty)
+            if (Regex.IsMatch(writer.Path, @"^IP$", RegexOptions.IgnoreCase))
+            {
+                writer.WriteValue(obj.ToIP());
+            }
+            else if (obj == Guid.Empty)
             {
                 writer.WriteValue(string.Empty);
             }

@@ -242,6 +242,11 @@ namespace SP.StudioCore.Data.Provider
             throw new NotImplementedException();
         }
 
+        public IEnumerable<T> ReadList<T>(int top, string condition, string sort, object? parameters = null, params Expression<Func<T, object>>[] fields) where T : class, new()
+        {
+            throw new NotImplementedException();
+        }
+
         public IEnumerable<TResult> ReadScalar<TResult, T>(T obj) where T : IProcedureModel
         {
             List<TResult> list = new List<TResult>();

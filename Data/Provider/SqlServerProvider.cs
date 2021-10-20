@@ -242,7 +242,7 @@ namespace SP.StudioCore.Data.Provider
         /// <param name="parameters"></param>
         /// <param name="fields">置顶要查询的字段</param>
         /// <returns></returns>
-        public IEnumerable<T> ReadList<T>(string condition, object parameters = null, params Expression<Func<T, object>>[] fields) where T : class, new()
+        public IEnumerable<T> ReadList<T>(string condition, object? parameters = null, params Expression<Func<T, object>>[] fields) where T : class, new()
         {
             List<T> list = new List<T>();
             string columns =
@@ -255,7 +255,40 @@ namespace SP.StudioCore.Data.Provider
                 {
                     while (reader.Read())
                     {
-                        list.Add((T)Activator.CreateInstance(typeof(T), reader));
+                        T? item = (T?)Activator.CreateInstance(typeof(T), reader);
+                        if (item != null)
+                        {
+                            list.Add(item);
+                        }
+                    }
+                }
+                finally
+                {
+                    if (!reader.IsClosed) reader.Close();
+                }
+            }
+            return list;
+        }
+
+        public IEnumerable<T> ReadList<T>(int top, string condition, string sort, object? parameters = null, params Expression<Func<T, object>>[] fields) where T : class, new()
+        {
+            List<T> list = new List<T>();
+            string columns =
+                fields.Length == 0 ?
+                string.Join(",", SchemaCache.GetColumns<T>().Select(t => $"[{t.Name}]")) :
+                string.Join(",", SchemaCache.GetColumns(fields).Select(t => $"[{t.Name}]"));
+            using (IDataReader reader = db.ReadData(CommandType.Text, $"SELECT TOP {top} {columns} FROM [{typeof(T).GetTableName()}] WHERE {condition} ORDER BY {sort}",
+                parameters))
+            {
+                try
+                {
+                    while (reader.Read())
+                    {
+                        T? item = (T?)Activator.CreateInstance(typeof(T), reader);
+                        if (item != null)
+                        {
+                            list.Add(item);
+                        }
                     }
                 }
                 finally
@@ -588,6 +621,7 @@ namespace SP.StudioCore.Data.Provider
             }
             return this.db.ExecuteNonQuery(CommandType.Text, sb.ToString(), parameters) == 1;
         }
+
 
     }
 }

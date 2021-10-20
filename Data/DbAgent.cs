@@ -84,10 +84,11 @@ namespace SP.StudioCore.Data
         /// </summary>
         /// <param name="msg"></param>
         /// <returns></returns>
-        public virtual MessageResult Message(string msg = null)
+        public virtual MessageResult? Message(string? msg = null)
         {
             if (this.context == null) return default;
-            MessageResult result = this.context.RequestServices.GetService<MessageResult>();
+            MessageResult? result = this.context.RequestServices.GetService<MessageResult>();
+            if (result == null) return default;
             if (!string.IsNullOrEmpty(msg)) result.Add(msg);
             return result;
         }

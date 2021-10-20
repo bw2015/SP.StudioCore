@@ -38,7 +38,7 @@ namespace SP.StudioCore.Data.Expressions
 
 
 
-        public override Expression Visit(Expression node)
+        public override Expression? Visit(Expression? node)
         {
             return base.Visit(node);
         }

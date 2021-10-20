@@ -79,7 +79,12 @@ namespace SP.StudioCore.Data.Repository
         /// <param name="condition">查询条件</param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        IEnumerable<T> ReadList<T>(string condition, object parameters = null, params Expression<Func<T, object>>[] fields) where T : class, new();
+        IEnumerable<T> ReadList<T>(string condition, object? parameters = null, params Expression<Func<T, object>>[] fields) where T : class, new();
+
+        /// <summary>
+        /// 使用SQL查询（支持TOP\ORDER)
+        /// </summary>
+        IEnumerable<T> ReadList<T>(int top, string condition, string sort, object? parameters = null, params Expression<Func<T, object>>[] fields) where T : class, new();
 
         /// <summary>
         /// 查询表的数据

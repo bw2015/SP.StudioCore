@@ -303,4 +303,13 @@ namespace SP.StudioCore.Web
             }
         }
     }
+
+    /// <summary>
+    /// 标记一个字段是IP地址
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
+    public class IPAddressAttribute : Attribute
+    {
+
+    }
 }

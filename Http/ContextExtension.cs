@@ -258,7 +258,7 @@ namespace SP.StudioCore.Http
         /// <param name="context"></param>
         /// <param name="encoding"></param>
         /// <returns></returns>
-        public static T GetJson<T>(this HttpContext context, Encoding encoding = null)
+        public static T? GetJson<T>(this HttpContext context, Encoding? encoding = null)
         {
             string input = context.GetString(encoding);
             if (string.IsNullOrEmpty(input)) return default;

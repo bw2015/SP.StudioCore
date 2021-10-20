@@ -10,7 +10,7 @@ namespace SP.StudioCore.Data.Expressions
     /// </summary>
     public class ExpressionUpdate : ExpressionVisitor
     {
-        public override Expression Visit(Expression node)
+        public override Expression? Visit(Expression? node)
         {
             return base.Visit(node);
         }

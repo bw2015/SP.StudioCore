@@ -410,5 +410,10 @@ namespace SP.StudioCore.Data.Provider
         {
             throw new NotImplementedException();
         }
+
+        public IEnumerable<T> ReadList<T>(int top, string condition, string sort, object? parameters = null, params Expression<Func<T, object>>[] fields) where T : class, new()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

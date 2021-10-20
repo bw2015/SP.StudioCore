@@ -55,6 +55,7 @@ namespace SP.StudioCore.Data
             provider.ReadData(condition, fields);
 
 
+
         public IDataReader ReadData<T>(params Expression<Func<T, object>>[] fields) where T : class, new() =>
             provider.ReadData(fields);
 
@@ -72,8 +73,11 @@ namespace SP.StudioCore.Data
         public T ReadInfo<T>(Expression<Func<T, bool>> condition, params Expression<Func<T, object>>[] fields) where T : class, new() =>
             provider.ReadInfo(condition, fields);
 
-        public IEnumerable<T> ReadList<T>(string condition, object parameters = null, params Expression<Func<T, object>>[] fields) where T : class, new() =>
-            provider.ReadList<T>(condition, parameters, fields);
+        public IEnumerable<T> ReadList<T>(string condition, object? parameters = null, params Expression<Func<T, object>>[] fields) where T : class, new() =>
+            provider.ReadList(condition, parameters, fields);
+
+        public IEnumerable<T> ReadList<T>(int top, string condition, string sort, object? parameters = null, params Expression<Func<T, object>>[] fields) where T : class, new() =>
+            provider.ReadList(top, condition, sort, parameters, fields);
 
         public IEnumerable<T> ReadList<T>(Expression<Func<T, bool>> condition, params Expression<Func<T, object>>[] fields) where T : class, new() =>
             provider.ReadList(condition, fields);

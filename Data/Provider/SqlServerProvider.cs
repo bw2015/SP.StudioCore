@@ -508,17 +508,20 @@ namespace SP.StudioCore.Data.Provider
         /// <param name="value"></param>
         /// <param name="condition"></param>
         /// <returns></returns>
-        public int UpdatePlus<T, TValue>(Expression<Func<T, TValue>> field, TValue value, Expression<Func<T, bool>> condition)
+        public TValue? UpdatePlus<T, TValue>(Expression<Func<T, TValue>> field, TValue value, Expression<Func<T, bool>> condition)
             where T : class, new()
             where TValue : struct
         {
             using (IExpressionCondition expression = db.GetExpressionCondition(condition))
             {
                 string whereSql = expression.ToCondition(out DynamicParameters parameters);
-                string fieldName = SchemaCache.GetColumnProperty(field).Name;
+                string? fieldName = SchemaCache.GetColumnProperty(field).Name;
+                string? tableName = typeof(T).GetTableName();
+
                 parameters.Add("@Value", value);
-                string sql = $"UPDATE [{typeof(T).GetTableName()}] SET [{fieldName}] = [{fieldName}] + @Value {whereSql}";
-                return db.ExecuteNonQuery(CommandType.Text, sql, parameters);
+                string sql = $"UPDATE [{tableName}] SET [{fieldName}] = [{fieldName}] + @Value {whereSql};SELECT [{fieldName}] FROM [{tableName}] {whereSql}";
+                object result = db.ExecuteScalar(CommandType.Text, sql, parameters);
+                return (TValue?)result;
             }
         }
 

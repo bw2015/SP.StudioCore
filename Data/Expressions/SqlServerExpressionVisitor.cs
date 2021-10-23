@@ -148,10 +148,13 @@ namespace SP.StudioCore.Data.Expressions
                         orderby = string.Format("ORDER BY {0} DESC", string.Join(",", item.Value.Select(c => $"[{c}]")));
                         break;
                     case MethodType.OrderBy:
-                        orderby = string.Format("ORDER BY {0} ASE", string.Join(",", item.Value.Select(c => $"[{c}]")));
+                        orderby = string.Format("ORDER BY {0} ASC", string.Join(",", item.Value.Select(c => $"[{c}]")));
                         break;
                     case MethodType.Select:
                         field = string.Join(",", item.Value.Select(c => $"[{c}]"));
+                        break;
+                    case MethodType.Take:
+                        sql = "SELECT TOP " + string.Join(",", item.Value) + " {0} FROM {1} {2} {3}";
                         break;
                     default:
                         break;
@@ -179,12 +182,20 @@ namespace SP.StudioCore.Data.Expressions
                 case TypeCode.Boolean:
                     _field.Push((((bool)value) ? 1 : 0).ToString());
                     break;
-                //case TypeCode.DateTime:
-                //    break;
+                case TypeCode.Int64:
+                    _field.Push(((long)value).ToString());
+                    break;
                 case TypeCode.DBNull:
                     break;
                 case TypeCode.Int32:
-                    _field.Push(((int)value).ToString());
+                    if (this.MethodType == MethodType.Take || this.MethodType == MethodType.Skip)
+                    {
+                        _method[this.MethodType].Add($"{value}");
+                    }
+                    else
+                    {
+                        _field.Push(((int)value).ToString());
+                    }
                     break;
                 case TypeCode.Object:
                     //获取泛型类型
@@ -197,7 +208,7 @@ namespace SP.StudioCore.Data.Expressions
                     }
                     else
                     {
-                        foreach (var item in this.Table.GetProperties().Where(c => !c.HasAttribute<NotMappedAttribute>()))
+                        foreach (var item in this.Table.GetProperties().Where(c => c.CanWrite && !c.HasAttribute<NotMappedAttribute>()))
                         {
                             string fieldname = this.GetColumnName(item);
                             this.AddColumnName(MethodType.Select, fieldname);
@@ -274,6 +285,8 @@ namespace SP.StudioCore.Data.Expressions
                 case MethodType.Any:
                 case MethodType.Count:
                 case MethodType.FirstOrDefault:
+                case MethodType.Take:
+                case MethodType.Skip:
                     this.AddColumnName(this.MethodType);
                     break;
                 default:

@@ -18,6 +18,8 @@ namespace SP.StudioCore.Data.Expressions
         Select,
         Any,
         Count,
-        FirstOrDefault
+        FirstOrDefault,
+        Take,
+        Skip
     }
 }

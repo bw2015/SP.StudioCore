@@ -227,7 +227,7 @@ namespace SP.StudioCore.Data.Provider
             return list;
         }
 
-        public IEnumerable<T> ReadList<T>(string condition, object parameters = null, params Expression<Func<T, object>>[] fields) where T : class, new()
+        public IEnumerable<T> ReadList<T>(string condition, object? parameters = null, params Expression<Func<T, object>>[] fields) where T : class, new()
         {
             throw new NotImplementedException();
         }
@@ -291,7 +291,7 @@ namespace SP.StudioCore.Data.Provider
             throw new NotImplementedException();
         }
 
-        public int UpdatePlus<T, TValue>(Expression<Func<T, TValue>> field, TValue value, Expression<Func<T, bool>> condition)
+        public TValue? UpdatePlus<T, TValue>(Expression<Func<T, TValue>> field, TValue value, Expression<Func<T, bool>> condition)
             where T : class, new()
             where TValue : struct
         {

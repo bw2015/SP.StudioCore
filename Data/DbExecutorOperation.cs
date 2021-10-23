@@ -112,7 +112,7 @@ namespace SP.StudioCore.Data
         public bool Delete<T>(T entity) where T : class, new() =>
             provider.Delete(entity);
 
-        public int UpdatePlus<T, TValue>(Expression<Func<T, TValue>> field, TValue value, Expression<Func<T, bool>> condition) where T : class, new() where TValue : struct =>
+        public TValue? UpdatePlus<T, TValue>(Expression<Func<T, TValue>> field, TValue value, Expression<Func<T, bool>> condition) where T : class, new() where TValue : struct =>
             provider.UpdatePlus(field, value, condition);
 
         public bool Exists<T>(T entity) where T : class, new() =>

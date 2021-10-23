@@ -334,7 +334,7 @@ namespace SP.StudioCore.Mvc
         /// <param name="converter"></param>
         /// <param name="data">附带输出内容</param>
         /// <returns></returns>
-        protected virtual string GetResultContent<T, TOutput>(IEnumerable<T> list, Converter<T, TOutput> converter = null, Object data = null)
+        protected virtual string GetResultContent<T, TOutput>(IEnumerable<T> list, Converter<T, TOutput>? converter = null, Object data = null)
         {
             StringBuilder sb = new StringBuilder();
             string result = string.Empty;

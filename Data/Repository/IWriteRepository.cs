@@ -87,7 +87,7 @@ namespace SP.StudioCore.Data.Repository
         /// <param name="value"></param>
         /// <param name="condition"></param>
         /// <returns></returns>
-        int UpdatePlus<T, TValue>(Expression<Func<T, TValue>> field, TValue value, Expression<Func<T, bool>> condition) where T : class, new() where TValue : struct;
+        TValue? UpdatePlus<T, TValue>(Expression<Func<T, TValue>> field, TValue value, Expression<Func<T, bool>> condition) where T : class, new() where TValue : struct;
 
         #endregion
 

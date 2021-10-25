@@ -115,8 +115,8 @@ namespace SP.StudioCore.Security
         /// <returns></returns>
         public static string DESEncrypt(string data, string key, string iv)
         {
-            byte[] byKey = System.Text.ASCIIEncoding.ASCII.GetBytes(key);
-            byte[] byIV = System.Text.ASCIIEncoding.ASCII.GetBytes(iv);
+            byte[] byKey = Encoding.ASCII.GetBytes(key);
+            byte[] byIV = Encoding.ASCII.GetBytes(iv);
 
             using (DESCryptoServiceProvider cryptoProvider = new DESCryptoServiceProvider())
             {
@@ -140,7 +140,7 @@ namespace SP.StudioCore.Security
         /// <param name="key">8位字符的密钥字符串(需要和加密时相同)</param>
         /// <param name="iv">8位字符的初始化向量字符串(需要和加密时相同)</param>
         /// <returns></returns>
-        public static string DESDecrypt(string data, string key, string iv)
+        public static string? DESDecrypt(string data, string key, string iv)
         {
             byte[] byKey = Encoding.ASCII.GetBytes(key);
             byte[] byIV = Encoding.ASCII.GetBytes(iv);
@@ -168,12 +168,12 @@ namespace SP.StudioCore.Security
         /// <param name="str">明文（待加密）</param>
         /// <param name="key">密文</param>
         /// <returns></returns>
-        public static string AesEncrypt(string str, string key)
+        public static string? AesEncrypt(string str, string key)
         {
             if (string.IsNullOrEmpty(str)) return null;
-            Byte[] toEncryptArray = Encoding.UTF8.GetBytes(str);
+            byte[] toEncryptArray = Encoding.UTF8.GetBytes(str);
 
-            using (RijndaelManaged rm = new RijndaelManaged
+            using (RijndaelManaged rm = new()
             {
                 Key = Encoding.UTF8.GetBytes(key),
                 Mode = CipherMode.ECB,
@@ -182,7 +182,7 @@ namespace SP.StudioCore.Security
             {
 
                 ICryptoTransform cTransform = rm.CreateEncryptor();
-                Byte[] resultArray = cTransform.TransformFinalBlock(toEncryptArray, 0, toEncryptArray.Length);
+                byte[] resultArray = cTransform.TransformFinalBlock(toEncryptArray, 0, toEncryptArray.Length);
                 return Convert.ToBase64String(resultArray);
             }
         }
@@ -198,9 +198,9 @@ namespace SP.StudioCore.Security
             if (string.IsNullOrEmpty(str)) return null;
             try
             {
-                Byte[] toEncryptArray = Convert.FromBase64String(str);
+                byte[] toEncryptArray = Convert.FromBase64String(str);
 
-                using (RijndaelManaged rm = new RijndaelManaged
+                using (RijndaelManaged rm = new()
                 {
                     Key = Encoding.UTF8.GetBytes(key),
                     Mode = CipherMode.ECB,
@@ -209,7 +209,7 @@ namespace SP.StudioCore.Security
                 {
 
                     ICryptoTransform cTransform = rm.CreateDecryptor();
-                    Byte[] resultArray = cTransform.TransformFinalBlock(toEncryptArray, 0, toEncryptArray.Length);
+                    byte[] resultArray = cTransform.TransformFinalBlock(toEncryptArray, 0, toEncryptArray.Length);
 
                     return Encoding.UTF8.GetString(resultArray);
                 }

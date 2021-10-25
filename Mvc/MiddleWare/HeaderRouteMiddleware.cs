@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -21,8 +22,9 @@ namespace SP.StudioCore.Mvc.MiddleWare
         }
         public async Task Invoke(HttpContext context)
         {
-            var    sw   = Stopwatch.StartNew();
-            string path = context.Request.Path.Value;
+            var sw = Stopwatch.StartNew();
+            string? path = context.Request.Path.Value;
+            if (path == null) return;
             if (path == "/")
             {
                 switch (context.Request.Method)
@@ -54,6 +56,24 @@ namespace SP.StudioCore.Mvc.MiddleWare
                             path = "/" + path;
                         }
                         context.Request.Path = path;
+
+                        if (!context.Request.HasFormContentType)
+                        {
+
+                            var originalBodyStream = context.Response.Body;
+                            await using (var responseBody = new MemoryStream())
+                            {
+                                // 先将MemoryStream给Body，用于后续取响应内容
+                                context.Response.Body = responseBody;
+                                await _next.Invoke(context: context);
+
+                                context.Response.Body.Seek(offset: 0, origin: SeekOrigin.Begin);
+                                var rspBody = await new StreamReader(stream: context.Response.Body).ReadToEndAsync();
+                                context.Response.Body.Seek(offset: 0, origin: SeekOrigin.Begin);
+                                await responseBody.CopyToAsync(destination: originalBodyStream);
+                            }
+                        }
+
                         break;
                 }
             }

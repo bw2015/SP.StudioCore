@@ -211,14 +211,14 @@ namespace SP.StudioCore.Http
             }
             else
             {
-                data.Add("Data", context.GetString());
+                data.Add("Data", context.GetString() ?? string.Empty);
             }
 
             return data.ToJson();
         }
 
 
-        public static byte[] GetData(this HttpContext context)
+        public static byte[]? GetData(this HttpContext context)
         {
             if (context.Request.Method != "POST" || context.Request.ContentLength == null || context.Request.ContentLength == 0) return null;
             byte[] data = context.GetItem<byte[]>();
@@ -240,11 +240,11 @@ namespace SP.StudioCore.Http
             }
         }
 
-        public static string GetString(this HttpContext context, Encoding? encoding = null)
+        public static string? GetString(this HttpContext context, Encoding? encoding = null)
         {
             if (context == null) return string.Empty;
             if (encoding == null) encoding = Encoding.UTF8;
-            byte[] data = context.GetData();
+            byte[]? data = context.GetData();
             if (data == null) return string.Empty;
             if (data.Length == 0) return context.Request.ContentLength.ToString();
             if (data == null) return "null";

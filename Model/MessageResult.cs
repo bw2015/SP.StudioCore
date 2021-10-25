@@ -27,8 +27,9 @@ namespace SP.StudioCore.Model
         /// </summary>
         /// <param name="result">当前对象</param>
         /// <returns>JSON</returns>
-        public static implicit operator string(MessageResult result)
+        public static implicit operator string?(MessageResult? result)
         {
+            if (result == null) return null;
             return result.ToString();
         }
     }

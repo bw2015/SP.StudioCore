@@ -41,7 +41,7 @@ namespace SP.StudioCore.Model
         {
 
         }
-        public Result(HttpStatusCode statusCode, int success, string message, object info)
+        public Result(HttpStatusCode statusCode, int success, string? message, object? info)
         {
             this.StatusCode = statusCode;
             this.Success = success;
@@ -63,16 +63,19 @@ namespace SP.StudioCore.Model
             this.Message = null;
             this.Info = info;
             this.IsException = false;
-
+            if (this.Type == null) return;
             switch (this.Type.Value)
             {
                 case ContentType.Result:
                     try
                     {
-                        JObject obj = JObject.Parse((string)this.Info);
-                        this.Success = obj["success"].Value<int>();
-                        this.Message = obj["msg"].Value<string>();
-                        this.Info = obj["info"];
+                        JObject? obj = JObject.Parse((string)this.Info);
+                        if (obj != null)
+                        {
+                            this.Success = obj["success"].Value<int>();
+                            this.Message = obj["msg"].Value<string>();
+                            this.Info = obj["info"];
+                        }
                     }
                     catch
                     {
@@ -107,13 +110,13 @@ namespace SP.StudioCore.Model
         /// 返回的信息
         /// </summary>
         [JsonProperty(PropertyName = "msg")]
-        public string Message { get; set; }
+        public string? Message { get; set; }
 
         /// <summary>
         /// 需要返回的对象
         /// </summary>
         [JsonProperty(PropertyName = "info")]
-        public object Info { get; set; }
+        public object? Info { get; set; }
 
         /// <summary>
         /// 是否异常

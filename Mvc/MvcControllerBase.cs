@@ -317,7 +317,7 @@ namespace SP.StudioCore.Mvc
         /// <param name="successMessage"></param>
         /// <param name="info">如果状态为成功需要输出的对象</param>
         /// <returns></returns>
-        protected virtual Result GetResultContent(bool success, string successMessage = "处理成功", object info = null)
+        protected virtual Result GetResultContent(bool success, string successMessage = "处理成功", object? info = null)
         {
             if (success) return new Result(success, successMessage, info);
             string? message = this.context.RequestServices.GetService<MessageResult>();

@@ -87,8 +87,10 @@ namespace SP.StudioCore.Web
                     if (IPAddress.TryParse(value, out IPAddress? address))
                     {
                         ip = address.ToString();
+                        break;
                     }
                 }
+                if (!string.IsNullOrEmpty(ip)) break;
             }
             if (string.IsNullOrEmpty(ip))
             {

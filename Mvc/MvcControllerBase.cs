@@ -77,7 +77,7 @@ namespace SP.StudioCore.Mvc
         {
             get
             {
-                return this.context.QF("PageIndex", 1);
+                return Math.Max(1, this.context.QF("PageIndex", 1));
             }
         }
 
@@ -85,7 +85,7 @@ namespace SP.StudioCore.Mvc
         {
             get
             {
-                return this.context.QF("PageSize", 20);
+                return Math.Max(1, this.context.QF("PageSize", 20));
             }
         }
 
@@ -379,7 +379,7 @@ namespace SP.StudioCore.Mvc
         /// <param name="converter"></param>
         /// <param name="data"></param>
         /// <returns></returns>
-        protected virtual Result GetResultList<T, TOutput>(IEnumerable<T> list, Converter<T, TOutput> converter = null, Object data = null)
+        protected virtual Result GetResultList<T, TOutput>(IEnumerable<T> list, Converter<T, TOutput>? converter = null, object? data = null)
         {
             string resultData = this.GetResultContent(list, converter, data);
             return this.GetResultContent(resultData);
@@ -394,9 +394,8 @@ namespace SP.StudioCore.Mvc
         /// <param name="data"></param>
         /// <param name="action"></param>
         /// <returns></returns>
-        protected virtual Result GetResultList<T, TOutput>(Func<SearchDescriptor<T>, ISearchRequest> search, Func<T, TOutput> convert = null, object data = null) where T : class, IDocument where TOutput : class
+        protected virtual Result GetResultList<T, TOutput>(Func<SearchDescriptor<T>, ISearchRequest> search, Func<T, TOutput>? convert = null, object? data = null) where T : class, IDocument
         {
-            if (convert == null) convert = t => t as TOutput;
             StringBuilder sb = new StringBuilder();
             string? json = null;
             Func<SearchDescriptor<T>, ISearchRequest> action = (s) =>
@@ -492,7 +491,7 @@ namespace SP.StudioCore.Mvc
         {
             if (converter == null)
             {
-                converter = t =>  t as TOutput;
+                converter = t => t as TOutput;
             }
             string json = string.Empty;
             IEnumerable<T> query;

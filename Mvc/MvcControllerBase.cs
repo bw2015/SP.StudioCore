@@ -406,7 +406,7 @@ namespace SP.StudioCore.Mvc
             ISearchResponse<T> response = ESDB.Search(action);
             if (!response.IsValid)
             {
-                throw new Exception(response.ServerError.ToString());
+                throw new Exception(response.DebugInformation);
             }
             if (convert == null)
             {

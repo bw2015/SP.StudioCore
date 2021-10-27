@@ -1,10 +1,12 @@
-﻿using System;
+﻿using SP.StudioCore.Enums;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
 
 namespace SP.StudioCore.Gateway.Push
 {
+    [EnumConfig(ignore: false)]
     public enum PushType : byte
     {
         [Description("未选择")]

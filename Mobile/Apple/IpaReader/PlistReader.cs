@@ -30,6 +30,7 @@
     arrays.  Again, see the test suite code PlistCS/PlistCS/plistTests.cs
     for comprehensive examples. 
 */
+using SP.StudioCore.Enums;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -935,6 +936,7 @@ namespace SP.StudioCore.Mobile.Apple.IpaReader
         #endregion
     }
 
+    [EnumConfig(ignore: false)]
     public enum plistType
     {
         Auto, Binary, Xml

@@ -76,7 +76,7 @@ namespace SP.StudioCore.Enums
 
         /// <summary>
         /// 枚举的备注信息缓存
-        /// KEY = {typeof(Enum).FullName}.{Enum}.{Language}
+        /// KEY = {typeof(Enum).FullName}.{Enum}
         /// VALUE = 对应语言包的备注内容
         /// </summary>
         private static Dictionary<string, string> _enumDescription = new Dictionary<string, string>();
@@ -152,11 +152,20 @@ namespace SP.StudioCore.Enums
             var dic = new Dictionary<string, Dictionary<string, string>>();
             foreach (Type type in ass.GetTypes().Where(t => t.IsEnum))
             {
-                string enumName = type.FullName;
+                string? enumName = type.FullName;
+                if (enumName == null) continue;
+
                 dic.Add(enumName, new Dictionary<string, string>());
                 foreach (Enum item in Enum.GetValues(type))
                 {
-                    dic[enumName].Add(item.ToString(), item.GetDescription());
+                    EnumConfigAttribute? config = type.GetAttribute<EnumConfigAttribute>();
+                    if (config?.Ignore == true) continue;
+                    string name = item.ToString();
+                    if (config?.UseCode == false)
+                    {
+                        name = Convert.ToInt32(item).ToString();
+                    }
+                    dic[enumName].Add(name, item.GetDescription());
                 }
             }
             return dic;

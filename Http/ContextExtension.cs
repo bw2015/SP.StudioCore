@@ -522,7 +522,7 @@ namespace SP.StudioCore.Http
         /// </summary>
         /// <param name="file"></param>
         /// <returns></returns>
-        public static byte[] ToArray(this IFormFile file)
+        public static byte[]? ToArray(this IFormFile file)
         {
             if (file == null) return null;
             using (MemoryStream ms = new())
@@ -534,7 +534,7 @@ namespace SP.StudioCore.Http
 
         public static string? ToString(this IFormFile file, Encoding? encoding = null)
         {
-            byte[] data = file.ToArray();
+            byte[]? data = file.ToArray();
             if (data == null) return null;
             if (encoding == null) encoding = Encoding.UTF8;
             return encoding.GetString(data);

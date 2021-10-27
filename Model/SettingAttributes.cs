@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SP.StudioCore.Enums;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -39,6 +40,7 @@ namespace SP.StudioCore.Model
     /// <summary>
     /// 自定义类型
     /// </summary>
+    [EnumConfig(ignore: false)]
     public enum SettingCustomType
     {
         /// <summary>

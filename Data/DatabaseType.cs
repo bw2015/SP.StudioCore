@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SP.StudioCore.Enums;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
@@ -8,6 +9,7 @@ namespace SP.StudioCore.Data
     /// <summary>
     /// 数据库类型
     /// </summary>
+    [EnumConfig(ignore:false)]
     public enum DatabaseType : byte
     {
         /// <summary>

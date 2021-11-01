@@ -73,12 +73,21 @@ namespace SP.StudioCore.Web.Sockets
             {
                 if (this.WebSocket.State == WebSocketState.Open)
                 {
-                    await this.WebSocket.SendAsync(new ArraySegment<byte>(data, 0, data.Length), WebSocketMessageType.Text, true, CancellationToken.None);
+                    using (var source = new CancellationTokenSource())
+                    {
+                        // 3秒超时
+                        source.CancelAfter(3000);
+                        await this.WebSocket.SendAsync(new ArraySegment<byte>(data, 0, data.Length), WebSocketMessageType.Text, true, source.Token);
+                    }
                 }
             }
             catch (WebSocketException ex)
             {
 
+            }
+            catch (TaskCanceledException ex)
+            {
+                ConsoleHelper.WriteLine($"[SendAsync - {ex.GetType().Name}] {ex.Message}", ConsoleColor.DarkGray);
             }
             catch (Exception ex)
             {
@@ -96,8 +105,15 @@ namespace SP.StudioCore.Web.Sockets
             {
                 if (!this.WebSocket.CloseStatus.HasValue)
                 {
-                    await this.WebSocket.CloseAsync(WebSocketCloseStatus.Empty, string.Empty, CancellationToken.None);
+                    using (CancellationTokenSource source = new CancellationTokenSource(1000))
+                    {
+                        await this.WebSocket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, string.Empty, source.Token);
+                    }
                 }
+            }
+            catch (TaskCanceledException ex)
+            {
+
             }
             catch (WebSocketException ex)
             {
@@ -105,7 +121,7 @@ namespace SP.StudioCore.Web.Sockets
             }
             catch (Exception ex)
             {
-                ConsoleHelper.WriteLine($"[CloseAsync - {ex.GetType().Name}] {ex.Message}", ConsoleColor.Red);
+                ConsoleHelper.WriteLine($"[CloseAsync - {ex.GetType().Name}] {ex.Message}   -   WebSocketClient.CloseAsync", ConsoleColor.Red);
             }
         }
 

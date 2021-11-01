@@ -38,5 +38,17 @@ namespace SP.StudioCore.Types
             //ToPositiveInfinity 当一个数字是其他两个数字的中间值时，会将其舍入为最接近且不小于无限精确的结果。
             //ToZero  当一个数字是其他两个数字的中间值时，会将其舍入为最接近结果，而不是无限精确的结果。
         }
+
+        /// <summary>
+        /// 保留小数位数（舍位处理，不做四舍五入）
+        /// 返回字符串
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="decimals"></param>
+        /// <returns></returns>
+        public static string ToString(this decimal value, int decimals)
+        {
+            return Math.Round(value, decimals, MidpointRounding.ToNegativeInfinity).ToString();
+        }
     }
 }

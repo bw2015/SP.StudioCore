@@ -40,7 +40,7 @@ namespace SP.StudioCore.Model
     /// <summary>
     /// 自定义类型
     /// </summary>
-    [EnumConfig(ignore: false)]
+    [EnumConfig(ignore: true)]
     public enum SettingCustomType
     {
         /// <summary>

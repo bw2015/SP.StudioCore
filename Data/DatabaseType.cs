@@ -9,7 +9,7 @@ namespace SP.StudioCore.Data
     /// <summary>
     /// 数据库类型
     /// </summary>
-    [EnumConfig(ignore:false)]
+    [EnumConfig(ignore:true)]
     public enum DatabaseType : byte
     {
         /// <summary>

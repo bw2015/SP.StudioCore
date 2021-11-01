@@ -936,7 +936,7 @@ namespace SP.StudioCore.Mobile.Apple.IpaReader
         #endregion
     }
 
-    [EnumConfig(ignore: false)]
+    [EnumConfig(ignore: true)]
     public enum plistType
     {
         Auto, Binary, Xml

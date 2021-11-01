@@ -525,6 +525,20 @@ namespace SP.StudioCore.Data.Provider
             }
         }
 
+        public int UpdateIn<T, TValue, TKey>(Expression<Func<T, TValue>> field, TValue value, Expression<Func<T, TKey>> condition, TKey[] keys)
+          where T : class, new()
+          where TValue : struct
+        {
+            if (keys == null || keys.Length == 0) return 0;
+            string? tableName = typeof(T).GetTableName();
+            string? whereName = SchemaCache.GetColumnProperty(field).Name;
+            string? fieldName = SchemaCache.GetColumnProperty(condition).Name;
+            DynamicParameters parameters = new DynamicParameters();
+            parameters.Add("@Value", value);
+            string sql = $"UPDATE [{tableName}] SET [{fieldName}] = @Value WHERE [{whereName}] IN ({string.Join(",", keys)})";
+            return db.ExecuteNonQuery(CommandType.Text, sql, parameters);
+        }
+
         public int ExecuteNonQuery<T>(T obj) where T : IProcedureModel
         {
             int rows = db.ExecuteNonQuery(CommandType.StoredProcedure, typeof(T).GetTableName(),
@@ -629,5 +643,7 @@ namespace SP.StudioCore.Data.Provider
         {
             return new DapperQueryable<TEntity>(new SqlServerQueryProvider(db));
         }
+
+
     }
 }

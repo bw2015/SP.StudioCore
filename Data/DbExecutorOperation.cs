@@ -114,7 +114,9 @@ namespace SP.StudioCore.Data
 
         public TValue? UpdatePlus<T, TValue>(Expression<Func<T, TValue>> field, TValue value, Expression<Func<T, bool>> condition) where T : class, new() where TValue : struct =>
             provider.UpdatePlus(field, value, condition);
-
+        public int UpdateIn<T, TValue, TKey>(Expression<Func<T, TValue>> field, TValue value, Expression<Func<T, TKey>> condition, TKey[] keys)
+          where T : class, new()
+          where TValue : struct => provider.UpdateIn(field, value, condition, keys);
         public bool Exists<T>(T entity) where T : class, new() =>
             provider.Exists(entity);
 
@@ -123,5 +125,7 @@ namespace SP.StudioCore.Data
         public int Count<T>() where T : class, new() => provider.Count<T>();
 
         public IQueryable<TEntity> Query<TEntity>() where TEntity : class, new() => provider.Query<TEntity>();
+
+
     }
 }

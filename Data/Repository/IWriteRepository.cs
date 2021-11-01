@@ -89,6 +89,19 @@ namespace SP.StudioCore.Data.Repository
         /// <returns></returns>
         TValue? UpdatePlus<T, TValue>(Expression<Func<T, TValue>> field, TValue value, Expression<Func<T, bool>> condition) where T : class, new() where TValue : struct;
 
+        /// <summary>
+        /// 批量修改 IN 方式
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="TValue"></typeparam>
+        /// <typeparam name="TKey"></typeparam>
+        /// <param name="field"></param>
+        /// <param name="value"></param>
+        /// <param name="condition"></param>
+        /// <param name="keys"></param>
+        /// <returns></returns>
+        int UpdateIn<T, TValue, TKey>(Expression<Func<T, TValue>> field, TValue value, Expression<Func<T, TKey>> condition, TKey[] keys) where T : class, new() where TValue : struct;
+
         #endregion
 
         #region ========  Insert ========

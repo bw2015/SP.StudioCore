@@ -420,5 +420,12 @@ namespace SP.StudioCore.Data.Provider
         {
             throw new NotImplementedException();
         }
+
+        public int UpdateIn<T, TValue, TKey>(Expression<Func<T, TValue>> field, TValue value, Expression<Func<T, TKey>> condition, TKey[] keys)
+            where T : class, new()
+            where TValue : struct
+        {
+            throw new NotImplementedException();
+        }
     }
 }

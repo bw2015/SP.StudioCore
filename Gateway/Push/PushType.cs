@@ -6,7 +6,7 @@ using System.Text;
 
 namespace SP.StudioCore.Gateway.Push
 {
-    [EnumConfig(ignore: false)]
+    [EnumConfig(ignore: true)]
     public enum PushType : byte
     {
         [Description("未选择")]

@@ -2,7 +2,7 @@ using SP.StudioCore.Enums;
 
 namespace SP.StudioCore.MQ.RabbitMQ
 {
-    [EnumConfig(ignore: false)]
+    [EnumConfig(ignore: true)]
     public enum ExchangeType
     {
         /// <summary>

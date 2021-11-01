@@ -347,7 +347,7 @@ namespace SP.StudioCore.Model
     /// <summary>
     /// 要返回的页面类型
     /// </summary>
-    [EnumConfig(ignore: false)]
+    [EnumConfig(ignore: true)]
     public enum ContentType
     {
         [Description("text/html")]

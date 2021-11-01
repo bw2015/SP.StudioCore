@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SP.StudioCore.Data.Expressions
 {
-    [EnumConfig(ignore: false)]
+    [EnumConfig(ignore: true)]
     public enum MethodType
     {
         None,

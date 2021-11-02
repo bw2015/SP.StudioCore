@@ -25,7 +25,7 @@ namespace SP.StudioCore.API
         /// <param name="localFilename">本地路径</param>
         /// <param name="message"></param>
         /// <returns></returns>
-        public static bool Upload(this OSSSetting setting, string objectName, string localFilename, out string message)
+        public static bool Upload(this OSSSetting setting, string objectName, string localFilename, out string? message)
         {
             message = null;
             try
@@ -49,7 +49,7 @@ namespace SP.StudioCore.API
         /// <param name="binaryData">二进制内容</param>
         /// <param name="message"></param>
         /// <returns></returns>
-        public static bool Upload(this OSSSetting setting, string objectName, byte[] binaryData, ObjectMetadata metadata, out string message)
+        public static bool Upload(this OSSSetting setting, string objectName, byte[] binaryData, ObjectMetadata metadata, out string? message)
         {
             message = null;
             try
@@ -184,9 +184,9 @@ namespace SP.StudioCore.API
                 throw new NullReferenceException();
             }
             string fix = file.FileName[file.FileName.LastIndexOf('.')..][1..];
-            byte[] data = file.ToArray();
+            byte[] data = file.ToArray() ?? System.Array.Empty<byte>();    
             string md5 = Encryption.toMD5Short(Encryption.toMD5(data));
-            string path = $"upload/{DateTime.Now.ToString("yyyyMM")}/{md5}.{fix}";
+            string path = $"upload/{DateTime.Now:yyyyMM}/{md5}.{fix}";
 
             if (setting.Upload(path, data, new ObjectMetadata(), out string message))
             {
@@ -201,9 +201,9 @@ namespace SP.StudioCore.API
                 throw new NullReferenceException();
             }
             string md5 = Encryption.toMD5Short(Encryption.toMD5(data));
-            string path = $"upload/{DateTime.Now.ToString("yyyyMM")}/{md5}.{fix}";
+            string path = $"upload/{DateTime.Now:yyyyMM}/{md5}.{fix}";
 
-            if (setting.Upload(path, data, new ObjectMetadata(), out string message))
+            if (setting.Upload(path, data, new ObjectMetadata(), out string? message))
             {
                 return $"/{path}";
             }
@@ -224,24 +224,24 @@ namespace SP.StudioCore.API
         /// EndPoint（地域节点）
         /// </summary>
         [Description("EndPoint")]
-        public string endpoint { get; set; }
+        public string? endpoint { get; set; }
 
         /// <summary>
         /// 授权账户（RAM管理内）
         /// </summary>
         [Description("授权账户")]
-        public string accessKeyId { get; set; }
+        public string? accessKeyId { get; set; }
 
         /// <summary>
         /// 授权密钥（RAM管理内）
         /// </summary>
         [Description("授权密钥")]
-        public string accessKeySecret { get; set; }
+        public string? accessKeySecret { get; set; }
 
         /// <summary>
         /// 存储对象名字（backet的名字）
         /// </summary>
         [Description("backetName")]
-        public string bucketName { get; set; }
+        public string? bucketName { get; set; }
     }
 }

@@ -34,8 +34,8 @@ namespace SP.StudioCore.Model
                 string name = (string)read[0];
                 if (!properties.ContainsKey(name)) continue;
                 PropertyInfo property = properties[name];
-                object value = ((string)read[1]).GetValue(property.PropertyType);
-                property.SetValue(this, value);
+                object? value = ((string)read[1]).GetValue(property.PropertyType);
+                if (value != null) property.SetValue(this, value);
             }
             if (!read.IsClosed) read.Close();
         }
@@ -52,44 +52,55 @@ namespace SP.StudioCore.Model
             {
                 if (request.AllKeys.Contains(property.Name))
                 {
-                    object value = request[property.Name];
+                    string value = request[property.Name] ?? string.Empty;
+                    object? result = null;
+
                     switch (property.PropertyType.Name)
                     {
                         case "Boolean":
-                            value = value.Equals("1") || value.ToString().Equals("true", StringComparison.CurrentCultureIgnoreCase);
+                            result = value.Equals("1") || value.Equals("true", StringComparison.CurrentCultureIgnoreCase);
                             break;
                         case "Int32[]":
-                            value = (HttpUtility.UrlDecode((string)value)).GetArray<int>().ToArray();
+                            result = (HttpUtility.UrlDecode(value)).GetArray<int>().ToArray();
                             break;
                         case "Byte[]":
-                            value = (HttpUtility.UrlDecode((string)value)).GetArray<byte>().ToArray();
+                            result = (HttpUtility.UrlDecode(value)).GetArray<byte>().ToArray();
                             break;
                         case "String[]":
-                            value = (HttpUtility.UrlDecode((string)value)).GetArray<string>().ToArray();
+                            result = (HttpUtility.UrlDecode(value)).GetArray<string>().ToArray();
                             break;
                         case "Guid":
-                            value = ((string)value).GetValue<Guid>();
+                            result = value.GetValue<Guid>();
                             break;
                         default:
                             if (property.PropertyType.IsArray)
                             {
-                                Type arrayType = property.PropertyType.GetElementType();
-                                string[] values = ((string)value).Split(',');
-                                System.Array array = System.Array.CreateInstance(arrayType, values.Length);
-                                for (int i = 0; i < array.Length; i++)
+                                Type? arrayType = property.PropertyType.GetElementType();
+                                if (arrayType != null)
                                 {
-                                    array.SetValue(values[i].ToEnum(arrayType), i);
+                                    string[] values = ((string)value).Split(',');
+                                    System.Array array = System.Array.CreateInstance(arrayType, values.Length);
+                                    for (int i = 0; i < array.Length; i++)
+                                    {
+                                        array.SetValue(values[i].ToEnum(arrayType), i);
+                                    }
+                                    result = array;
                                 }
-                                value = array;
                             }
                             else if (property.PropertyType.IsEnum)
                             {
-                                value = value.ToString().ToEnum(property.PropertyType);
+                                result = value.ToEnum(property.PropertyType);
+                            }
+                            else
+                            {
+                                result = value;
                             }
                             break;
                     }
-                    // Convert.ChangeType(value, property.PropertyType)
-                    property.SetValue(this, value.GetValue(property.PropertyType), null);
+                    if (result != null)
+                    {
+                        property.SetValue(this, result.GetValue(property.PropertyType), null);
+                    }
                 }
             }
         }
@@ -104,7 +115,7 @@ namespace SP.StudioCore.Model
             foreach (PropertyInfo property in this.GetType().GetProperties())
             {
                 if (!property.CanWrite || property.HasAttribute<IgnoreAttribute>()) continue;
-                object value = property.GetValue(this, null);
+                object? value = property.GetValue(this, null);
                 if (value != null)
                 {
                     switch (property.PropertyType.Name)
@@ -122,7 +133,7 @@ namespace SP.StudioCore.Model
                                 string[] arrayValue = new string[array.Length];
                                 for (int i = 0; i < array.Length; i++)
                                 {
-                                    arrayValue[i] = array.GetValue(i).ToString();
+                                    arrayValue[i] = array.GetValue(i)?.ToString() ?? string.Empty;
                                 }
                                 value = string.Join(",", arrayValue);
                             }
@@ -164,7 +175,7 @@ namespace SP.StudioCore.Model
                 t.Name,
                 Value = t.GetValue(this, null),
                 Type = t.PropertyType.FullName,
-                t.GetAttribute<DescriptionAttribute>().Description
+                t.GetAttribute<DescriptionAttribute>()?.Description
             });
         }
 
@@ -172,7 +183,7 @@ namespace SP.StudioCore.Model
         /// 键值对返回对应的值
         /// </summary>
         /// <returns></returns>
-        public virtual Dictionary<string, object> ToDictionary()
+        public virtual Dictionary<string, object?> ToDictionary()
         {
             return this.GetType().GetProperties().Where(t => t.HasAttribute<DescriptionAttribute>()).ToDictionary(c => c.Name, c => c.GetValue(this, null));
         }
@@ -189,7 +200,7 @@ namespace SP.StudioCore.Model
                 t.Name,
                 Value = t.GetValue(this, null),
                 Type = t.PropertyType.FullName,
-                t.GetAttribute<DescriptionAttribute>().Description
+                t.GetAttribute<DescriptionAttribute>()?.Description
             });
         }
 

@@ -10,7 +10,6 @@ namespace SP.StudioCore.Web.ipv6wry
 {
     internal class AccessFile
     {
-        private string dbFile; //文件位置
         private Stream? stream;
         //public string file;
         public int total; //数据总量
@@ -20,13 +19,10 @@ namespace SP.StudioCore.Web.ipv6wry
         public int index_end_offset; //结束索引
         public int offlen; //地址长度（数据记录地址）
         public int iplen; //IP长度
-        private string v;
+
         public AccessFile(string dbFile, string v)
         {
-            this.dbFile = dbFile;
-            this.v = v;
             this.stream = new FileStream(dbFile, FileMode.OpenOrCreate, FileAccess.Read);
-
             this.index_start_offset = this.read4(16);
             this.total = this.read4(8);
             this.offlen = this.read1(6);
@@ -38,24 +34,9 @@ namespace SP.StudioCore.Web.ipv6wry
         /// 跳过的字节数
         /// </summary>
         /// <param name="v"></param>
-        public void seek(long v)
+        private void seek(long v)
         {
-            stream.Seek(v, SeekOrigin.Begin);
-        }
-
-        internal void write(byte[] vs)
-        {
-            stream.Write(vs, 0, vs.Length);
-        }
-
-        internal void readFully(byte[] dbBinStr, int v, int length)
-        {
-            stream.Read(dbBinStr, v, length);
-        }
-
-        public long length()
-        {
-            return this.stream.Length;
+            stream?.Seek(v, SeekOrigin.Begin);
         }
 
         internal void close()
@@ -73,34 +54,24 @@ namespace SP.StudioCore.Web.ipv6wry
         /// 获取指针
         /// </summary>
         /// <returns></returns>
-        public long getFilePointer()
+        private long getFilePointer()
         {
-            return stream.Position;
+            return stream?.Position ?? 0;
         }
-        /// <summary>
-        /// 写数据
-        /// </summary>
-        /// <param name="v"></param>
-        internal void write(int v)
-        {
-            var bytes = BitConverter.GetBytes(v);
-            stream.Write(bytes, 0, bytes.Length);
-        }
+
         /// <summary>
         /// 读数据：8字节
         /// </summary>
         /// <returns></returns>
-        public long read8(int seek0, int size = 8)
+        private long read8(int seek0, int size = 8)
         {
             if (seek0 > 0)
             {
                 this.seek(seek0);
             }
-            //var bytes = BitConverter.GetBytes(8);
             var bytes = new byte[8];
-            stream.Read(bytes, 0, bytes.Length);
+            stream?.Read(bytes, 0, bytes.Length);
             long te = BitConverter.ToInt64(bytes, 0);
-            //BigInteger gi = new BigInteger(bytes);
             return te;
         }
 
@@ -108,14 +79,14 @@ namespace SP.StudioCore.Web.ipv6wry
         /// 读数据：4字节
         /// </summary>
         /// <returns></returns>
-        public int read4(int seek0, int size = 4)
+        private int read4(int seek0, int size = 4)
         {
             if (seek0 > 0)
             {
                 this.seek(seek0);
             }
             var bytes = BitConverter.GetBytes(size);
-            stream.Read(bytes, 0, bytes.Length);
+            stream?.Read(bytes, 0, bytes.Length);
             int te = BitConverter.ToInt32(bytes, 0);
             return te;
         }
@@ -124,14 +95,14 @@ namespace SP.StudioCore.Web.ipv6wry
         /// 读数据：4字节
         /// </summary>
         /// <returns></returns>
-        public int read3(int seek0, int size = 3)
+        private int read3(int seek0, int size = 3)
         {
             if (seek0 > 0)
             {
                 this.seek(seek0);
             }
             var bytes = new byte[3];
-            stream.Read(bytes, 0, bytes.Length);
+            stream?.Read(bytes, 0, bytes.Length);
             return bytes[0] + bytes[1] * 256 + bytes[2] * 256 * 256;
         }
 
@@ -139,7 +110,7 @@ namespace SP.StudioCore.Web.ipv6wry
         /// 读数据：1字节
         /// </summary>
         /// <returns></returns>
-        public int read1(int seek0)
+        private int read1(int seek0)
         {
             if (seek0 > 0)
             {
@@ -147,7 +118,7 @@ namespace SP.StudioCore.Web.ipv6wry
             }
 
             var bytes = new byte[2];
-            stream.Read(bytes, 0, bytes.Length);
+            stream?.Read(bytes, 0, bytes.Length);
             int te = BitConverter.ToUInt16(bytes, 0);
             return te % 256;
         }
@@ -157,7 +128,7 @@ namespace SP.StudioCore.Web.ipv6wry
         /// </summary>
         /// <param name="offset"></param>
         /// <returns></returns>
-        public string[] read_record(int offset)
+        private string[] read_record(int offset)
         {
             string[] record = new string[] { "", "" };
             int flag = this.read1(offset); //读取offset的1字节
@@ -175,10 +146,10 @@ namespace SP.StudioCore.Web.ipv6wry
                 {
                     record[1] = this.read_location(offset + this.offlen + 1); //获取运营商
                 }
-                else
-                {
-                    record[1] = this.read_location(offset + (record[0]).ToString().Length + 1); //运营商跟在后面
-                }
+                //else
+                //{
+                //    record[1] = this.read_location(offset + (record[0]).ToString().Length + 1); //运营商跟在后面
+                //}
             }
             return record;
         }
@@ -188,7 +159,7 @@ namespace SP.StudioCore.Web.ipv6wry
         /// </summary>
         /// <param name=""></param>
         /// <returns></returns>
-        public string read_location(int offset)
+        private string read_location(int offset)
         {
             if (offset == 0)
             {
@@ -213,7 +184,7 @@ namespace SP.StudioCore.Web.ipv6wry
         }
 
         // 读取文字
-        public string readstr(int offset = -1)
+        private string readstr(int offset = -1)
         {
             if (offset > 0)
             {
@@ -236,9 +207,8 @@ namespace SP.StudioCore.Web.ipv6wry
                 offset++;
                 chr = this.read1(offset);
             }
-            UTF8Encoding utf8 = new UTF8Encoding();
             str = str.ToUpper();
-            string str_aa = Encoding.GetEncoding("UTF-8").GetString(this.HexStringToByteArray(str));
+            string str_aa = Encoding.UTF8.GetString(this.HexStringToByteArray(str));
             return str_aa;
         }
 
@@ -289,15 +259,16 @@ namespace SP.StudioCore.Web.ipv6wry
 
             int ip_record_offset = this.read4(ip_offset + this.iplen, this.offlen);
             string[] ip_addr = this.read_record(ip_record_offset);
-            string ip_addr_disp = ip_addr[0] + " " + ip_addr[1];
-            IPv6Object i6 = new IPv6Object();
 
-            i6.ip_find = ip_find;
-            i6.ip_addr_disp = ip_addr;
-            i6.ip_addr = ip_addr[0];
-            i6.ip_isp = ip_addr[1];
-            i6.ip_start = ip_start;
-            i6.ip_end = ip_end;
+            IPv6Object i6 = new()
+            {
+                ip_find = ip_find,
+                ip_addr_disp = ip_addr,
+                ip_addr = ip_addr[0],
+                ip_isp = ip_addr[1],
+                ip_start = ip_start,
+                ip_end = ip_end
+            };
 
             return i6;
         }
@@ -310,7 +281,7 @@ namespace SP.StudioCore.Web.ipv6wry
             IPAddress address = IPAddress.Parse(strIp);
             byte[] ipbyte = address.GetAddressBytes().Reverse().ToArray();
             long tex = BitConverter.ToInt64(ipbyte, 8);
-            string te0 = System.Convert.ToString(tex, 16);
+            string te0 = Convert.ToString(tex, 16);
             return tex;
         }
 
@@ -331,12 +302,6 @@ namespace SP.StudioCore.Web.ipv6wry
                             System.Convert.ToString(a1, 16) + ":" +
                             System.Convert.ToString(a0, 16) + "::";
             IPAddress address = IPAddress.Parse(strIp);
-
-            //byte[] ipn64 = new byte[8];
-            //byte[] ipn128 = new byte[16];
-            //ipbyte.CopyTo(ipn128);
-            //ipn64.CopyTo(ipn128);
-            //IPAddress address = IPAddress.
 
             return address.ToString();
         }
@@ -384,6 +349,7 @@ namespace SP.StudioCore.Web.ipv6wry
                 return this.find(ip_num1, ip_num2, m, r);
             }
         }
+
         /// <summary>
         /// 数据比较
         /// </summary>

@@ -172,15 +172,18 @@ namespace SP.StudioCore.Data.Expressions
                     break;
                 case ExpressionType.Constant:
                     {
-                        ConstantExpression constant = (ConstantExpression)node.Expression;
-                        switch (node.Member.MemberType)
+                        ConstantExpression? constant = (ConstantExpression?)node.Expression;
+                        if (constant != null)
                         {
-                            case MemberTypes.Property:
-                                this.AppendParameter(((PropertyInfo)node.Member).GetValue(constant.Value));
-                                break;
-                            case MemberTypes.Field:
-                                this.AppendParameter(((FieldInfo)node.Member).GetValue(constant.Value));
-                                break;
+                            switch (node.Member.MemberType)
+                            {
+                                case MemberTypes.Property:
+                                    this.AppendParameter(((PropertyInfo)node.Member).GetValue(constant.Value));
+                                    break;
+                                case MemberTypes.Field:
+                                    this.AppendParameter(((FieldInfo)node.Member).GetValue(constant.Value));
+                                    break;
+                            }
                         }
                     }
                     break;

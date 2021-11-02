@@ -11,7 +11,7 @@ namespace SP.StudioCore.Web.ipv6wry
     internal class AccessFile
     {
         private string dbFile; //文件位置
-        private Stream stream;
+        private Stream? stream;
         //public string file;
         public int total; //数据总量
         //public int db4;
@@ -25,7 +25,7 @@ namespace SP.StudioCore.Web.ipv6wry
         {
             this.dbFile = dbFile;
             this.v = v;
-            this.stream = new FileStream(dbFile, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+            this.stream = new FileStream(dbFile, FileMode.OpenOrCreate, FileAccess.Read);
 
             this.index_start_offset = this.read4(16);
             this.total = this.read4(8);

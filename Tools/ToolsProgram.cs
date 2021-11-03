@@ -45,10 +45,11 @@ namespace SP.StudioCore.Tools
 
                 foreach (Type work in works)
                 {
-                    ConsoleHelper.WriteLine(work.FullName, ConsoleColor.Green);
+                    ConsoleHelper.WriteLine(work.FullName ?? string.Empty, ConsoleColor.Green);
 
-                    MethodInfo method = typeof(ServiceCollectionHostedServiceExtensions).GetMethods().FirstOrDefault(t => t.Name == "AddHostedService" && t.GetParameters().Length == 1);
+                    MethodInfo? method = typeof(ServiceCollectionHostedServiceExtensions).GetMethods().FirstOrDefault(t => t.Name == "AddHostedService" && t.GetParameters().Length == 1);
 
+                    if (method == null) continue;
                     method.MakeGenericMethod(work).Invoke(null, new object[] { services });
                 }
                 //ServiceCollectionHostedServiceExtensions.AddHostedService(services);

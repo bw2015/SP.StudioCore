@@ -49,40 +49,59 @@ namespace SP.StudioCore.Tools
                 return staticFile.Value;
             }
 
-            Type start = assembly.GetTypes().FirstOrDefault(t => t.IsBaseType<StartBase>());
+            Type? start = assembly.GetTypes().FirstOrDefault(t => t.IsBaseType<StartBase>());
             if (start == null) return context.ShowError(HttpStatusCode.MethodNotAllowed, $"Tools.{controller}.Start");
 
-            MethodInfo methodInfo = start.GetMethod(methodName);
+            MethodInfo? methodInfo = start.GetMethod(methodName);
             if (methodInfo == null) return context.ShowError(HttpStatusCode.NotFound, methodName);
 
             // 得到动作的参数
             ParameterInfo[] parameters = methodInfo.GetParameters();
-            object obj = Activator.CreateInstance(start, new object[] { context });
+            object? obj = Activator.CreateInstance(start, new object[] { context });
+            if (obj == null) return context.ShowError(HttpStatusCode.NotFound, start.FullName);
 
-            if (context.Request.Method == "GET")
-            {
-                return (Result)methodInfo.Invoke(obj, parameters.Select(t => context.QS(t.Name).GetValue(t.ParameterType)).ToArray());
-            }
-            else if (context.Request.Method == "POST")
-            {
-                if (parameters.Length == 0)
-                {
-                    return (Result)methodInfo.Invoke(obj, null);
-                }
-                else if (parameters.Length == 1 && parameters[0].HasAttribute<FromBodyAttribute>())
-                {
-                    Type parameterType = parameters[0].ParameterType;
-                    string value = context.GetString();
-                    object parameterValue = JsonConvert.DeserializeObject(value, parameterType);
-                    return (Result)methodInfo.Invoke(obj, new[] { parameterValue });
-                }
-                else
-                {
-                    return (Result)methodInfo.Invoke(obj, parameters.Select(t => context.QF(t.Name).GetValue(t.ParameterType)).ToArray());
-                }
-            }
+            bool isGetMethod = methodInfo.HasAttribute<HttpGetAttribute>();
+            bool isPostMethod = methodInfo.HasAttribute<HttpPostAttribute>();
 
-            return context.ShowError(HttpStatusCode.BadRequest, $"{path},{  string.Join(",", parameters.Select(t => t.ParameterType.Name)) }");
+            Result? result = (Result?)methodInfo.Invoke(obj, context.GetParameterValue(parameters));
+            if (result.HasValue) return result.Value;
+
+            return context.ShowError(HttpStatusCode.InternalServerError, $"{path},{  string.Join(",", parameters.Select(t => t.ParameterType.Name)) }");
+        }
+
+        private static object? GetParameterValue(this HttpContext context, ParameterInfo parameter)
+        {
+            string? name = parameter.Name;
+            if (name == null) return null;
+            object? value;
+            if (parameter.HasAttribute<FromQueryAttribute>())
+            {
+                value = context.QS(name).GetValue(parameter.ParameterType);
+            }
+            else if (parameter.HasAttribute<FromFormAttribute>())
+            {
+                value = context.QF(name).GetValue(parameter.ParameterType);
+            }
+            else if (parameter.HasAttribute<FromBodyAttribute>())
+            {
+                value = JsonConvert.DeserializeObject(context.GetString() ?? string.Empty, parameter.ParameterType);
+            }
+            else
+            {
+                value = context.GetParam(name).GetValue(parameter.ParameterType);
+            }
+            return value;
+        }
+
+        private static object?[]? GetParameterValue(this HttpContext context, ParameterInfo[] parameters)
+        {
+            if (parameters.Length == 0) return null;
+            List<object?> list = new List<object?>();
+            foreach (ParameterInfo parameter in parameters)
+            {
+                list.Add(context.GetParameterValue(parameter));
+            }
+            return list.ToArray();
         }
 
         /// <summary>
@@ -135,7 +154,7 @@ namespace SP.StudioCore.Tools
             if (handlerType == null) return null;
 
             WebSocketHandlerBase? ws = (WebSocketHandlerBase?)Activator.CreateInstance(handlerType);
-            if(ws == null) return null;
+            if (ws == null) return null;
             WebSocketHandlerCache.Add(assemblyName, ws);
             return ws;
         }

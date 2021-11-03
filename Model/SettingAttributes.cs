@@ -29,10 +29,11 @@ namespace SP.StudioCore.Model
         /// <summary>
         /// 自己定义的名字
         /// </summary>
-        public string Type { get; set; }
+        public string? Type { get; set; }
 
-        public static implicit operator string(SettingCustomTypeAttribute attribute)
+        public static implicit operator string?(SettingCustomTypeAttribute? attribute)
         {
+            if (attribute == null) return null;
             return attribute.Type;
         }
     }

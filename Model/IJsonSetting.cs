@@ -53,12 +53,13 @@ namespace SP.StudioCore.Model
         {
             return this.GetType().GetProperties().Where(t => !t.HasAttribute<IgnoreAttribute>() && t.HasAttribute<DescriptionAttribute>()).Select(t =>
             {
-                string type = this.GetTypeName(t);
+                string? type = this.GetTypeName(t);
+                if (type == null) return null;
                 return new
                 {
                     t.Name,
                     Value = t.GetValue(this, null),
-                    t.GetAttribute<DescriptionAttribute>().Description,
+                    t.GetAttribute<DescriptionAttribute>()?.Description,
                     Type = type,
                     List = this.GetList(t, type),
                     t.PropertyType.IsEnum
@@ -66,16 +67,16 @@ namespace SP.StudioCore.Model
             });
         }
 
-        private string GetTypeName(PropertyInfo property)
+        private string? GetTypeName(PropertyInfo property)
         {
             if (property.HasAttribute<SettingCustomTypeAttribute>()) return property.GetAttribute<SettingCustomTypeAttribute>();
             if (property.PropertyType.IsGenericType) return "List";
             return property.PropertyType.FullName;
         }
 
-        private object GetList(PropertyInfo property, string type)
+        private object? GetList(PropertyInfo property, string type)
         {
-            object result = null;
+            object? result = null;
             if (type == "List")
             {
                 result = new
@@ -85,7 +86,7 @@ namespace SP.StudioCore.Model
                     {
                         t.Name,
                         Type = this.GetTypeName(t),
-                        t.GetAttribute<DescriptionAttribute>().Description
+                        t.GetAttribute<DescriptionAttribute>()?.Description
                     })
                 };
             }

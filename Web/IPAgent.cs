@@ -84,7 +84,7 @@ namespace SP.StudioCore.Web
                 if (string.IsNullOrEmpty(values)) continue;
                 foreach (string value in values.Split(','))
                 {
-                    if (IPAddress.TryParse(value, out IPAddress? address))
+                    if (IPAddress.TryParse(value.Trim(), out IPAddress? address))
                     {
                         ip = address.ToString();
                         break;

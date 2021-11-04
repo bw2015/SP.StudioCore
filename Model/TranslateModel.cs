@@ -1,4 +1,6 @@
 ﻿using Newtonsoft.Json;
+using SP.StudioCore.API.TranslateAPI;
+using SP.StudioCore.Array;
 using SP.StudioCore.Cache.Redis;
 using SP.StudioCore.Enums;
 using SP.StudioCore.Json;
@@ -195,6 +197,32 @@ namespace SP.StudioCore.Model
                 translate.Add(language, string.Format(format, this[language]));
             }
             return translate;
+        }
+
+        /// <summary>
+        /// 调用机器翻译（修改自身）
+        /// </summary>
+        /// <param name="setting">API参数配置</param>
+        /// <param name="source">来源语言</param>
+        /// <param name="languages">要翻译的语言</param>
+        /// <returns></returns>
+        public TranslateModel Translate(TranslateAPISetting setting, Language source, params Language[] languages)
+        {
+            string content = this.Get(source, string.Empty);
+            if (string.IsNullOrWhiteSpace(content)) return this;
+
+            foreach (Language language in languages)
+            {
+                string target = this.Get(language, string.Empty);
+                // 如果已有翻译则不做处理
+                if (!string.IsNullOrWhiteSpace(target) && target != content) continue;
+
+                if (setting.Execute(content, source, language, out target))
+                {
+                    this[language] = target;
+                }
+            }
+            return this;
         }
     }
 }

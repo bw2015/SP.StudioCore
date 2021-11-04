@@ -72,15 +72,15 @@ namespace SP.StudioCore.Model
                         JObject? obj = JObject.Parse((string)this.Info);
                         if (obj != null)
                         {
-                            this.Success = obj["success"].Value<int>();
-                            this.Message = obj["msg"].Value<string>();
+                            this.Success = obj["success"]?.Value<int>() ?? 0;
+                            this.Message = obj["msg"]?.Value<string>();
                             this.Info = obj["info"];
                         }
                     }
                     catch
                     {
                         this.Success = 0;
-                        this.Message = (string)this.Info;
+                        this.Message = (string?)this.Info;
                     }
                     break;
             }

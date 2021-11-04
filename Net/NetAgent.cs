@@ -92,7 +92,7 @@ namespace SP.StudioCore.Net
             return UploadData(url, encoding.GetBytes(data), encoding, wc, headers);
         }
 
-        public static async Task<HttpResponseMessage> UploadDataAsync(string url, string data, Encoding encoding = null, WebClient wc = null, Dictionary<string, string> headers = null)
+        public static Task<HttpResponseMessage> UploadDataAsync(string url, string data, Encoding encoding = null, WebClient wc = null, Dictionary<string, string> headers = null)
         {
             if (headers == null) headers = new Dictionary<string, string>();
             if (!headers.ContainsKey("Content-Type"))
@@ -107,7 +107,7 @@ namespace SP.StudioCore.Net
 
             StringContent content = new StringContent(data, encoding, headers["Content-Type"]);
             Task<HttpResponseMessage> response = new HttpClient().PostAsync(url, content);
-            return response.Result;
+            return response;
         }
 
         public static async Task PostAsync(string url, string data)

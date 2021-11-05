@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace SP.StudioCore.API
@@ -30,7 +31,7 @@ namespace SP.StudioCore.API
             message = null;
             try
             {
-                OssClient client = new OssClient(setting.endpoint, setting.accessKeyId, setting.accessKeySecret);
+                OssClient       client = new OssClient(setting.endpoint, setting.accessKeyId, setting.accessKeySecret);
                 PutObjectResult result = client.PutObject(setting.bucketName, objectName, localFilename);
                 return true;
             }
@@ -56,7 +57,7 @@ namespace SP.StudioCore.API
             {
                 using (MemoryStream requestContent = new MemoryStream(binaryData))
                 {
-                    OssClient client = new OssClient(setting.endpoint, setting.accessKeyId, setting.accessKeySecret);
+                    OssClient       client = new OssClient(setting.endpoint, setting.accessKeyId, setting.accessKeySecret);
                     PutObjectResult result = client.PutObject(setting.bucketName, objectName, requestContent, metadata);
                     return true;
                 }
@@ -85,7 +86,7 @@ namespace SP.StudioCore.API
         {
             OssClient client = new OssClient(setting.endpoint, setting.accessKeyId, setting.accessKeySecret);
 
-            string uploadId = uploadTokenId.Get(uploadToken);
+            string         uploadId  = uploadTokenId.Get(uploadToken);
             List<PartETag> partETags = uploadETags.Get(uploadToken);
             if (index == 1)
             {
@@ -94,7 +95,7 @@ namespace SP.StudioCore.API
                     ExpirationTime = DateTime.Now.AddDays(1)
                 });
                 var result = client.InitiateMultipartUpload(request);
-                uploadId = result.UploadId;
+                uploadId  = result.UploadId;
                 partETags = new List<PartETag>();
 
                 if (uploadTokenId.ContainsKey(uploadToken))
@@ -120,8 +121,8 @@ namespace SP.StudioCore.API
                 var result = client.UploadPart(new UploadPartRequest(setting.bucketName, objectName, uploadId)
                 {
                     InputStream = requestContent,
-                    PartSize = binaryData.Length,
-                    PartNumber = index
+                    PartSize    = binaryData.Length,
+                    PartNumber  = index
                 });
                 partETags.Add(result.PartETag);
             }
@@ -165,7 +166,7 @@ namespace SP.StudioCore.API
         /// </summary>
         public static bool Delete(this OSSSetting setting, string objectName)
         {
-            OssClient client = new OssClient(setting.endpoint, setting.accessKeyId, setting.accessKeySecret);
+            OssClient          client = new OssClient(setting.endpoint, setting.accessKeyId, setting.accessKeySecret);
             DeleteObjectResult result = client.DeleteObject(setting.bucketName, objectName);
             return true;
         }
@@ -183,9 +184,9 @@ namespace SP.StudioCore.API
             {
                 throw new NullReferenceException();
             }
-            string fix = file.FileName[file.FileName.LastIndexOf('.')..][1..];
-            byte[] data = file.ToArray() ?? System.Array.Empty<byte>();    
-            string md5 = Encryption.toMD5Short(Encryption.toMD5(data));
+            string fix  = file.FileName[file.FileName.LastIndexOf('.')..][1..];
+            byte[] data = file.ToArray() ?? System.Array.Empty<byte>();
+            string md5  = Encryption.toMD5Short(Encryption.toMD5(data));
             string path = $"upload/{DateTime.Now:yyyyMM}/{md5}.{fix}";
 
             if (setting.Upload(path, data, new ObjectMetadata(), out string message))
@@ -200,7 +201,7 @@ namespace SP.StudioCore.API
             {
                 throw new NullReferenceException();
             }
-            string md5 = Encryption.toMD5Short(Encryption.toMD5(data));
+            string md5  = Encryption.toMD5Short(Encryption.toMD5(data));
             string path = $"upload/{DateTime.Now:yyyyMM}/{md5}.{fix}";
 
             if (setting.Upload(path, data, new ObjectMetadata(), out string? message))
@@ -208,6 +209,51 @@ namespace SP.StudioCore.API
                 return $"/{path}";
             }
             throw new Exception(message);
+        }
+
+        /// <summary>
+        /// 列举文件
+        /// </summary>
+        public static List<OssObjectSummary> GetFileList(this OSSSetting setting, string prefix, bool isPrintLog = true)
+        {
+            var       lstFile    = new List<OssObjectSummary>();
+            OssClient client     = new(setting.endpoint, setting.accessKeyId, setting.accessKeySecret);
+            string    nextMarker = null;
+            if (isPrintLog) Console.WriteLine($"***************开始读取{prefix}文件***************");
+            while (true)
+            {
+                if (isPrintLog) Console.WriteLine($"正在读取{prefix}文件，当前已读取{lstFile.Count()}个文件");
+                var lst = client.ListObjects(new ListObjectsRequest(setting.bucketName)
+                {
+                    Prefix       = prefix,
+                    Marker       = nextMarker,
+                    MaxKeys      = 1000,
+                    Delimiter    = null,
+                    EncodingType = null,
+                    RequestPayer = RequestPayer.BucketOwner
+                });
+                nextMarker = lst.NextMarker;
+                lstFile.AddRange(lst.ObjectSummaries);
+                if (!lst.IsTruncated) break;
+            }
+            // 移除到第一目录前缀
+            if (prefix.EndsWith("/"))
+            {
+                lstFile.RemoveAll(o => o.Key == prefix);
+            }
+            if (isPrintLog) Console.WriteLine($"读取{prefix}完成，共读取到：{lstFile.Count()}个文件");
+            if (isPrintLog) Console.WriteLine($"************************************************");
+            if (isPrintLog) Console.WriteLine();
+            return lstFile;
+        }
+
+        /// <summary>
+        /// 检查文件是否存在于OSS
+        /// </summary>
+        public static bool ExistsFile(this OSSSetting setting, string file)
+        {
+            OssClient client = new(setting.endpoint, setting.accessKeyId, setting.accessKeySecret);
+            return client.DoesObjectExist(setting.bucketName, file);
         }
     }
 

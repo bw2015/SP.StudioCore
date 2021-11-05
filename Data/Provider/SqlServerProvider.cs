@@ -531,8 +531,8 @@ namespace SP.StudioCore.Data.Provider
         {
             if (keys == null || keys.Length == 0) return 0;
             string? tableName = typeof(T).GetTableName();
-            string? whereName = SchemaCache.GetColumnProperty(field).Name;
-            string? fieldName = SchemaCache.GetColumnProperty(condition).Name;
+            string? fieldName = SchemaCache.GetColumnProperty(field).Name;
+            string? whereName = SchemaCache.GetColumnProperty(condition).Name;
             DynamicParameters parameters = new DynamicParameters();
             parameters.Add("@Value", value);
             string sql = $"UPDATE [{tableName}] SET [{fieldName}] = @Value WHERE [{whereName}] IN ({string.Join(",", keys)})";

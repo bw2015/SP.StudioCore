@@ -55,7 +55,6 @@ namespace SP.StudioCore.MQ.RabbitMQ
         /// <param name="consumeThreadNums">线程数（默认8）</param>
         public static IRabbitManager GetConsumerInstance(string connectionConfigName, string queueName, int consumeThreadNums, int lastAckTimeoutRestart)
         {
-            //var configurationDefault = new Config();
             RabbitConnect rabbitConnect = Config.GetConfig("Rabbit", connectionConfigName);
             return new RabbitManager(rabbitConnect, queueName, consumeThreadNums, lastAckTimeoutRestart);
         }

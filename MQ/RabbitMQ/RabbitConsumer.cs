@@ -73,14 +73,14 @@ namespace SP.StudioCore.MQ.RabbitMQ
         /// <param name="consumeThreadNums">线程数（默认8）</param>
         public RabbitConsumer(RabbitConnect connect, string queueName, int lastAckTimeoutRestart, int consumeThreadNums)
         {
-            this._connect = connect;
+            this._connect               = connect;
             this._lastAckTimeoutRestart = lastAckTimeoutRestart;
-            this._consumeThreadNums = consumeThreadNums;
-            this._queueName = queueName;
-            this._lastAckAt = DateTime.Now;
+            this._consumeThreadNums     = consumeThreadNums;
+            this._queueName             = queueName;
+            this._lastAckAt             = DateTime.Now;
 
             if (_lastAckTimeoutRestart == 0) _lastAckTimeoutRestart = 5 * 60;
-            if (_consumeThreadNums == 0) _consumeThreadNums = 8;
+            if (_consumeThreadNums     == 0) _consumeThreadNums     = 8;
         }
 
         /// <summary>
@@ -91,7 +91,7 @@ namespace SP.StudioCore.MQ.RabbitMQ
         public void Start(IListenerMessage listener, bool autoAck = false)
         {
             _listener = listener;
-            _autoAck = autoAck;
+            _autoAck  = autoAck;
             Connect(_listener, _autoAck);
             CheckStatsAndConnect();
         }
@@ -110,6 +110,9 @@ namespace SP.StudioCore.MQ.RabbitMQ
         /// </summary>
         private void CheckStatsAndConnect()
         {
+            // 大于0，才开起自动重连
+            if (this._lastAckTimeoutRestart < 1) return;
+
             // 检查连接状态
             _cts = new CancellationTokenSource();
             Task.Factory.StartNew(token =>
@@ -154,7 +157,7 @@ namespace SP.StudioCore.MQ.RabbitMQ
             // 只获取一次
             var resp = _channel.BasicGet(_queueName, autoAck);
 
-            var result = false;
+            var result  = false;
             var message = Encoding.UTF8.GetString(resp.Body.ToArray());
             try
             {
@@ -204,7 +207,7 @@ namespace SP.StudioCore.MQ.RabbitMQ
         private void Connect()
         {
             if (_connect.Connection == null || !_connect.Connection.IsOpen) _connect.Open();
-            if (_channel == null || _channel.IsClosed) _channel = _connect.Connection.CreateModel();
+            if (_channel            == null || _channel.IsClosed) _channel = _connect.Connection.CreateModel();
             _lastAckAt = DateTime.Now;
         }
 
@@ -219,7 +222,7 @@ namespace SP.StudioCore.MQ.RabbitMQ
             var consumer = new EventingBasicConsumer(_channel);
             consumer.Received += (model, ea) =>
             {
-                bool result = true;
+                bool    result  = true;
                 string? message = Encoding.UTF8.GetString(ea.Body.ToArray());
                 try
                 {

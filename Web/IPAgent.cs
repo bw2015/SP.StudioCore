@@ -13,6 +13,7 @@ using System.Net;
 using Elasticsearch.Net;
 using System.Net.Sockets;
 using SP.StudioCore.Web.ipv6wry;
+using SP.StudioCore.Web.IPRule;
 
 namespace SP.StudioCore.Web
 {
@@ -22,12 +23,12 @@ namespace SP.StudioCore.Web
     public static class IPAgent
     {
 
-        private static IPHeader? header = IocCollection.GetService<IPHeader>();
+        private static IIPRule ipRule => IocCollection.GetService<IIPRule>() ?? new DefaultRule();
 
         /// <summary>
         /// 没有IP地址
         /// </summary>
-        private const string NO_IP = "0.0.0.0";
+        internal const string NO_IP = "0.0.0.0";
 
         /// <summary>
         /// IP库的路径
@@ -61,42 +62,13 @@ namespace SP.StudioCore.Web
             }
         }
 
-
         /// <summary>
         /// 获取IP（支持IPV6）
         /// </summary>
-        /// <param name="context"></param>
-        /// <returns></returns>
         public static string GetIP(this HttpContext context)
         {
             if (context == null) return NO_IP;
-            string ip = string.Empty;
-
-            string[] keys = header == null ?
-                new[] { "Ali-CDN-Real-IP", "X-Real-IP", "X-Forwarded-IP", "X-Forwarded-For" }
-                :
-                header.Headers;
-
-            foreach (string key in keys)
-            {
-                if (key == null || !context.Request.Headers.ContainsKey(key)) continue;
-                string values = context.Request.Headers[key];
-                if (string.IsNullOrEmpty(values)) continue;
-                foreach (string value in values.Split(','))
-                {
-                    if (IPAddress.TryParse(value.Trim(), out IPAddress? address))
-                    {
-                        ip = address.ToString();
-                        break;
-                    }
-                }
-                if (!string.IsNullOrEmpty(ip)) break;
-            }
-            if (string.IsNullOrEmpty(ip))
-            {
-                ip = context.Features.Get<IHttpConnectionFeature>()?.RemoteIpAddress?.ToString() ?? NO_IP;
-            }
-            return ip;
+            return ipRule.GetIP(context);
         }
 
         /// <summary>

@@ -394,19 +394,23 @@ namespace SP.StudioCore.Mvc
         /// <param name="data"></param>
         /// <param name="action"></param>
         /// <returns></returns>
-        protected virtual Result GetResultList<T, TOutput>(Func<SearchDescriptor<T>, ISearchRequest> search, Func<T, TOutput>? convert = null, object? data = null) where T : class, IDocument
+        protected virtual Result GetResultList<T, TOutput>(Func<SearchDescriptor<T>, ISearchRequest> search, Func<T, TOutput>? convert = null, object? data = null, Action<IEnumerable<T>>? action = null) where T : class, IDocument
         {
             StringBuilder sb = new StringBuilder();
             string? json = null;
-            Func<SearchDescriptor<T>, ISearchRequest> action = (s) =>
+            Func<SearchDescriptor<T>, ISearchRequest> query = (s) =>
             {
                 return search.Invoke(s.Paged(this.PageIndex, this.PageSize));
             };
 
-            ISearchResponse<T> response = ESDB.Search(action);
+            ISearchResponse<T> response = ESDB.Search(query);
             if (!response.IsValid)
             {
                 throw new Exception(response.DebugInformation);
+            }
+            if (action != null)
+            {
+                action(response.Documents.ToList());
             }
             if (convert == null)
             {
@@ -425,6 +429,8 @@ namespace SP.StudioCore.Mvc
             .Append("}");
             return GetResultContent(sb.ToString());
         }
+
+
         /// <summary>
         /// 分页输出（指定分页参数）
         /// </summary>
@@ -437,7 +443,7 @@ namespace SP.StudioCore.Mvc
         /// <param name="data"></param>
         /// <param name="action"></param>
         /// <returns></returns>
-        protected virtual Result GetResultList<T, TOutput>(IOrderedQueryable<T> list, int pageindex, int pagesize, Func<T, TOutput> converter = null, object data = null, Action<IEnumerable<T>> action = null) where TOutput : class
+        protected virtual Result GetResultList<T, TOutput>(IOrderedQueryable<T> list, int pageindex, int pagesize, Func<T, TOutput> converter = null, object data = null, Action<IEnumerable<T>>? action = null) where TOutput : class
         {
             if (converter == null) converter = t => t as TOutput;
             StringBuilder sb = new StringBuilder();

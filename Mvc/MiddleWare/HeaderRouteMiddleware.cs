@@ -81,8 +81,6 @@ namespace SP.StudioCore.Mvc.MiddleWare
             {
                 context.Request.Path = path[1..];
             }
-
-            Console.WriteLine($"HeaderRouteMiddleware {sw.ElapsedMilliseconds}");
             await _next(context).ConfigureAwait(false);
         }
     }

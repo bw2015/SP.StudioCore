@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SP.StudioCore.Ioc;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -25,7 +26,10 @@ namespace SP.StudioCore.Net
             }
         }
 
-        private static WebClient CreateWebClient(string url = null, Encoding encoding = null)
+        private static IHttpRequestConfig RequestConfig => IocCollection.GetService<IHttpRequestConfig>() ?? new HttpRequestConfig();
+
+
+        private static WebClient CreateWebClient(string? url = null, Encoding? encoding = null)
         {
             if (encoding == null) encoding = Encoding.UTF8;
             WebClient wc = new WebClient
@@ -129,10 +133,10 @@ namespace SP.StudioCore.Net
         /// <returns></returns>
         public static string UploadData(string url, byte[] data, Encoding encoding = null, WebClient wc = null, Dictionary<string, string> headers = null)
         {
-            string strResult = null;
             encoding ??= Encoding.UTF8;
             using (wc ??= CreateWebClient(url))
             {
+                string? strResult;
                 try
                 {
                     if (headers != null)
@@ -146,7 +150,7 @@ namespace SP.StudioCore.Net
                     {
                         wc.Headers.Add(HttpRequestHeader.ContentType, "text/plain;charset=UTF-8");
                     }
-                    byte[] dataResult = wc.UploadData(url, "POST", data);
+                    byte[] dataResult = wc.UploadData(RequestConfig.GetUrl(url), "POST", data);
                     strResult = encoding.GetString(dataResult);
                     wc.Headers.Remove("Content-Type");
                 }
@@ -188,7 +192,7 @@ namespace SP.StudioCore.Net
                         }
                     }
                     if (!wc.Headers.AllKeys.Contains("Content-Type")) wc.Headers.Add(HttpRequestHeader.ContentType, "text/plain;charset=UTF-8");
-                    wc.UploadDataAsync(new Uri(url), data);
+                    wc.UploadDataAsync(new Uri(RequestConfig.GetUrl(url)), data);
                 }
                 catch (WebException ex)
                 {
@@ -205,7 +209,7 @@ namespace SP.StudioCore.Net
         /// <param name="header"></param>
         /// <param name="wc"></param>
         /// <returns></returns>
-        public static string DownloadData(string url, Encoding encoding, Dictionary<string, string> header = null, WebClient wc = null)
+        public static string DownloadData(string url, Encoding encoding, Dictionary<string, string>? header = null, WebClient? wc = null)
         {
             if (encoding == null) encoding = Encoding.Default;
             bool isNew = false;
@@ -221,11 +225,11 @@ namespace SP.StudioCore.Net
                     wc.Headers[item.Key] = item.Value;
                 }
             }
-            string strResult = null;
+            string? strResult = null;
             try
             {
-                byte[] data = wc.DownloadData(url);
-                if (wc.ResponseHeaders[HttpResponseHeader.ContentEncoding] == "gzip")
+                byte[] data = wc.DownloadData(RequestConfig.GetUrl(url));
+                if (wc.ResponseHeaders?[HttpResponseHeader.ContentEncoding] == "gzip")
                 {
                     data = UnGZip(data);
                 }
@@ -265,7 +269,7 @@ namespace SP.StudioCore.Net
         /// </summary>
         /// <param name="url"></param>
         /// <returns></returns>
-        public static byte[] DownloadFile(string url, Dictionary<string, string> header = null, WebClient wc = null)
+        public static byte[]? DownloadFile(string url, Dictionary<string, string> header = null, WebClient wc = null)
         {
             bool isNew = false;
             if (wc == null)
@@ -280,7 +284,7 @@ namespace SP.StudioCore.Net
                     wc.Headers[item.Key] = item.Value;
                 }
             }
-            byte[] data = null;
+            byte[]? data = null;
             try
             {
                 data = wc.DownloadData(url);
@@ -296,18 +300,16 @@ namespace SP.StudioCore.Net
             return data;
         }
 
-        private static HttpClient httpClient;
+        private static HttpClient? httpClient;
+
         /// <summary>
         /// 异步返回内容
         /// </summary>
-        /// <param name="url"></param>
-        /// <param name="encoding"></param>
-        /// <returns></returns>
-        public static async Task<string> GetString(string url, Encoding encoding = null)
+        public static async Task<string> GetString(string url, Encoding? encoding = null)
         {
             if (httpClient == null) httpClient = new HttpClient();
-            if (encoding == null) encoding = Encoding.UTF8;
-            byte[] data = await httpClient.GetByteArrayAsync(url).ConfigureAwait(false);
+            encoding ??= Encoding.UTF8;
+            byte[] data = await httpClient.GetByteArrayAsync(RequestConfig.GetUrl(url)).ConfigureAwait(false);
             return encoding.GetString(data);
         }
     }

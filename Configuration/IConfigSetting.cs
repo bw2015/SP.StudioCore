@@ -11,6 +11,9 @@ namespace SP.StudioCore.Configuration
     /// </summary>
     public interface IConfigSetting
     {
-        public string Key { get; set; }
+        /// <summary>
+        /// 获取配置内容
+        /// </summary>
+        public string GetConfigContent(string content);
     }
 }

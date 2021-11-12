@@ -1,4 +1,5 @@
-﻿using SP.StudioCore.Ioc;
+﻿using Microsoft.Data.SqlClient;
+using SP.StudioCore.Ioc;
 using SP.StudioCore.Utils;
 using System;
 using System.Collections.Generic;
@@ -51,6 +52,13 @@ namespace SP.StudioCore.Jobs
                              object content = job.Execute();
                              JobDelegate.ServiceLog(job.GetType().Name, content, sw.ElapsedMilliseconds);
                              isRun = true;
+                         }
+                     }
+                     catch (SqlException ex)
+                     {
+                         if (ex.Number == 18456)
+                         {
+                             JobDelegate.Exception(new Exception("database login failed"));
                          }
                      }
                      catch (Exception ex)

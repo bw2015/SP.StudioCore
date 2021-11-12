@@ -427,5 +427,10 @@ namespace SP.StudioCore.Data.Provider
         {
             throw new NotImplementedException();
         }
+
+        public int Update<T, TField1, TField2, TField3>(Expression<Func<T, TField1>> field1, TField1 value1, Expression<Func<T, TField2>> field2, TField2 value2, Expression<Func<T, TField3>> field3, TField3 value3, Expression<Func<T, bool>> condition) where T : class, new()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

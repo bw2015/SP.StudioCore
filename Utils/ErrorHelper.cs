@@ -17,13 +17,13 @@ namespace SP.StudioCore.Utils
     public static class ErrorHelper
     {
         /// <summary>
-        /// 獲取詳細的錯誤信息（JSON格式）
+        /// 獲取詳細的錯誤信息（字典格式）
         /// </summary>
         /// <param name="ex"></param>
         /// <returns></returns>
-        public static string GetExceptionContent(Exception ex, HttpContext? context = null)
+        public static Dictionary<string, object> GetException(Exception ex, HttpContext? context = null)
         {
-            Dictionary<string, object> data = new Dictionary<string, object>
+            Dictionary<string, object> data = new()
             {
                 { "Message", ex.Message },
                 { "Time", DateTime.Now }
@@ -85,7 +85,15 @@ namespace SP.StudioCore.Utils
                 data.Add("Exception", Exception);
             }
 
-            return JsonConvert.SerializeObject(data);
+            return data;
+        }
+        
+        /// <summary>
+        /// 獲取詳細的錯誤信息（JSON格式）
+        /// </summary>
+        public static string GetExceptionContent(Exception ex, HttpContext? context = null)
+        {
+            return JsonConvert.SerializeObject(GetException(ex, context));
         }
     }
 }

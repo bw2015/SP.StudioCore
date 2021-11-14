@@ -31,7 +31,7 @@ namespace SP.StudioCore.API
             message = null;
             try
             {
-                OssClient client = new OssClient(setting.endpoint, setting.accessKeyId, setting.accessKeySecret);
+                OssClient       client = new OssClient(setting.endpoint, setting.accessKeyId, setting.accessKeySecret);
                 PutObjectResult result = client.PutObject(setting.bucketName, objectName, localFilename);
                 return true;
             }
@@ -57,7 +57,7 @@ namespace SP.StudioCore.API
             {
                 using (MemoryStream requestContent = new MemoryStream(binaryData))
                 {
-                    OssClient client = new OssClient(setting.endpoint, setting.accessKeyId, setting.accessKeySecret);
+                    OssClient       client = new OssClient(setting.endpoint, setting.accessKeyId, setting.accessKeySecret);
                     PutObjectResult result = client.PutObject(setting.bucketName, objectName, requestContent, metadata);
                     return true;
                 }
@@ -79,14 +79,12 @@ namespace SP.StudioCore.API
         /// <param name="objectName"></param>
         /// <param name="binaryData"></param>
         /// <param name="index">第多少个分片（从1开始）</param>
-        /// <param name="total">总分片数量</param>
         /// <param name="uploadId">如果是第二个分片则必须传入</param>
         /// <returns></returns>
-        public static bool Upload(this OSSSetting setting, string objectName, byte[] binaryData, int index, int total, ref string uploadId)
+        public static PartETag Upload(this OSSSetting setting, string objectName, byte[] binaryData, int index, ref string uploadId)
         {
             OssClient client = new OssClient(setting.endpoint, setting.accessKeyId, setting.accessKeySecret);
-
-
+            PartETag  partETagResult;
             if (index == 1)
             {
                 var request = new InitiateMultipartUploadRequest(setting.bucketName, objectName, new ObjectMetadata
@@ -97,25 +95,39 @@ namespace SP.StudioCore.API
                 uploadId = result.UploadId;
             }
 
-            using (MemoryStream requestContent = new MemoryStream(binaryData))
+            using (MemoryStream requestContent = new(binaryData))
             {
                 var result = client.UploadPart(new UploadPartRequest(setting.bucketName, objectName, uploadId)
                 {
                     InputStream = requestContent,
-                    PartSize = binaryData.Length,
-                    PartNumber = index
+                    PartSize    = binaryData.Length,
+                    PartNumber  = index
                 });
+                partETagResult = result.PartETag;
             }
-
-            if (index == total)
-            {
-                var completeMultipartUploadRequest = new CompleteMultipartUploadRequest(setting.bucketName, objectName, uploadId);
-                client.CompleteMultipartUpload(completeMultipartUploadRequest);
-            }
-
-            return true;
+            return partETagResult;
         }
 
+        /// <summary>
+        /// 分片断点续传完成后传入
+        /// </summary>
+        /// <param name="setting"></param>
+        /// <param name="objectName"></param>
+        /// <param name="uploadId">如果是第二个分片则必须传入</param>
+        /// <param name="partETags"> </param>
+        /// <returns></returns>
+        public static void UploadFinish(this OSSSetting setting, string objectName, string uploadId, List<PartETag> partETags)
+        {
+            OssClient client = new(setting.endpoint, setting.accessKeyId, setting.accessKeySecret);
+
+            var completeMultipartUploadRequest = new CompleteMultipartUploadRequest(setting.bucketName, objectName, uploadId);
+            foreach (var partETag in partETags.OrderBy(o=>o.PartNumber))
+            {
+                completeMultipartUploadRequest.PartETags.Add(partETag);
+            }
+            client.CompleteMultipartUpload(completeMultipartUploadRequest);
+        }
+        
         /// <summary>
         /// 设定文件的过期时间
         /// </summary>
@@ -139,7 +151,7 @@ namespace SP.StudioCore.API
         /// </summary>
         public static bool Delete(this OSSSetting setting, string objectName)
         {
-            OssClient client = new OssClient(setting.endpoint, setting.accessKeyId, setting.accessKeySecret);
+            OssClient          client = new OssClient(setting.endpoint, setting.accessKeyId, setting.accessKeySecret);
             DeleteObjectResult result = client.DeleteObject(setting.bucketName, objectName);
             return true;
         }
@@ -157,9 +169,9 @@ namespace SP.StudioCore.API
             {
                 throw new NullReferenceException();
             }
-            string fix = file.FileName[file.FileName.LastIndexOf('.')..][1..];
+            string fix  = file.FileName[file.FileName.LastIndexOf('.')..][1..];
             byte[] data = file.ToArray() ?? System.Array.Empty<byte>();
-            string md5 = Encryption.toMD5Short(Encryption.toMD5(data));
+            string md5  = Encryption.toMD5Short(Encryption.toMD5(data));
             string path = $"upload/{DateTime.Now:yyyyMM}/{md5}.{fix}";
 
             if (setting.Upload(path, data, new ObjectMetadata(), out string message))
@@ -174,7 +186,7 @@ namespace SP.StudioCore.API
             {
                 throw new NullReferenceException();
             }
-            string md5 = Encryption.toMD5Short(Encryption.toMD5(data));
+            string md5  = Encryption.toMD5Short(Encryption.toMD5(data));
             string path = $"upload/{DateTime.Now:yyyyMM}/{md5}.{fix}";
 
             if (setting.Upload(path, data, new ObjectMetadata(), out string? message))
@@ -189,19 +201,19 @@ namespace SP.StudioCore.API
         /// </summary>
         public static List<OssObjectSummary> GetFileList(this OSSSetting setting, string prefix, bool isPrintLog = true)
         {
-            var lstFile = new List<OssObjectSummary>();
-            OssClient client = new(setting.endpoint, setting.accessKeyId, setting.accessKeySecret);
-            string nextMarker = null;
+            var       lstFile    = new List<OssObjectSummary>();
+            OssClient client     = new(setting.endpoint, setting.accessKeyId, setting.accessKeySecret);
+            string    nextMarker = null;
             if (isPrintLog) Console.WriteLine($"***************开始读取{prefix}文件***************");
             while (true)
             {
                 if (isPrintLog) Console.WriteLine($"正在读取{prefix}文件，当前已读取{lstFile.Count()}个文件");
                 var lst = client.ListObjects(new ListObjectsRequest(setting.bucketName)
                 {
-                    Prefix = prefix,
-                    Marker = nextMarker,
-                    MaxKeys = 1000,
-                    Delimiter = null,
+                    Prefix       = prefix,
+                    Marker       = nextMarker,
+                    MaxKeys      = 1000,
+                    Delimiter    = null,
                     EncodingType = null,
                     RequestPayer = RequestPayer.BucketOwner
                 });

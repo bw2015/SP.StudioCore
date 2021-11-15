@@ -397,6 +397,11 @@ namespace SP.StudioCore.Model
         /// 301跳转
         /// </summary>
         [Description("Redirect")]
-        Redirect = 114
+        Redirect = 114,
+        /// <summary>
+        /// 返回excel格式
+        /// </summary>
+        [Description("application/ms-excel")]
+        Excel
     }
 }

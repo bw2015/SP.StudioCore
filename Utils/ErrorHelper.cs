@@ -50,7 +50,7 @@ namespace SP.StudioCore.Utils
                         }
                         else
                         {
-                            RequestData.Add("PostData", context.GetString());
+                            RequestData.Add("PostData", context.GetString() ?? "null");
                         }
                     }
                     catch (Exception dataException)
@@ -87,7 +87,7 @@ namespace SP.StudioCore.Utils
 
             return data;
         }
-        
+
         /// <summary>
         /// 獲取詳細的錯誤信息（JSON格式）
         /// </summary>

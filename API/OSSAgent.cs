@@ -69,7 +69,6 @@ namespace SP.StudioCore.API
             }
         }
 
-        private static Dictionary<string, string> uploadTokenId = new Dictionary<string, string>();
 
         private static Dictionary<string, List<PartETag>> uploadETags = new Dictionary<string, List<PartETag>>();
 
@@ -80,14 +79,12 @@ namespace SP.StudioCore.API
         /// <param name="objectName"></param>
         /// <param name="binaryData"></param>
         /// <param name="index">第多少个分片（从1开始）</param>
-        /// <param name="total">总分片数量</param>
+        /// <param name="uploadId">如果是第二个分片则必须传入</param>
         /// <returns></returns>
-        public static bool Upload(this OSSSetting setting, string objectName, byte[] binaryData, int index, int total, string uploadToken)
+        public static PartETag Upload(this OSSSetting setting, string objectName, byte[] binaryData, int index, ref string uploadId)
         {
             OssClient client = new OssClient(setting.endpoint, setting.accessKeyId, setting.accessKeySecret);
-
-            string         uploadId  = uploadTokenId.Get(uploadToken);
-            List<PartETag> partETags = uploadETags.Get(uploadToken);
+            PartETag  partETagResult;
             if (index == 1)
             {
                 var request = new InitiateMultipartUploadRequest(setting.bucketName, objectName, new ObjectMetadata
@@ -95,28 +92,10 @@ namespace SP.StudioCore.API
                     ExpirationTime = DateTime.Now.AddDays(1)
                 });
                 var result = client.InitiateMultipartUpload(request);
-                uploadId  = result.UploadId;
-                partETags = new List<PartETag>();
-
-                if (uploadTokenId.ContainsKey(uploadToken))
-                {
-                    uploadTokenId[uploadToken] = uploadId;
-                }
-                else
-                {
-                    uploadTokenId.Add(uploadToken, uploadId);
-                }
-                if (uploadETags.ContainsKey(uploadToken))
-                {
-                    uploadETags[uploadToken] = partETags;
-                }
-                else
-                {
-                    uploadETags.Add(uploadToken, partETags);
-                }
+                uploadId = result.UploadId;
             }
 
-            using (MemoryStream requestContent = new MemoryStream(binaryData))
+            using (MemoryStream requestContent = new(binaryData))
             {
                 var result = client.UploadPart(new UploadPartRequest(setting.bucketName, objectName, uploadId)
                 {
@@ -124,25 +103,31 @@ namespace SP.StudioCore.API
                     PartSize    = binaryData.Length,
                     PartNumber  = index
                 });
-                partETags.Add(result.PartETag);
+                partETagResult = result.PartETag;
             }
-
-            if (index == total)
-            {
-                var completeMultipartUploadRequest = new CompleteMultipartUploadRequest(setting.bucketName, objectName, uploadId);
-                foreach (var partETag in partETags)
-                {
-                    completeMultipartUploadRequest.PartETags.Add(partETag);
-                }
-                client.CompleteMultipartUpload(completeMultipartUploadRequest);
-
-                if (uploadTokenId.ContainsKey(uploadToken)) uploadTokenId.Remove(uploadToken);
-                if (uploadETags.ContainsKey(uploadToken)) uploadETags.Remove(uploadToken);
-            }
-
-            return true;
+            return partETagResult;
         }
 
+        /// <summary>
+        /// 分片断点续传完成后传入
+        /// </summary>
+        /// <param name="setting"></param>
+        /// <param name="objectName"></param>
+        /// <param name="uploadId">如果是第二个分片则必须传入</param>
+        /// <param name="partETags"> </param>
+        /// <returns></returns>
+        public static void UploadFinish(this OSSSetting setting, string objectName, string uploadId, List<PartETag> partETags)
+        {
+            OssClient client = new(setting.endpoint, setting.accessKeyId, setting.accessKeySecret);
+
+            var completeMultipartUploadRequest = new CompleteMultipartUploadRequest(setting.bucketName, objectName, uploadId);
+            foreach (var partETag in partETags.OrderBy(o=>o.PartNumber))
+            {
+                completeMultipartUploadRequest.PartETags.Add(partETag);
+            }
+            client.CompleteMultipartUpload(completeMultipartUploadRequest);
+        }
+        
         /// <summary>
         /// 设定文件的过期时间
         /// </summary>

@@ -17,7 +17,7 @@ namespace SP.StudioCore.Jobs
     /// </summary>
     public static class JobFactory
     {
-        private static IJobDelegate JobDelegate = IocCollection.GetService<IJobDelegate>();
+        private static IJobDelegate? JobDelegate = IocCollection.GetService<IJobDelegate>();
 
         public static void Run(Assembly assembly)
         {
@@ -47,10 +47,10 @@ namespace SP.StudioCore.Jobs
                      Stopwatch sw = Stopwatch.StartNew();
                      try
                      {
-                         if (job.IsTheard || JobDelegate.LockJob(jobName, job.Interval))
+                         if (job.IsTheard || (JobDelegate != null && JobDelegate.LockJob(jobName, job.Interval)))
                          {
                              object content = job.Execute();
-                             JobDelegate.ServiceLog(job.GetType().Name, content, sw.ElapsedMilliseconds);
+                             JobDelegate?.ServiceLog(job.GetType().Name, content, sw.ElapsedMilliseconds);
                              isRun = true;
                          }
                      }
@@ -58,13 +58,13 @@ namespace SP.StudioCore.Jobs
                      {
                          if (ex.Number == 18456)
                          {
-                             JobDelegate.Exception(new Exception("database login failed"));
+                             JobDelegate?.Exception(new Exception("database login failed"));
                          }
                      }
                      catch (Exception ex)
                      {
                          ConsoleHelper.WriteLine(ex.Message, ConsoleColor.Red);
-                         JobDelegate.Exception(ex);
+                         JobDelegate?.Exception(ex);
                      }
                      finally
                      {

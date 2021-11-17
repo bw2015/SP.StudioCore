@@ -28,7 +28,7 @@ namespace SP.StudioCore.Web
         /// <summary>
         /// 没有IP地址
         /// </summary>
-        internal const string NO_IP = "0.0.0.0";
+        public const string NO_IP = "0.0.0.0";
 
         /// <summary>
         /// IP库的路径

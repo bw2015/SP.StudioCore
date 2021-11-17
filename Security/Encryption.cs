@@ -47,7 +47,7 @@ namespace SP.StudioCore.Security
         /// </summary>
         /// <param name="md5">必須是大寫的MD5</param>
         /// <returns></returns>
-        public static string toMD5Short(string md5)
+        public static string toMD5Short(this string md5)
         {
             md5 = md5.ToUpper();
             md5 = Regex.Replace(md5, $@"[^{MD5CHAR}]", "0");

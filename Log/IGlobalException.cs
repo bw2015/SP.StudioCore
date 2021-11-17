@@ -10,6 +10,6 @@ namespace SP.StudioCore.Log
         /// <summary>
         /// 处理异常
         /// </summary>
-        bool Handle(Exception exp);
+        bool Handle(Exception exp, string message);
     }
 }

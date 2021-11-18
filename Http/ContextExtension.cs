@@ -389,14 +389,17 @@ namespace SP.StudioCore.Http
         /// </summary>
         /// <param name="context"></param>
         /// <returns></returns>
-        public static Language GetLanguage(this HttpContext context)
+        public static Language GetLanguage(this HttpContext context, Language defaultLanguage = Language.CHN)
         {
             if (context.Request.Headers.ContainsKey(Const.LANGUAGE))
             {
-                return context.Head(Const.LANGUAGE).ToEnum<Language>();
+                if (Enum.IsDefined(typeof(Language), context.Head(Const.LANGUAGE)))
+                {
+                    return context.Head(Const.LANGUAGE).ToEnum<Language>();
+                }
+                return defaultLanguage;
             }
-
-            return Language.CHN;
+            return defaultLanguage;
         }
 
         /// <summary>

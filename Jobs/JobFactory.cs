@@ -19,11 +19,15 @@ namespace SP.StudioCore.Jobs
     {
         private static IJobDelegate? JobDelegate = IocCollection.GetService<IJobDelegate>();
 
-        public static void Run(Assembly assembly)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="runjob">需要被执行的Job</param>
+        public static void Run(Assembly assembly, params string[] runjob)
         {
             if (assembly == null) return;
             IEnumerable<IJobBase?> jobs = assembly.GetTypes()
-                .Where(t => !t.IsAbstract && t.IsSubclassOf(typeof(IJobBase)))
+                .Where(t => !t.IsAbstract && t.IsSubclassOf(typeof(IJobBase)) && (!runjob.Any() || runjob.Contains(t.Name)))
                 .Select(t => (IJobBase?)Activator.CreateInstance(t));
 
             string? service = assembly?.GetName().Name;

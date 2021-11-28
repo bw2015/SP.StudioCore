@@ -46,7 +46,7 @@ namespace SP.StudioCore.Tools
             .UseMiddleware<ToolsExceptionMIddleware>()
                 .Run(async (context) =>
                 {
-                    await ToolsFactory.Invote(context).WriteAsync(context).ConfigureAwait(false);
+                    await ToolsFactory.Invote(context).WriteAsync(context).ConfigureAwait(true);
                 });
         }
     }

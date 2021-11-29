@@ -49,10 +49,10 @@ namespace SP.StudioCore.Json
         /// <param name="info"></param>
         /// <param name="key"></param>
         /// <returns></returns>
-        public static T Get<T>(this JObject info, string key)
+        public static T? Get<T>(this JObject info, string key)
         {
             if (!info.ContainsKey(key)) return default;
-            JToken token = info[key];
+            JToken? token = info[key];
             if (token == null || token.GetType() != typeof(JValue)) return default;
             JValue value = (JValue)token;
             if (value.Value == null) return default;

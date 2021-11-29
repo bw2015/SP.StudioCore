@@ -269,7 +269,7 @@ namespace SP.StudioCore.Net
         /// </summary>
         /// <param name="url"></param>
         /// <returns></returns>
-        public static byte[]? DownloadFile(string url, Dictionary<string, string> header = null, WebClient wc = null)
+        public static byte[]? DownloadFile(string url, Dictionary<string, string>? header = null, WebClient? wc = null)
         {
             bool isNew = false;
             if (wc == null)
@@ -289,7 +289,7 @@ namespace SP.StudioCore.Net
             {
                 data = wc.DownloadData(url);
             }
-            catch (WebException ex)
+            catch
             {
                 data = null;
             }

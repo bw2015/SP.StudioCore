@@ -36,7 +36,8 @@ namespace SP.StudioCore.Json
                         new BoolConvert(),
                         new GuidConvert(),
                         new StringConvert(),
-                        new JsonStringConvert()
+                        new JsonStringConvert(),
+                        new LongConvert()
                     },
                     NullValueHandling = NullValueHandling.Ignore
                 };
@@ -234,6 +235,43 @@ namespace SP.StudioCore.Json
             {
                 JsonString obj = (JsonString)value;
                 writer.WriteRawValue(obj.ToString());
+            }
+        }
+
+        public override bool CanRead => false;
+    }
+
+    /// <summary>
+    /// 针对 js number 超过 9007199254740992 的解决办法
+    /// </summary>
+    public class LongConvert : JsonConverter
+    {
+        public override bool CanConvert(Type objectType)
+        {
+            return objectType == typeof(long);
+        }
+
+        public override object ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
+        {
+            throw new NotImplementedException();
+        }
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
+        {
+            if (value == null)
+            {
+                writer.WriteNull();
+            }
+            else
+            {
+                long number = (long)value;
+                if (number > 9007199254740992)
+                {
+                    writer.WriteRawValue($"\"{number}\"");
+                }
+                else
+                {
+                    writer.WriteRawValue(number.ToString());
+                }
             }
         }
 

@@ -83,11 +83,11 @@ namespace SP.StudioCore.Linq
         {
             if (string.IsNullOrWhiteSpace(field) || string.IsNullOrWhiteSpace(type)) return query;
             string sorting = string.Empty;
-            if (type.ToUpper().Trim() == "ASC")
+            if (type.ToUpper().Trim() == "ASC" || type.ToLower().Trim() == "asc" || type.ToLower().Trim() == "ascending")
             {
                 sorting = "OrderBy";
             }
-            else if (type.ToUpper().Trim() == "DESC")
+            else if (type.ToUpper().Trim() == "DESC" || type.ToLower().Trim() == "desc" || type.ToLower().Trim() == "descending")
             {
                 sorting = "OrderByDescending";
             }

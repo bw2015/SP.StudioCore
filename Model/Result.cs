@@ -211,7 +211,7 @@ namespace SP.StudioCore.Model
             return new ContentResult()
             {
                 StatusCode = (int)result.StatusCode,
-                ContentType = type.GetAttribute<DescriptionAttribute>().Description,
+                ContentType = type.GetAttribute<DescriptionAttribute>()?.Description,
                 Content = result.ToString()
             };
         }

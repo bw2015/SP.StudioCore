@@ -10,7 +10,7 @@ namespace SP.StudioCore.Utils
     {
         private static object _lock = new object();
 
-        public static void WriteLine(string message, ConsoleColor color)
+        public static string WriteLine(string message, ConsoleColor color)
         {
             lock (_lock)
             {
@@ -18,9 +18,10 @@ namespace SP.StudioCore.Utils
                 Console.WriteLine(message);
                 Console.ResetColor();
             }
+            return message;
         }
 
-        public static void Write(string message, ConsoleColor color)
+        public static string Write(string message, ConsoleColor color)
         {
             lock (_lock)
             {
@@ -28,6 +29,7 @@ namespace SP.StudioCore.Utils
                 Console.Write(message);
                 Console.ResetColor();
             }
+            return message;
         }
     }
 }

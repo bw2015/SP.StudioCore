@@ -58,13 +58,6 @@ namespace SP.StudioCore.Jobs
                              isRun = true;
                          }
                      }
-                     catch (SqlException ex)
-                     {
-                         if (ex.Number == 18456)
-                         {
-                             JobDelegate?.Exception(new Exception("database login failed"));
-                         }
-                     }
                      catch (Exception ex)
                      {
                          ConsoleHelper.WriteLine(ex.Message, ConsoleColor.Red);

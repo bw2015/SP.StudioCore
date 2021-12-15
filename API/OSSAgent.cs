@@ -8,6 +8,8 @@ using SP.StudioCore.Security;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -175,11 +177,31 @@ namespace SP.StudioCore.API
             string md5 = Encryption.toMD5Short(Encryption.toMD5(data));
             string path = $"upload/{DateTime.Now:yyyyMM}/{md5}.{fix}";
 
-            if (setting.Upload(path, data, new ObjectMetadata(), out string message))
+            if (setting.Upload(path, data, new ObjectMetadata(), out string? message))
             {
                 return $"/{path}";
             }
             throw new Exception(message);
+        }
+
+        /// <summary>
+        /// 上传图片
+        /// </summary>
+        public static string UploadImage(this OSSSetting setting, Image image, string folder = "upload/", ImageFormat? format = null)
+        {
+            format ??= ImageFormat.Png;
+            using (MemoryStream stream = new MemoryStream())
+            {
+                image.Save(stream, format);
+                byte[] data = stream.ToArray();
+                string md5 = Encryption.toMD5Short(Encryption.toMD5(data));
+                string path = $"{folder}{md5}.{format.ToString().ToLower()}";
+                if (setting.Upload(path, data, new ObjectMetadata(), out string? message))
+                {
+                    return $"/{path}";
+                }
+                throw new Exception(message);
+            }
         }
 
         /// <summary>

@@ -79,7 +79,7 @@ namespace SP.StudioCore.Tools
             {
                 _method.TryAdd($"{assembly.FullName}:{methodName}", methodInfo = start.GetMethod(methodName));
             }
-            if (methodInfo == null) return context.ShowError(HttpStatusCode.NotFound, methodName);
+            if (methodInfo == null) return context.ShowError(HttpStatusCode.NotFound,$"{start.FullName}.{methodName}");
 
             ConsoleHelper.WriteLine($"查找动作，耗时：{sw.ElapsedMilliseconds}ms", ConsoleColor.Green);
 

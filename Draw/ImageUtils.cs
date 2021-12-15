@@ -41,6 +41,21 @@ namespace SP.StudioCore.Draw
         }
 
         /// <summary>
+        /// base图片转化成为图片对象
+        /// </summary>
+        /// <param name="base64"></param>
+        /// <returns></returns>
+        public static Image ToImage(this string base64)
+        {
+            byte[] bytes = Convert.FromBase64String(base64);
+            using (Stream ms = new MemoryStream(bytes, 0, bytes.Length))
+            {
+                Image image = Image.FromStream(ms, true);
+                return image;
+            }
+        }
+
+        /// <summary>
         /// 比对两张图片是否完全一致
         /// </summary>
         /// <param name="bitmap"></param>
@@ -142,6 +157,34 @@ namespace SP.StudioCore.Draw
                     count++;
             }
             return count;
+        }
+
+        public static int CompareImage(this string hash1, string[] hashs)
+        {
+            if (hashs == null || !hashs.Any()) return 64;
+            List<int> list = new();
+            foreach (string hash in hashs)
+            {
+                list.Add(hash1.CompareImage(hash));
+            }
+            return list.Min();
+        }
+
+        /// <summary>
+        /// 多重比对
+        /// </summary>
+        /// <param name="hash"></param>
+        /// <param name="hashs"></param>
+        /// <returns></returns>
+        public static int CompareImage(this string[] hash, string[] hashs)
+        {
+            if (hash == null || !hash.Any() || hashs == null || !hashs.Any()) return 64;
+            List<int> list = new();
+            foreach (string code in hash)
+            {
+                list.Add(code.CompareImage(hashs));
+            }
+            return list.Min();
         }
 
     }

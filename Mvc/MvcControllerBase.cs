@@ -398,6 +398,7 @@ namespace SP.StudioCore.Mvc
         {
             StringBuilder sb = new StringBuilder();
             string? json = null;
+            if (this.PageIndex * this.PageSize > 10_000) throw new Exception("请缩小条件范围");//此处应该返回错误Code
             Func<SearchDescriptor<T>, ISearchRequest> query = (s) =>
             {
                 return search.Invoke(s.Paged(this.PageIndex, this.PageSize));

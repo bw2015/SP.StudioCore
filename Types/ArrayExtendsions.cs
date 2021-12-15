@@ -57,5 +57,27 @@ namespace SP.StudioCore.Types
             }
         }
 
+        /// <summary>
+        /// 分割集合 转二维数组
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="soucre"></param>
+        /// <param name="take"></param>
+        /// <returns></returns>
+        public static IEnumerable<T[]> Excision<T>(this IEnumerable<T> soucre, int take)
+        {
+            int count = soucre.Count();
+            if (count <= take)
+            {
+                yield return soucre.ToArray();
+            }
+            else
+            {
+                for (int i = 0; i < Math.Floor((double)count / take) + 1; i++)
+                {
+                    yield return soucre.Skip(i * take).Take(take).ToArray();
+                }
+            }
+        }
     }
 }

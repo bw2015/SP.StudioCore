@@ -129,6 +129,8 @@ namespace SP.StudioCore.Enums
         KIDR = 14,
         [Description("金币"), CurrencyExchange(1)]
         COIN = 15,
+        [Description("港币"), CurrencyExchange(0.82)]
+        HKD
     }
 
     /// <summary>

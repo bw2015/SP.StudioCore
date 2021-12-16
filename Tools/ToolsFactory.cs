@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using SP.StudioCore.Http;
 using SP.StudioCore.Model;
+using SP.StudioCore.Mvc;
 using SP.StudioCore.Types;
 using SP.StudioCore.Utils;
 using System;
@@ -38,6 +39,14 @@ namespace SP.StudioCore.Tools
         /// <returns></returns>
         internal static Result Invote(HttpContext context)
         {
+            //ConsoleHelper.WriteLine(context.GetString(), ConsoleColor.Blue);
+            //foreach (var item in context.Request.Headers)
+            //{
+            //    ConsoleHelper.WriteLine($"   {item.Key} => {item.Value}", ConsoleColor.DarkBlue);
+            //}
+
+            //return new Result();
+
             Stopwatch sw = Stopwatch.StartNew();
 
             string path = context.Request.Path.ToString();
@@ -79,7 +88,7 @@ namespace SP.StudioCore.Tools
             {
                 _method.TryAdd($"{assembly.FullName}:{methodName}", methodInfo = start.GetMethod(methodName));
             }
-            if (methodInfo == null) return context.ShowError(HttpStatusCode.NotFound,$"{start.FullName}.{methodName}");
+            if (methodInfo == null) return context.ShowError(HttpStatusCode.NotFound, $"{start.FullName}.{methodName}");
 
             ConsoleHelper.WriteLine($"查找动作，耗时：{sw.ElapsedMilliseconds}ms", ConsoleColor.Green);
 
@@ -125,6 +134,10 @@ namespace SP.StudioCore.Tools
             else if (parameter.HasAttribute<FromBodyAttribute>())
             {
                 value = JsonConvert.DeserializeObject(context.GetString() ?? string.Empty, parameter.ParameterType);
+            }
+            else if (parameter.HasAttribute<FromJsonAttribute>())
+            {
+                value = JsonConvert.DeserializeObject(context.QF(name), parameter.ParameterType);
             }
             else
             {

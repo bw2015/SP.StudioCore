@@ -83,19 +83,18 @@ namespace SP.StudioCore.Http
 
         #region ========== 获取数据 ==============
 
-        public static string QF(this HttpContext context, string key)
+        public static string? QF(this HttpContext context, string key)
         {
             if (context.Request.Method == "POST" && context.Request.HasFormContentType && context.Request.ContentLength != null && context.Request.Form.ContainsKey(key))
             {
                 return context.Request.Form[key];
             }
-
             return null;
         }
 
         public static T QF<T>(this HttpContext context, string key, T t)
         {
-            string value = context.QF(key);
+            string? value = context.QF(key);
             if (string.IsNullOrEmpty(value)) return t;
             return value.IsType<T>() ? value.GetValue<T>() : t;
         }

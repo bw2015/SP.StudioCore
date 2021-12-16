@@ -40,6 +40,20 @@ namespace SP.StudioCore.Draw
             }
         }
 
+        public static byte[] ToArray(this Image image, ImageFormat? format = null)
+        {
+            format ??= ImageFormat.Png;
+            using (MemoryStream ms = new MemoryStream())
+            {
+                image.Save(ms, format);
+                byte[] arr = new byte[ms.Length];
+                ms.Position = 0;
+                ms.Read(arr, 0, (int)ms.Length);
+                ms.Close();
+                return arr;
+            }
+        }
+
         /// <summary>
         /// base图片转化成为图片对象
         /// </summary>

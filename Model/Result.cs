@@ -25,7 +25,7 @@ namespace SP.StudioCore.Model
             : this(HttpStatusCode.OK, success ? 1 : 0, string.Empty, null)
         { }
 
-        public Result(bool success, string message, object info)
+        public Result(bool success, string message, object? info)
            : this(HttpStatusCode.OK, success ? 1 : 0, message, null)
         {
             this.Info = info;

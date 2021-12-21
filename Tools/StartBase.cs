@@ -1,4 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
+using SP.StudioCore.Http;
+using SP.StudioCore.Json;
+using SP.StudioCore.Model;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -26,5 +29,61 @@ namespace SP.StudioCore.Tools
         /// </summary>
         /// <returns></returns>
         protected string GetTime() => $"{sw.ElapsedMilliseconds}ms";
+
+        protected int PageIndex => this.context.QF("PageIndex", 1);
+
+        protected int PageSize => this.context.QF("PageSize", 20);
+
+        /// <summary>
+        /// 输出一个成功的JSON数据
+        /// </summary>
+        protected virtual Result GetResultContent(object data)
+        {
+            return new Result(true, string.Empty, data);
+        }
+
+        protected virtual Result GetResultContent(bool success, object data)
+        {
+            return new Result(true, string.Empty, info: success ? data : null);
+        }
+
+        protected virtual Result GetResultList<T, TOutput>(IOrderedQueryable<T> list, Func<T, TOutput>? converter = null, object? data = null, Action<IEnumerable<T>>? action = null) where TOutput : class
+        {
+            converter ??= t => t as TOutput;
+            StringBuilder sb = new();
+            string? json = null;
+            IEnumerable<T> query;
+            if (this.PageIndex == 1)
+            {
+                query = list.Take(PageSize).ToArray();
+            }
+            else
+            {
+                query = list.Skip((PageIndex - 1) * PageSize).Take(PageSize).ToArray();
+            }
+            action?.Invoke(query);
+            if (converter == null)
+            {
+                json = query.ToJson();
+            }
+            else
+            {
+                if (typeof(TOutput).Name == "String")
+                {
+                    json = string.Concat("[", string.Join(",", query.Select(converter)), "]");
+                }
+                else
+                {
+                    json = query.Select(converter).ToJson();
+                }
+            }
+            return this.GetResultContent(string.Concat("{",
+                $"\"RecordCount\":{ list.Count() },",
+                $"\"PageIndex\":{this.PageIndex},",
+                $"\"PageSize\":{this.PageSize},",
+                $"\"data\":{ (data == null ? "null" : data.ToJson()) },",
+                $"\"list\":{json}",
+                "}"));
+        }
     }
 }

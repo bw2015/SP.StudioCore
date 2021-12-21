@@ -53,9 +53,7 @@ namespace SP.StudioCore.Tools
                 Guid logId = Guid.NewGuid();
                 string info = ErrorHelper.GetExceptionContent(ex, context);
 
-                Console.ForegroundColor = ConsoleColor.Red;
-                _logger.LogError(info);
-                Console.ResetColor();
+                ConsoleHelper.WriteLine(info, ConsoleColor.Red);
 
                 await context.ShowError(ErrorType.Exception, ex.Message, new Dictionary<string, object>()
                 {

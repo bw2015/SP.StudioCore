@@ -153,7 +153,7 @@ namespace SP.StudioCore.Enums
             foreach (Type type in ass.GetTypes().Where(t => t.IsEnum))
             {
                 string? enumName = type.FullName;
-                if (enumName == null) continue;
+                if (enumName == null || dic.ContainsKey(enumName)) continue;
 
                 dic.Add(enumName, new Dictionary<string, string>());
                 foreach (Enum item in Enum.GetValues(type))
@@ -165,7 +165,10 @@ namespace SP.StudioCore.Enums
                     {
                         name = Convert.ToInt32(item).ToString();
                     }
-                    dic[enumName].Add(name, item.GetDescription());
+                    if (!dic[enumName].ContainsKey(name))
+                    {
+                        dic[enumName].Add(name, item.GetDescription());
+                    }
                 }
             }
             return dic;

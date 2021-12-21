@@ -29,6 +29,26 @@ namespace SP.StudioCore.Net
             }
         }
 
+        /// <summary>
+        /// 表单提交
+        /// </summary>
+        /// <param name="uRL"></param>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public static string UploadValues(string url, NameValueCollection data, Encoding? encoding = null, WebClient? wc = null, Dictionary<string, string>? headers = null)
+        {
+            wc ??= CreateWebClient();
+            headers ??= new Dictionary<string, string>();
+            encoding ??= Encoding.UTF8;
+            foreach (KeyValuePair<string, string> header in headers)
+            {
+                wc.Headers[header.Key] = header.Value;
+            }
+            byte[] resultData = wc.UploadValues(url, data);
+            return encoding.GetString(resultData);
+        }
+
         private static IHttpRequestConfig RequestConfig => IocCollection.GetService<IHttpRequestConfig>() ?? new HttpRequestConfig();
 
 
@@ -319,7 +339,7 @@ namespace SP.StudioCore.Net
         /// <summary>
         /// 上传文件
         /// </summary>
-        public static string UploadData(string url, NameValueCollection nvc, MultipartModel file, Encoding? encoding = null, Dictionary<string, string>? header = null, WebClient? wc = null)
+        public static string UploadFile(string url, NameValueCollection nvc, MultipartModel file, Encoding? encoding = null, Dictionary<string, string>? header = null, WebClient? wc = null)
         {
             wc ??= CreateWebClient(url, encoding);
             encoding ??= Encoding.UTF8;

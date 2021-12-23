@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using SP.StudioCore.Enums;
 using SP.StudioCore.Http;
+using SP.StudioCore.Model;
 using SP.StudioCore.Mvc.Exceptions;
 using SP.StudioCore.Utils;
 using System;
@@ -21,12 +22,10 @@ namespace SP.StudioCore.Tools
     public class ToolsExceptionMIddleware
     {
         private readonly RequestDelegate _next;
-        private readonly ILogger<ToolsExceptionMIddleware> _logger;
 
         public ToolsExceptionMIddleware(RequestDelegate next, ILogger<ToolsExceptionMIddleware> logger)
         {
             _next = next;
-            _logger = logger;
         }
 
         public async Task Invoke(HttpContext context, IWebHostEnvironment env)
@@ -40,6 +39,7 @@ namespace SP.StudioCore.Tools
                 string? message = ex.InnerException?.Message;
                 if (!string.IsNullOrEmpty(message))
                 {
+                    context.Response.ContentType = ContentType.JSON.GetDescription();
                     await context.Response.WriteAsync(message);
                 }
             }

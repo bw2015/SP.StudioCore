@@ -23,9 +23,9 @@ namespace SP.StudioCore.Types
         /// <typeparam name="T"></typeparam>
         /// <param name="value"></param>
         /// <returns></returns>
-        public static T GetValue<T>(this object value)
+        public static T? GetValue<T>(this object value)
         {
-            return (T)value.GetValue(typeof(T));
+            return (T?)value.GetValue(typeof(T));
         }
 
         /// <summary>
@@ -37,9 +37,22 @@ namespace SP.StudioCore.Types
         public static object? GetValue(this object? value, Type? type = null)
         {
             if (value == null && type == null) throw new NullReferenceException();
-            if (type == null) type = value?.GetType();
-            if (value == null || value == DBNull.Value) return type?.GetDefaultValue();
+            if (type == null)
+            {
+                type = value?.GetType();
+                if (type == null) return null;
+            }
+            if (value == null || value == DBNull.Value)
+            {
+                return type?.GetDefaultValue();
+            }
             object? obj = null;
+
+            bool isNullable = type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
+            if (isNullable)
+            {
+                type = type.GetGenericArguments().FirstOrDefault();
+            }
             switch (value.GetType().Name)
             {
                 case "DateTime":
@@ -71,7 +84,14 @@ namespace SP.StudioCore.Types
                             obj = long.TryParse((string)value, out long longValue) ? longValue : (long)0;
                             break;
                         case "Int32":
-                            obj = int.TryParse((string)value, out int intValue) ? intValue : 0;
+                            if (int.TryParse((string)value, out int intValue))
+                            {
+                                obj = intValue;
+                            }
+                            else
+                            {
+                                obj = isNullable ? null : (int?)0;
+                            }
                             break;
                         case "Int16":
                         case "Short":
@@ -105,7 +125,14 @@ namespace SP.StudioCore.Types
                             }
                             else if (type.IsEnum)
                             {
-                                obj = ((string)value).ToEnum(type);
+                                if (isNullable && !Enum.IsDefined(type, (string)value))
+                                {
+                                    obj = null;
+                                }
+                                else
+                                {
+                                    obj = ((string)value).ToEnum(type);
+                                }
                             }
                             else if (type.IsArray)
                             {

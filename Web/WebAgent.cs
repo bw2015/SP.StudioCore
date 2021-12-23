@@ -417,7 +417,7 @@ namespace SP.StudioCore.Web
         /// </summary>
         /// <param name="time"></param>
         /// <returns></returns>
-        public static long GetTimestamps(DateTime time)
+        public static long GetTimestamps(this DateTime time)
         {
             return (time.ToUniversalTime().Ticks - 621355968000000000) / 10000;
         }

@@ -44,7 +44,7 @@ namespace SP.StudioCore.Tools
 
         protected virtual Result GetResultContent(bool success, object data)
         {
-            return new Result(true, string.Empty, info: success ? data : null);
+            return new Result(success, string.Empty, info: success ? data : null);
         }
 
         protected virtual Result GetResultList<T, TOutput>(IOrderedQueryable<T> list, Func<T, TOutput>? converter = null, object? data = null, Action<IEnumerable<T>>? action = null) where TOutput : class

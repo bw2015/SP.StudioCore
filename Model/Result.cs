@@ -146,9 +146,9 @@ namespace SP.StudioCore.Model
             try
             {
                 JObject obj = JObject.Parse(input);
-                return new Result(obj["success"].Value<int>() == 1,
-                     obj["msg"].Value<string>(),
-                     obj["info"] == null ? null : (JObject)obj["info"]
+                return new Result(obj["success"]?.Value<int>() == 1,
+                     obj["msg"]?.Value<string>() ?? string.Empty,
+                     obj["info"] == null ? null : (JObject?)obj["info"]
                     );
 
             }
@@ -264,7 +264,7 @@ namespace SP.StudioCore.Model
             switch (this.StatusCode)
             {
                 case HttpStatusCode.Unauthorized:
-                    context.Response.ContentType = ContentType.HTML.GetAttribute<DescriptionAttribute>().Description;
+                    context.Response.ContentType = ContentType.HTML.GetDescription();
                     context.Response.Headers.Add("WWW-Authenticate", $"Basic realm=\"{this.Message}\"");
                     task = context.Response.WriteAsync(Resources._401, Encoding.UTF8);
                     break;
@@ -275,7 +275,7 @@ namespace SP.StudioCore.Model
             {
                 if (this.Type == null)
                 {
-                    context.Response.ContentType = ContentType.JSON.GetAttribute<DescriptionAttribute>().Description;
+                    context.Response.ContentType = ContentType.JSON.GetDescription();
                     result = this.ToString();
                     task = context.Response.WriteAsync(result);
                 }

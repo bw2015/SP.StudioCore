@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using SP.StudioCore.Http;
 using SP.StudioCore.Model;
 using SP.StudioCore.Mvc;
+using SP.StudioCore.Protobufs;
 using SP.StudioCore.Types;
 using SP.StudioCore.Utils;
 using System;
@@ -39,83 +40,90 @@ namespace SP.StudioCore.Tools
         /// <returns></returns>
         internal static Result Invote(HttpContext context)
         {
-            //ConsoleHelper.WriteLine(context.GetString(), ConsoleColor.Blue);
+            //logs.Add(context.GetString(), ConsoleColor.Blue);
             //foreach (var item in context.Request.Headers)
             //{
-            //    ConsoleHelper.WriteLine($"   {item.Key} => {item.Value}", ConsoleColor.DarkBlue);
+            //    logs.Add($"   {item.Key} => {item.Value}", ConsoleColor.DarkBlue);
             //}
 
             //return new Result();
 
             Stopwatch sw = Stopwatch.StartNew();
-
-            string path = context.Request.Path.ToString();
-            if (Regex.IsMatch(path, @"^/\w+$", RegexOptions.IgnoreCase))
+            List<string> logs = new List<string>();
+            try
             {
-                path += "/Index";
+                string path = context.Request.Path.ToString();
+                if (Regex.IsMatch(path, @"^/\w+$", RegexOptions.IgnoreCase))
+                {
+                    path += "/Index";
+                }
+                Regex regex = new(@"^/(?<Controller>\w+)/(?<Method>[\w\.]+)$", RegexOptions.IgnoreCase);
+                if (!regex.IsMatch(path))
+                {
+                    return context.ShowError(HttpStatusCode.MethodNotAllowed, path);
+                }
+                string controller = regex.Match(path).Groups["Controller"].Value;
+                string methodName = regex.Match(path).Groups["Method"].Value;
+
+                if (!_assembly.TryGetValue($"Tools.{controller}", out Assembly? assembly))
+                {
+                    _assembly.TryAdd($"Tools.{controller}", assembly = Assembly.Load($"Tools.{controller}"));
+                }
+                logs.Add($"资源加载完毕，耗时：{sw.ElapsedMilliseconds}ms");
+
+                if (assembly == null) return context.ShowError(HttpStatusCode.BadRequest, controller);
+
+                Result? staticFile = GetStaticFile(assembly, path);
+                if (staticFile.HasValue)
+                {
+                    return staticFile.Value;
+                }
+
+                if (!_start.TryGetValue($"{assembly.FullName}:Startup", out Type? start))
+                {
+                    _start.TryAdd($"{assembly.FullName}:Startup", start = assembly.GetTypes().FirstOrDefault(t => t.IsBaseType<StartBase>()));
+                }
+                logs.Add($"查找启动类，耗时：{sw.ElapsedMilliseconds}ms"); ;
+
+                if (start == null) return context.ShowError(HttpStatusCode.MethodNotAllowed, $"Tools.{controller}.Start");
+
+                if (!_method.TryGetValue($"{assembly.FullName}:{methodName}", out MethodInfo? methodInfo))
+                {
+                    _method.TryAdd($"{assembly.FullName}:{methodName}", methodInfo = start.GetMethod(methodName));
+                }
+                if (methodInfo == null) return context.ShowError(HttpStatusCode.NotFound, $"{start.FullName}.{methodName}");
+
+                logs.Add($"查找动作，耗时：{sw.ElapsedMilliseconds}ms"); ;
+
+                // 得到动作的参数
+                if (!_parameter.TryGetValue($"{assembly.FullName}:{methodName}", out ParameterInfo[]? parameters))
+                {
+                    _parameter.TryAdd($"{assembly.FullName}:{methodName}", parameters = methodInfo.GetParameters());
+                }
+                if (parameters == null) parameters = System.Array.Empty<ParameterInfo>();
+
+                logs.Add($"获取参数，耗时：{sw.ElapsedMilliseconds}ms"); ;
+
+                // 创建实例
+                object? obj = Activator.CreateInstance(start, new object[] { context });
+                if (obj == null) return context.ShowError(HttpStatusCode.NotFound, start.FullName);
+
+                logs.Add($"创建实例，耗时：{sw.ElapsedMilliseconds}ms"); ;
+
+                bool isGetMethod = methodInfo.HasAttribute<HttpGetAttribute>();
+                bool isPostMethod = methodInfo.HasAttribute<HttpPostAttribute>();
+
+                Result? result = (Result?)methodInfo.Invoke(obj, context.GetParameterValue(parameters));
+                logs.Add($"执行完毕，耗时：{sw.ElapsedMilliseconds}ms"); ;
+
+                if (result.HasValue) return result.Value;
+
+                return context.ShowError(HttpStatusCode.InternalServerError, $"{path},{  string.Join(",", parameters.Select(t => t.ParameterType.Name)) }");
             }
-            Regex regex = new(@"^/(?<Controller>\w+)/(?<Method>[\w\.]+)$", RegexOptions.IgnoreCase);
-            if (!regex.IsMatch(path))
+            finally
             {
-                return context.ShowError(HttpStatusCode.MethodNotAllowed, path);
+                ConsoleHelper.WriteLine(string.Join("\n\r", logs), ConsoleColor.Green);
             }
-            string controller = regex.Match(path).Groups["Controller"].Value;
-            string methodName = regex.Match(path).Groups["Method"].Value;
-
-            if (!_assembly.TryGetValue($"Tools.{controller}", out Assembly? assembly))
-            {
-                _assembly.TryAdd($"Tools.{controller}", assembly = Assembly.Load($"Tools.{controller}"));
-            }
-            ConsoleHelper.WriteLine($"资源加载完毕，耗时：{sw.ElapsedMilliseconds}ms", ConsoleColor.Green);
-
-            if (assembly == null) return context.ShowError(HttpStatusCode.BadRequest, controller);
-
-            Result? staticFile = GetStaticFile(assembly, path);
-            if (staticFile.HasValue)
-            {
-                return staticFile.Value;
-            }
-
-            if (!_start.TryGetValue($"{assembly.FullName}:Startup", out Type? start))
-            {
-                _start.TryAdd($"{assembly.FullName}:Startup", start = assembly.GetTypes().FirstOrDefault(t => t.IsBaseType<StartBase>()));
-            }
-            ConsoleHelper.WriteLine($"查找启动类，耗时：{sw.ElapsedMilliseconds}ms", ConsoleColor.Green);
-
-            if (start == null) return context.ShowError(HttpStatusCode.MethodNotAllowed, $"Tools.{controller}.Start");
-
-            if (!_method.TryGetValue($"{assembly.FullName}:{methodName}", out MethodInfo? methodInfo))
-            {
-                _method.TryAdd($"{assembly.FullName}:{methodName}", methodInfo = start.GetMethod(methodName));
-            }
-            if (methodInfo == null) return context.ShowError(HttpStatusCode.NotFound, $"{start.FullName}.{methodName}");
-
-            ConsoleHelper.WriteLine($"查找动作，耗时：{sw.ElapsedMilliseconds}ms", ConsoleColor.Green);
-
-            // 得到动作的参数
-            if (!_parameter.TryGetValue($"{assembly.FullName}:{methodName}", out ParameterInfo[]? parameters))
-            {
-                _parameter.TryAdd($"{assembly.FullName}:{methodName}", parameters = methodInfo.GetParameters());
-            }
-            if (parameters == null) parameters = System.Array.Empty<ParameterInfo>();
-
-            ConsoleHelper.WriteLine($"获取参数，耗时：{sw.ElapsedMilliseconds}ms", ConsoleColor.Green);
-
-            // 创建实例
-            object? obj = Activator.CreateInstance(start, new object[] { context });
-            if (obj == null) return context.ShowError(HttpStatusCode.NotFound, start.FullName);
-
-            ConsoleHelper.WriteLine($"创建实例，耗时：{sw.ElapsedMilliseconds}ms", ConsoleColor.Green);
-
-            bool isGetMethod = methodInfo.HasAttribute<HttpGetAttribute>();
-            bool isPostMethod = methodInfo.HasAttribute<HttpPostAttribute>();
-
-            Result? result = (Result?)methodInfo.Invoke(obj, context.GetParameterValue(parameters));
-            ConsoleHelper.WriteLine($"执行完毕，耗时：{sw.ElapsedMilliseconds}ms", ConsoleColor.Green);
-
-            if (result.HasValue) return result.Value;
-
-            return context.ShowError(HttpStatusCode.InternalServerError, $"{path},{  string.Join(",", parameters.Select(t => t.ParameterType.Name)) }");
         }
 
         private static object? GetParameterValue(this HttpContext context, ParameterInfo parameter)
@@ -137,7 +145,11 @@ namespace SP.StudioCore.Tools
             }
             else if (parameter.HasAttribute<FromJsonAttribute>())
             {
-                value = JsonConvert.DeserializeObject(context.QF(name), parameter.ParameterType);
+                value = JsonConvert.DeserializeObject(context.QF(name) ?? String.Empty, parameter.ParameterType);
+            }
+            else if (parameter.HasAttribute<FromProtobufAttribute>())
+            {
+                value = context.GetData()?.ToObject(parameter.ParameterType);
             }
             else
             {

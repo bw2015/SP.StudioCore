@@ -68,6 +68,7 @@
         <PackageReference Include="BouncyCastle.NetCore" Version="1.8.8" />
         <PackageReference Include="Dapper" Version="2.0.90" />
         <PackageReference Include="Gma.QrCodeNet.Core" Version="2.0.1" />
+        <PackageReference Include="Google.Protobuf" Version="3.19.1" />
         <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
         <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
         <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />

@@ -127,7 +127,7 @@ namespace SP.StudioCore.Types
                             {
                                 if (isNullable && !Enum.IsDefined(type, (string)value))
                                 {
-                                    obj = null;
+                                    return obj = null;
                                 }
                                 else
                                 {

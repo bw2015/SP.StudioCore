@@ -26,11 +26,20 @@ namespace SP.StudioCore.Configuration
             return _configsetting.GetConfigContent(config[$"{application}:{name}"]);
         }
 
+        public static T GetConfig<T>(string application, string name)
+        {
+            return config.GetSection($"{application}:{name}").Get<T>();
+        }
+
         public static string GetConfig(params string[] args)
         {
             return _configsetting.GetConfigContent(config[string.Join(":", args)]);
-            //  return Encryption.AesDecrypt(config[string.Join(":", args)], Encryption.toMD5(_configsetting.Key));
 
+        }
+
+        public static T GetConfig<T>(params string[] args)
+        {
+            return config.GetSection(string.Join(":", args)).Get<T>();
         }
 
         public static string GetConnectionString(string name)

@@ -1,4 +1,7 @@
-﻿using SP.StudioCore.Model;
+﻿using Newtonsoft.Json;
+using SP.StudioCore.Gateway.Push.Telegrams;
+using SP.StudioCore.Json;
+using SP.StudioCore.Model;
 using SP.StudioCore.Net;
 using System;
 using System.Collections.Generic;
@@ -24,6 +27,18 @@ namespace SP.StudioCore.Gateway.Push
         /// </summary>
         [Description("网关")]
         public string Url { get; set; } = "https://api.telegram.org/";
+
+        /// <summary>
+        /// 读取信息
+        /// </summary>
+        public IEnumerable<getUpdatesResponse>? getUpdates(long offset = 0)
+        {
+            string url = $"{this.Url}bot{this.Token}/getUpdates?offset={offset}";
+            string content = NetAgent.DownloadData(url, Encoding.UTF8);
+            TelegramResponse<getUpdatesResponse[]>? response = JsonConvert.DeserializeObject<TelegramResponse<getUpdatesResponse[]>>(content);
+            if (response == null || !response) return null;
+            return (getUpdatesResponse[])response;
+        }
 
         /// <summary>
         /// 密钥
@@ -57,7 +72,7 @@ namespace SP.StudioCore.Gateway.Push
         /// <returns></returns>
         public bool sendMessage(string? message, params string[] channel)
         {
-            if(message == null) return false;
+            if (message == null) return false;
             string url = $"{this.Url}bot{this.Token}/sendMessage";
             foreach (string id in this.GetChannels(channel))
             {

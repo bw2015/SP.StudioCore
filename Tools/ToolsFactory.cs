@@ -122,7 +122,7 @@ namespace SP.StudioCore.Tools
             }
             finally
             {
-                ConsoleHelper.WriteLine(string.Join("\n\r", logs), ConsoleColor.Green);
+                //ConsoleHelper.WriteLine(string.Join("\n\r", logs), ConsoleColor.Green);
             }
         }
 

@@ -1,6 +1,9 @@
 ﻿using SP.StudioCore.Ioc;
+using SP.StudioCore.Utils;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -24,6 +27,26 @@ namespace SP.StudioCore.Net
                 AssemblyName assemblyName = assembly.GetName();
                 return string.Concat(assemblyName.Name, "/", assemblyName.Version);
             }
+        }
+
+        /// <summary>
+        /// 表单提交
+        /// </summary>
+        /// <param name="uRL"></param>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public static string UploadValues(string url, NameValueCollection data, Encoding? encoding = null, WebClient? wc = null, Dictionary<string, string>? headers = null)
+        {
+            wc ??= CreateWebClient();
+            headers ??= new Dictionary<string, string>();
+            encoding ??= Encoding.UTF8;
+            foreach (KeyValuePair<string, string> header in headers)
+            {
+                wc.Headers[header.Key] = header.Value;
+            }
+            byte[] resultData = wc.UploadValues(url, data);
+            return encoding.GetString(resultData);
         }
 
         private static IHttpRequestConfig RequestConfig => IocCollection.GetService<IHttpRequestConfig>() ?? new HttpRequestConfig();
@@ -81,7 +104,7 @@ namespace SP.StudioCore.Net
         /// <param name="wc"></param>
         /// <param name="header">要写入头部的信息</param>
         /// <returns></returns>
-        public static string UploadData(string url, string data, Encoding encoding = null, WebClient wc = null, Dictionary<string, string> headers = null)
+        public static string UploadData(string url, string data, Encoding? encoding = null, WebClient? wc = null, Dictionary<string, string>? headers = null)
         {
             if (headers == null) headers = new Dictionary<string, string>();
             if (!headers.ContainsKey("Content-Type"))
@@ -311,6 +334,29 @@ namespace SP.StudioCore.Net
             encoding ??= Encoding.UTF8;
             byte[] data = await httpClient.GetByteArrayAsync(RequestConfig.GetUrl(url)).ConfigureAwait(false);
             return encoding.GetString(data);
+        }
+
+        /// <summary>
+        /// 上传文件
+        /// </summary>
+        public static string UploadFile(string url, NameValueCollection nvc, MultipartModel file, Encoding? encoding = null, Dictionary<string, string>? header = null, WebClient? wc = null)
+        {
+            wc ??= CreateWebClient(url, encoding);
+            encoding ??= Encoding.UTF8;
+            var multipart = new MultipartFormBuilder();
+            foreach (string key in nvc.Keys)
+            {
+                multipart.AddField(key, nvc[key] ?? string.Empty);
+            }
+            multipart.AddFile(file);
+
+            wc.Headers.Add(HttpRequestHeader.ContentType, multipart.ContentType);
+            using (var stream = multipart.GetStream())
+            {
+                byte[] data = wc.UploadData(url, stream.ToArray());
+                return encoding.GetString(data);
+            }
+
         }
     }
 }

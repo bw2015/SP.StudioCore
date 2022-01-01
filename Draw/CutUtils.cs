@@ -31,5 +31,10 @@ namespace SP.StudioCore.Draw
                 return bmpCrop;
             }
         }
+
+        public static Image Cut(this Image image, Rectangle area)
+        {
+            return image.Cut(area.X, area.Y, area.Width, area.Height);
+        }
     }
 }

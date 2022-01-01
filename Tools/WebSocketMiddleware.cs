@@ -28,7 +28,7 @@ namespace SP.StudioCore.Tools
         /// <summary>
         /// websocket的逻辑处理
         /// </summary>
-        private WebSocketHandlerBase ws;
+        private WebSocketHandlerBase? ws;
 
         public async Task Invoke(HttpContext context)
         {

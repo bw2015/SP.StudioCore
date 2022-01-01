@@ -41,10 +41,10 @@
           <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
         <None Update="Properties\domain.xml">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+            <CopyToOutputDirectory>Never</CopyToOutputDirectory>
         </None>
         <None Update="Properties\401.html">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+            <CopyToOutputDirectory>Never</CopyToOutputDirectory>
         </None>
         <Compile Remove="MQ\RabbitMQ\RabbitBase.cs" />
         <Compile Remove="MQ\RabbitMQ\RabbitProducer.cs" />
@@ -68,6 +68,7 @@
         <PackageReference Include="BouncyCastle.NetCore" Version="1.8.8" />
         <PackageReference Include="Dapper" Version="2.0.90" />
         <PackageReference Include="Gma.QrCodeNet.Core" Version="2.0.1" />
+        <PackageReference Include="Google.Protobuf" Version="3.19.1" />
         <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
         <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
         <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
@@ -98,7 +99,7 @@
         <EmbeddedResource Update="Properties\Resources.resx">
             <Generator>ResXFileCodeGenerator</Generator>
             <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+            <CopyToOutputDirectory>Never</CopyToOutputDirectory>
         </EmbeddedResource>
     </ItemGroup>
 

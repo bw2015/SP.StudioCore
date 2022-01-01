@@ -59,7 +59,8 @@ namespace SP.StudioCore.Types
                     obj = (DateTime)value == DateTime.MinValue ? DateTime.Parse("1900-1-1") : value;
                     break;
                 case "String":
-                    switch (type.Name)
+                    string str = (string)value;
+                    switch (type?.Name)
                     {
                         case "Guid":
                             if (Guid.TryParse((string)value, out Guid guid))
@@ -72,7 +73,7 @@ namespace SP.StudioCore.Types
                             }
                             break;
                         case "Boolean":
-                            obj = value.ToString().Equals("1") || value.ToString().Equals("true", StringComparison.CurrentCultureIgnoreCase) || value.ToString().Equals("on", StringComparison.CurrentCultureIgnoreCase);
+                            obj = str.Equals("1") || str.Equals("true", StringComparison.CurrentCultureIgnoreCase) || str.Equals("on", StringComparison.CurrentCultureIgnoreCase);
                             break;
                         case "Decimal":
                             obj = decimal.TryParse((string)value, out decimal decimalValue) ? decimalValue : 0.00M;
@@ -86,11 +87,22 @@ namespace SP.StudioCore.Types
                         case "Int32":
                             if (int.TryParse((string)value, out int intValue))
                             {
-                                obj = intValue;
+                                if (isNullable)
+                                {
+                                    obj = (int?)intValue;
+                                }
+                                else
+                                {
+                                    obj = intValue;
+                                }
+                            }
+                            else if (isNullable)
+                            {
+                                obj = default(int?);
                             }
                             else
                             {
-                                obj = isNullable ? null : (int?)0;
+                                obj = default(int);
                             }
                             break;
                         case "Int16":
@@ -116,7 +128,7 @@ namespace SP.StudioCore.Types
                             obj = ((string)value).GetArray<string>().ToArray();
                             break;
                         case "String":
-                            if (value == null) obj = string.Empty;
+                            obj = str;
                             break;
                         default:
                             if (type.IsBaseType<ISetting>())
@@ -152,7 +164,7 @@ namespace SP.StudioCore.Types
                     if (type.IsBaseType<ISetting>()) obj = Activator.CreateInstance(type, value.ToString());
                     break;
             }
-            return obj == null ? value : obj;
+            return obj;
         }
 
         internal static object? GetDefaultValue(this Type? type)

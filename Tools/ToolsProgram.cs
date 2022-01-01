@@ -16,7 +16,14 @@ namespace SP.StudioCore.Tools
         protected static bool WebStartup(string[] args)
         {
             if (!args.Contains("--urls")) return false;
-            CreateWebHostBuilder(args).Build().Run();
+            CreateWebHostBuilder<ToolsStartup>(args).Build().Run();
+            return true;
+        }
+
+        protected static bool WebStartup<TStartup>(string[] args) where TStartup : ToolsStartup
+        {
+            if (!args.Contains("--urls")) return false;
+            CreateWebHostBuilder<TStartup>(args).Build().Run();
             return true;
         }
 
@@ -57,15 +64,19 @@ namespace SP.StudioCore.Tools
             }).Build().Run();
         }
 
-        private static IHostBuilder CreateWebHostBuilder(string[] args) =>
-           Host.CreateDefaultBuilder(args)
+        private static IHostBuilder CreateWebHostBuilder<TStartup>(string[] args) where TStartup : ToolsStartup
+        {
+            return Host.CreateDefaultBuilder(args)
                .ConfigureWebHostDefaults(webBuilder =>
                {
-                   webBuilder.UseStartup<ToolsStartup>();
+                   webBuilder.UseStartup<TStartup>();
                });
+        }
 
-        private static IHostBuilder CreateWorkHostBuilder(string[] args, Action<HostBuilderContext, IServiceCollection> configureDelegate) =>
-           Host.CreateDefaultBuilder(args)
-               .ConfigureServices(configureDelegate);
+        private static IHostBuilder CreateWorkHostBuilder(string[] args, Action<HostBuilderContext, IServiceCollection> configureDelegate)
+        {
+            return Host.CreateDefaultBuilder(args)
+                   .ConfigureServices(configureDelegate);
+        }
     }
 }

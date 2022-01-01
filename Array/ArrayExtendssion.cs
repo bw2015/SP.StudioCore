@@ -29,7 +29,7 @@ namespace SP.StudioCore.Array
             int index = System.Array.IndexOf(args, argName);
             if (index == -1 || args.Length < index + 1) return defaultValue;
             string value = args[index + 1];
-            return value.GetValue<T>();
+            return value.GetValue<T>() ?? defaultValue;
         }
 
         public static string Get(this string[] args, string argName)

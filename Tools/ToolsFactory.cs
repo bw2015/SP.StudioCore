@@ -38,7 +38,7 @@ namespace SP.StudioCore.Tools
         /// </summary>
         /// <param name="context"></param>
         /// <returns></returns>
-        internal static Result Invote(HttpContext context)
+        public static Result Invote(HttpContext context)
         {
             //logs.Add(context.GetString(), ConsoleColor.Blue);
             //foreach (var item in context.Request.Headers)

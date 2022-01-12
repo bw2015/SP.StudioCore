@@ -12,6 +12,7 @@ namespace SP.StudioCore.Healthy
         /// <returns></returns>
         public static IServiceCollection AddHealthy(this IServiceCollection services, HealthyOptions options)
         {
+            if (string.IsNullOrEmpty(options.Address)) return services;
             HealthyProvider.Run(options);
             return services;
         }

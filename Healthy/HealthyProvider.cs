@@ -19,6 +19,7 @@ namespace SP.StudioCore.Healthy
             //定义客户端ID
             string clientId = Guid.NewGuid().ToString();
             if (string.IsNullOrWhiteSpace(options.ServiceName)) return;
+            if (string.IsNullOrWhiteSpace(options.Address)) return;
             Task.Run(() =>
             {
                 try

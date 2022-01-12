@@ -7,6 +7,7 @@ namespace SP.StudioCore.Healthy
     {
         public static IApplicationBuilder UseHealthy(this IApplicationBuilder app, HealthyOptions options)
         {
+            if (string.IsNullOrEmpty(options.Address)) return app;
             HealthyProvider.Run(options);
             return app;
         }

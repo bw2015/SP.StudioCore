@@ -130,7 +130,9 @@ namespace SP.StudioCore.Enums
         [Description("金币"), CurrencyExchange(1)]
         COIN = 15,
         [Description("港币"), CurrencyExchange(0.82)]
-        HKD
+        HKD,
+        [Description("USDT"),CurrencyExchange(7)]
+        USDT
     }
 
     /// <summary>

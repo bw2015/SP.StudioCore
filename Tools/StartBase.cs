@@ -37,9 +37,9 @@ namespace SP.StudioCore.Tools
         /// <summary>
         /// 输出一个成功的JSON数据
         /// </summary>
-        protected virtual Result GetResultContent(object data)
+        protected virtual Result GetResultContent(object data, string msg = "操作成功")
         {
-            return new Result(true, string.Empty, data);
+            return new Result(true, msg, data);
         }
 
         protected virtual Result GetResultContent(bool success, object data)

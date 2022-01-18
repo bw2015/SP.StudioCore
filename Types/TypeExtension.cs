@@ -56,7 +56,14 @@ namespace SP.StudioCore.Types
             switch (value.GetType().Name)
             {
                 case "DateTime":
-                    obj = (DateTime)value == DateTime.MinValue ? DateTime.Parse("1900-1-1") : value;
+                    if (isNullable && (DateTime)value == DateTime.MinValue)
+                    {
+                        obj = null;
+                    }
+                    else
+                    {
+                        obj = (DateTime)value == DateTime.MinValue ? DateTime.Parse("1900-1-1") : value;
+                    }
                     break;
                 case "String":
                     string str = (string)value;
@@ -118,7 +125,25 @@ namespace SP.StudioCore.Types
                             break;
                         case "DateTime":
                             DateTime dateTime;
-                            obj = DateTime.TryParse((string)value, out dateTime) ? dateTime : new DateTime(1900, 1, 1);
+                            if (DateTime.TryParse((string)value, out dateTime))
+                            {
+                                if (isNullable)
+                                {
+                                    obj = (DateTime?)dateTime;
+                                }
+                                else
+                                {
+                                    obj = dateTime;
+                                }
+                            }
+                            else if (isNullable)
+                            {
+                                obj = null;
+                            }
+                            else
+                            {
+                                obj = new DateTime(1900, 1, 1);
+                            }
                             break;
                         case "Int32[]":
                         case "System.Int32[]":

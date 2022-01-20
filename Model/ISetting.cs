@@ -93,13 +93,13 @@ namespace SP.StudioCore.Model
                             }
                             else
                             {
-                                result = value;
+                                result = value.GetValue(property.PropertyType);
                             }
                             break;
                     }
                     if (result != null)
                     {
-                        property.SetValue(this, result.GetValue(property.PropertyType), null);
+                        property.SetValue(this, result, null);
                     }
                 }
             }

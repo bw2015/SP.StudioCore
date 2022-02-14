@@ -187,6 +187,7 @@ namespace SP.StudioCore.Types
                     break;
                 default:
                     if (type.IsBaseType<ISetting>()) obj = Activator.CreateInstance(type, value.ToString());
+                    else obj = value;
                     break;
             }
             return obj;

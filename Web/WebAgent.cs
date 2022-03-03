@@ -290,6 +290,9 @@ namespace SP.StudioCore.Web
                         result = str.Split(split).ToList().ConvertAll(t => (T)((object)Guid.Parse(t))).ToArray();
                     }
                     break;
+                case "Int64":
+                    result = str.Split(split).Where(t => t.IsType<T>()).Select(t => (T)Convert.ChangeType(t, typeof(T))).ToArray();
+                    break;
                 case "Decimal":
                     regex = string.Format(@"([0-9\.]+{0})?\d+$", split);
                     if (Regex.IsMatch(str, regex, RegexOptions.IgnoreCase))

@@ -109,10 +109,6 @@
         <Folder Include="Mvc\Results\" />
     </ItemGroup>
 
-    <ItemGroup>
-      <ProjectReference Include="..\Simple.Elasticsearch\Simple.Elasticsearch.csproj" />
-    </ItemGroup>
-
     <!--<Target Name="PostBuild" AfterTargets="PostBuildEvent">
       <Exec Command="copy /y &quot;$(SolutionDir)\Publish\Kill.bat&quot;" />
     </Target>-->

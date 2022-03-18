@@ -1,7 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 using SP.StudioCore.Json;
 using System;
-using Nest;
 
 namespace SP.StudioCore.API.Wallets.Responses
 {

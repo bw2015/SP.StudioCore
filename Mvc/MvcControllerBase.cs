@@ -13,11 +13,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Http;
 using SP.StudioCore.Ioc;
 using SP.StudioCore.Data.Repository;
-using Nest;
-using Result = SP.StudioCore.Model.Result;
 using Language = SP.StudioCore.Enums.Language;
 using System.Linq.Expressions;
-using Simple.Elasticsearch;
 
 namespace SP.StudioCore.Mvc
 {
@@ -36,10 +33,7 @@ namespace SP.StudioCore.Mvc
         /// </summary>
         protected virtual IWriteRepository WriteDB => IocCollection.GetService<IWriteRepository>();
 
-        /// <summary>
-        /// ES连接对象
-        /// </summary>
-        protected virtual IElasticClient ESDB => IocCollection.GetService<IElasticClient>();
+
 
         private Stopwatch Stopwatch { get; }
 
@@ -384,52 +378,7 @@ namespace SP.StudioCore.Mvc
             string resultData = this.GetResultContent(list, converter, data);
             return this.GetResultContent(resultData);
         }
-        /// <summary>
-        /// ES对象分页返回
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <typeparam name="TOutput"></typeparam>
-        /// <param name="response"></param>
-        /// <param name="convert"></param>
-        /// <param name="data"></param>
-        /// <param name="action"></param>
-        /// <returns></returns>
-        protected virtual Result GetResultList<T, TOutput>(Func<SearchDescriptor<T>, ISearchRequest> search, Func<T, TOutput>? convert = null, object? data = null, Action<IEnumerable<T>>? action = null) where T : class, IDocument
-        {
-            StringBuilder sb = new StringBuilder();
-            string? json = null;
-            if (this.PageIndex * this.PageSize > 10_000) throw new Exception("请缩小条件范围");//此处应该返回错误Code
-            Func<SearchDescriptor<T>, ISearchRequest> query = (s) =>
-            {
-                return search.Invoke(s.Paged(this.PageIndex, this.PageSize));
-            };
-
-            ISearchResponse<T> response = ESDB.Search(query);
-            if (!response.IsValid)
-            {
-                throw new Exception(response.DebugInformation);
-            }
-            if (action != null)
-            {
-                action(response.Documents.ToList());
-            }
-            if (convert == null)
-            {
-                json = response.Documents.ToJson();
-            }
-            else
-            {
-                json = response.Documents.Select(convert).ToJson();
-            }
-            sb.Append("{")
-            .AppendFormat("\"RecordCount\":{0},", response.Total == -1 ? 0 : response.Total)
-            .AppendFormat("\"PageIndex\":{0},", this.PageIndex)
-            .AppendFormat("\"PageSize\":{0},", this.PageSize)
-            .AppendFormat("\"data\":{0}", data == null ? "null" : data.ToJson())
-            .AppendFormat(",\"list\":{0}", json)
-            .Append("}");
-            return GetResultContent(sb.ToString());
-        }
+        
 
 
         /// <summary>

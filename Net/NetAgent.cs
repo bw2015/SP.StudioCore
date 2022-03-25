@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Security;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,6 +17,18 @@ namespace SP.StudioCore.Net
 {
     public static class NetAgent
     {
+        /// <summary>
+        /// 忽略证书错误
+        /// </summary>
+        static NetAgent()
+        {
+            ServicePointManager.ServerCertificateValidationCallback =
+               new RemoteCertificateValidationCallback(
+                    delegate
+                    { return true; }
+                );
+        }
+
         /// <summary>
         /// 默认的用户代理字符串
         /// </summary>

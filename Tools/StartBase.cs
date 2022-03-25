@@ -47,6 +47,12 @@ namespace SP.StudioCore.Tools
             return new Result(success, string.Empty, info: success ? data : null);
         }
 
+        protected virtual Result GetResultContent(bool success, string? successMessage)
+        {
+            successMessage ??= "操作成功";
+            return new Result(success, success ? successMessage : context.GetItem<MessageResult>()?.ToString() ?? string.Empty);
+        }
+
         protected virtual Result GetResultList<T, TOutput>(IOrderedQueryable<T> list, Func<T, TOutput>? converter = null, object? data = null, Action<IEnumerable<T>>? action = null) where TOutput : class
         {
             converter ??= t => t as TOutput;

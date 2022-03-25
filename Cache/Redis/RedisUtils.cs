@@ -222,6 +222,9 @@ namespace SP.StudioCore.Cache.Redis
                 case "Float":
                     obj = (float)value;
                     break;
+                case "Double":
+                    obj = (double)value;
+                    break;
                 case "Int32[]":
                     obj = WebAgent.GetArray<int>(value);
                     break;

@@ -50,6 +50,7 @@ namespace SP.StudioCore.Utils
         {
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.Append("Binary Size: " + data.Length + NEW_LINE);
+            if (data == null || data.Length == 0) return stringBuilder.ToString();
             if (data.Length > MAX_DUMP_LENGTH)
             {
                 stringBuilder.Append("** Data larger than max dump size of " + MAX_DUMP_LENGTH + ". Data not displayed");
@@ -93,6 +94,19 @@ namespace SP.StudioCore.Utils
             }
 
             return stringBuilder.ToString();
+        }
+
+        /// <summary>
+        /// 在同一行复写
+        /// </summary>
+        public static void OverWrite(string context)
+        {
+            lock (_lock)
+            {
+                Console.WriteLine(context); 
+                Console.SetCursorPosition(0, Console.CursorTop - 1);
+            }
+
         }
     }
 }

@@ -27,7 +27,7 @@ namespace SP.StudioCore.Array
         public static T Get<T>(this string[] args, string argName, T defaultValue)
         {
             int index = System.Array.IndexOf(args, argName);
-            if (index == -1 || args.Length < index + 1) return defaultValue;
+            if (index == -1 || args.Length <= index + 1) return defaultValue;
             string value = args[index + 1];
             return value.GetValue<T>() ?? defaultValue;
         }

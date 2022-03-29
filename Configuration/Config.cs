@@ -14,7 +14,7 @@ namespace SP.StudioCore.Configuration
 
 
         private static readonly IConfigurationRoot config = new ConfigurationBuilder()
-            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: false)
             .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}.json", optional: true, reloadOnChange: true) //增加环境配置文件
             .AddEnvironmentVariables()
             .Build();

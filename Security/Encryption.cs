@@ -46,7 +46,7 @@ namespace SP.StudioCore.Security
         /// 返回簡寫的MD5值（64位編碼，4位16進制轉化成爲1位）
         /// </summary>
         /// <param name="md5">必須是大寫的MD5</param>
-        /// <returns></returns>
+        /// <returns>8位编码</returns>
         public static string toMD5Short(this string md5)
         {
             md5 = md5.ToUpper();

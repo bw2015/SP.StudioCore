@@ -26,14 +26,20 @@
 
     <ItemGroup>
         <Compile Remove="Ipdb\**" />
+        <Compile Remove="Model\Inject\**" />
         <Compile Remove="MQ\Kafaka\**" />
         <Compile Remove="MQ\RocketMQ\**" />
+        <Compile Remove="Mvc\Results\**" />
         <EmbeddedResource Remove="Ipdb\**" />
+        <EmbeddedResource Remove="Model\Inject\**" />
         <EmbeddedResource Remove="MQ\Kafaka\**" />
         <EmbeddedResource Remove="MQ\RocketMQ\**" />
+        <EmbeddedResource Remove="Mvc\Results\**" />
         <None Remove="Ipdb\**" />
+        <None Remove="Model\Inject\**" />
         <None Remove="MQ\Kafaka\**" />
         <None Remove="MQ\RocketMQ\**" />
+        <None Remove="Mvc\Results\**" />
         <None Update="ipipfree.ipdb">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
@@ -104,9 +110,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Folder Include="Model\Inject\" />
         <Folder Include="MQ\RabbitMQ\" />
-        <Folder Include="Mvc\Results\" />
     </ItemGroup>
 
     <!--<Target Name="PostBuild" AfterTargets="PostBuildEvent">

@@ -36,6 +36,11 @@ namespace SP.StudioCore.Model
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
     public sealed class PermissionAttribute : System.Attribute
     {
+        public PermissionAttribute()
+        {
+            this.Value = string.Empty;
+        }
+
         public PermissionAttribute(string value)
         {
             this.Value = value;

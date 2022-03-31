@@ -2,8 +2,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using SP.StudioCore.Http;
+using SP.StudioCore.Ioc;
 using SP.StudioCore.Model;
 using SP.StudioCore.Mvc;
+using SP.StudioCore.Mvc.Exceptions;
+using SP.StudioCore.Mvc.Services;
 using SP.StudioCore.Protobufs;
 using SP.StudioCore.Types;
 using SP.StudioCore.Utils;
@@ -32,6 +35,8 @@ namespace SP.StudioCore.Tools
         private static ConcurrentDictionary<string, Type?> _start = new();
         private static ConcurrentDictionary<string, MethodInfo?> _method = new();
         private static ConcurrentDictionary<string, ParameterInfo[]?> _parameter = new();
+
+        private static IPermission? permission => IocCollection.GetService<IPermission>();
 
         /// <summary>
         /// 执行工具包内方法
@@ -93,7 +98,17 @@ namespace SP.StudioCore.Tools
                 }
                 if (methodInfo == null) return context.ShowError(HttpStatusCode.NotFound, $"{start.FullName}.{methodName}");
 
-                logs.Add($"查找动作，耗时：{sw.ElapsedMilliseconds}ms"); ;
+                logs.Add($"查找动作，耗时：{sw.ElapsedMilliseconds}ms");
+
+                // 检查是否需要管理员登录
+                if (methodInfo.HasAttribute<PermissionAttribute>())
+                {
+                    if (permission == null) throw new ResultException("未实现IPermission");
+                    if (!permission.CheckPermission(context, methodInfo.GetAttribute<PermissionAttribute>()))
+                    {
+                        throw new ResultException("没有权限");
+                    }
+                }
 
                 // 得到动作的参数
                 if (!_parameter.TryGetValue($"{assembly.FullName}:{methodName}", out ParameterInfo[]? parameters))

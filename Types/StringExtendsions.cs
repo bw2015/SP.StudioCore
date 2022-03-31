@@ -28,6 +28,33 @@ namespace SP.StudioCore.Types
             return str;
         }
         /// <summary>
+        /// 替换后面字符串
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="length"></param>
+        /// <param name="symbol"></param>
+        /// <returns></returns>
+        public static string ReplaceLast(this string str, int length, char symbol = '*')
+        {
+            if (str.Length < length)
+                return str;
+            return str.Substring(0, length) + new string(symbol, str.Length - length);
+        }
+        /// <summary>
+        /// 替换中间字符串
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="before"></param>
+        /// <param name="after"></param>
+        /// <param name="symbol"></param>
+        /// <returns></returns>
+        public static string ReplaceCenter(this string str, int before, int after, char symbol = '*')
+        {
+            if (str.Length < before || str.Length < before + after)
+                return str;
+            return str.Substring(0, before) + new string(symbol, before + after) + str.Substring(str.Length - after);
+        }
+        /// <summary>
         /// 获取字符串中出现某字符串的所有索引位置
         /// </summary>
         /// <param name="str"></param>

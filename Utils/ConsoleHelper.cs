@@ -103,8 +103,8 @@ namespace SP.StudioCore.Utils
         {
             lock (_lock)
             {
-                Console.WriteLine(context); 
                 Console.SetCursorPosition(0, Console.CursorTop - 1);
+                Console.WriteLine(context);
             }
 
         }

@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using SP.StudioCore.Enums;
 using SP.StudioCore.Http;
+using SP.StudioCore.Json;
 using SP.StudioCore.Model;
 using SP.StudioCore.Mvc.Exceptions;
 using SP.StudioCore.Utils;
@@ -58,7 +59,7 @@ namespace SP.StudioCore.Tools
                 await context.ShowError(ErrorType.Exception, ex.Message, new Dictionary<string, object>()
                 {
                     {"RequestID", logId},
-                    {"Track", JObject.Parse( info) }
+                    {"Track", new JsonString(info) }
                 }).WriteAsync(context).ConfigureAwait(true);
             }
         }

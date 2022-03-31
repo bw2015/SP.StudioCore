@@ -23,7 +23,7 @@ namespace SP.StudioCore.Tools
             _next = next;
         }
 
-        private WebSocketClient wsClient;
+        private WebSocketClient? wsClient;
 
         /// <summary>
         /// websocket的逻辑处理

@@ -100,7 +100,7 @@ namespace SP.StudioCore.Tools
 
                 logs.Add($"查找动作，耗时：{sw.ElapsedMilliseconds}ms");
 
-                // 检查是否需要管理员登录
+                // 检查是否需要管理员登录&权限检查
                 if (methodInfo.HasAttribute<PermissionAttribute>())
                 {
                     if (permission == null) throw new ResultException("未实现IPermission");

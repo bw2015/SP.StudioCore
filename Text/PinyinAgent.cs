@@ -36,6 +36,32 @@ namespace SP.StudioCore.Text
             return sb.ToString();
         }
 
-     
+        /// <summary>
+        /// 获取拼音
+        /// </summary>
+        /// <param name="chinese"></param>
+        /// <param name="ignoreTone">是否忽略音调</param>
+        /// <returns>默认大写</returns>
+        public static string ToPinYin(this string chinese, bool ignoreTone = true)
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (char ch in chinese)
+            {
+                if (Regex.IsMatch(ch.ToString(), "[a-zA-Z]"))
+                {
+                    sb.Append(ch);
+                }
+                else if (ChineseChar.IsValidChar(ch))
+                {
+                    ChineseChar cc = new ChineseChar(ch);
+                    var arr = cc.Pinyins;
+                    if (arr == null || arr.Count == 0) continue;
+                    string name = arr[0];
+                    if (ignoreTone) name = Regex.Replace(name, @"\d", string.Empty);
+                    sb.Append(name);
+                }
+            }
+            return sb.ToString();
+        }
     }
 }

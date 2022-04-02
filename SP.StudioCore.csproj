@@ -110,6 +110,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Folder Include="Libiary\ThoughtWorks.QRCode.Codec\" />
         <Folder Include="MQ\RabbitMQ\" />
     </ItemGroup>
 

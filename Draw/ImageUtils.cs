@@ -62,6 +62,11 @@ namespace SP.StudioCore.Draw
         public static Image ToImage(this string base64)
         {
             byte[] bytes = Convert.FromBase64String(base64);
+            return bytes.ToImage();
+        }
+
+        public static Image ToImage(this byte[] bytes)
+        {
             using (Stream ms = new MemoryStream(bytes, 0, bytes.Length))
             {
                 Image image = Image.FromStream(ms, true);

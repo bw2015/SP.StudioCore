@@ -7,6 +7,9 @@ using System.Drawing.Imaging;
 using System.Web;
 using Gma.QrCodeNet.Encoding;
 using Gma.QrCodeNet.Encoding.Windows.Render;
+using SP.StudioCore.Net;
+using ThoughtWorks.QRCode.Codec.Data;
+using ThoughtWorks.QRCode.Codec;
 
 namespace SP.StudioCore.Draw
 {
@@ -33,6 +36,25 @@ namespace SP.StudioCore.Draw
             MemoryStream ms = new MemoryStream();
             renderer.WriteToStream(qrCode.Matrix, ImageFormat.Png, ms);
             return ms.ToArray();
+        }
+
+        /// <summary>
+        /// 解析二维码
+        /// </summary>
+        /// <param name="url">远程路径</param>
+        /// <returns></returns>
+        public static string Decode(Uri url, Encoding? encoding = null)
+        {
+            encoding ??= Encoding.UTF8;
+            byte[]? bytes = NetAgent.DownloadFile(url.ToString());
+            if (bytes == null) throw new TimeoutException($"download image file timeout => {url}");
+
+            using (Image image = bytes.ToImage())
+            {
+                Bitmap bitmap = new Bitmap(image);
+                QRCodeBitmapImage qRCode = new QRCodeBitmapImage(bitmap);
+                return new QRCodeDecoder().decode(qRCode, encoding);
+            }
         }
     }
 }

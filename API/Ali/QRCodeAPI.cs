@@ -38,7 +38,7 @@ namespace SP.StudioCore.API.Ali
             if (this.Gateway == null) throw new NullReferenceException("the gateway is null");
             if (string.IsNullOrEmpty(src)) throw new FormatException();
 
-            string json = NetAgent.UploadData(this.Gateway, $"src={src}", Encoding.UTF8, headers: new()
+            string json = NetAgent.UploadData(this.Gateway, $"src={src}&type=nor", Encoding.UTF8, headers: new()
             {
                 { "Authorization", $"APPCODE {this.AppCode}" }
             });

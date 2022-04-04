@@ -256,7 +256,7 @@ namespace SP.StudioCore.Model
         /// </summary>
         public Task WriteAsync(HttpContext context)
         {
-            Task task = null;
+            Task? task = null;
             // 对外输出内容
             string result = string.Empty;
             context.Response.StatusCode = (int)this.StatusCode;
@@ -281,7 +281,7 @@ namespace SP.StudioCore.Model
                 }
                 else
                 {
-                    context.Response.ContentType = this.Type.Value.GetAttribute<DescriptionAttribute>().Description;
+                    context.Response.ContentType = this.Type.Value.GetAttribute<DescriptionAttribute>()?.Description ?? "text/paint";
                     switch (this.Type.Value)
                     {
                         case ContentType.HTML:
@@ -290,19 +290,19 @@ namespace SP.StudioCore.Model
                         case ContentType.JS:
                         case ContentType.M3U8:
                         case ContentType.CSS:
-                            result = (string)this.Info;
+                            result = (string?)this.Info ?? string.Empty;
                             task = context.Response.WriteAsync(result, Encoding.UTF8);
                             break;
                         case ContentType.JPEG:
                         case ContentType.PNG:
                         case ContentType.GIF:
                         case ContentType.PDF:
-                            byte[] data = (byte[])this.Info;
+                            byte[] data = (byte[]?)this.Info ?? System.Array.Empty<byte>();
                             task = context.Response.Body.WriteAsync(data, 0, data.Length);
                             context.Response.Body.Close();
                             break;
                         case ContentType.JSON:
-                            if (this.Info.GetType().Name == "String")
+                            if (this.Info?.GetType().Name == "String")
                             {
                                 result = (string)this.Info;
                                 task = context.Response.WriteAsync(result, Encoding.UTF8);
@@ -314,7 +314,7 @@ namespace SP.StudioCore.Model
                             }
                             break;
                         case ContentType.GZIP:
-                            byte[] gzipData = (byte[])this.Info;
+                            byte[] gzipData = (byte[]?)this.Info ?? System.Array.Empty<byte>();
                             context.Response.Headers.Add("Content-Encoding", "gzip");
                             context.Response.Headers.Add("Content-Length", gzipData.Length.ToString());
                             task = context.Response.Body.WriteAsync(gzipData, 0, gzipData.Length);
@@ -322,12 +322,12 @@ namespace SP.StudioCore.Model
                             break;
                         case ContentType.Redirect:
                             context.Response.StatusCode = 301;
-                            string url = (string)this.Info;
+                            string? url = (string?)this.Info;
                             if (!string.IsNullOrEmpty(url))
                             {
                                 context.Response.Headers.Add("Location", url);
                             }
-                            return context.Response.WriteAsync(string.Empty);
+                            task = context.Response.WriteAsync(string.Empty);
                             break;
                     }
                 }
@@ -339,6 +339,7 @@ namespace SP.StudioCore.Model
                     context.SetItem(Const.RESULT, result);
                 }
             }
+            if (task == null) throw new NullReferenceException($"UNKNOW Result.ContentType");
             return task;
         }
 

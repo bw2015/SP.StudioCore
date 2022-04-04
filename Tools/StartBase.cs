@@ -42,9 +42,9 @@ namespace SP.StudioCore.Tools
             return new Result(true, msg, data);
         }
 
-        protected virtual Result GetResultContent(bool success, object data)
+        protected virtual Result GetResultContent(bool success, object data, string successMessage = "操作成功")
         {
-            return new Result(success, string.Empty, info: success ? data : null);
+            return new Result(success, success ? successMessage : string.Empty, info: success ? data : null);
         }
 
         protected virtual Result GetResultContent(bool success, string? successMessage)
@@ -92,6 +92,6 @@ namespace SP.StudioCore.Tools
                 "}"));
         }
 
-       
+
     }
 }

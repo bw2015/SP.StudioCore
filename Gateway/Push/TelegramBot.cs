@@ -1,8 +1,10 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using SP.StudioCore.Gateway.Push.Telegrams;
 using SP.StudioCore.Json;
 using SP.StudioCore.Model;
 using SP.StudioCore.Net;
+using SP.StudioCore.Utils;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -74,12 +76,27 @@ namespace SP.StudioCore.Gateway.Push
         {
             if (message == null) return false;
             string url = $"{this.Url}bot{this.Token}/sendMessage";
+            bool isSend = false;
             foreach (string id in this.GetChannels(channel))
             {
                 string data = $"chat_id={id}&text={HttpUtility.UrlEncode(message)}&parse_mode=HTML";
-                NetAgent.UploadData(url, data, Encoding.UTF8);
+                string result = NetAgent.UploadData(url, data, Encoding.UTF8);
+                try
+                {
+                    JObject info = JObject.Parse(result);
+                    isSend = info["ok"]?.Value<bool>() ?? false;
+                    if (!isSend)
+                    {
+                        ConsoleHelper.WriteLine(result, ConsoleColor.Red);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    ConsoleHelper.WriteLine($"{ex.Message} - {result}", ConsoleColor.Red);
+                    isSend = false;
+                }
             }
-            return true;
+            return isSend;
         }
         /// <summary>
         /// 发送文本信息

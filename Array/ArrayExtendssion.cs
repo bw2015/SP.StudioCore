@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Web;
 using Array = System.Array;
@@ -47,6 +48,35 @@ namespace SP.StudioCore.Array
         public static string ToQueryString<TKey, TValue>(this IEnumerable<KeyValuePair<TKey, TValue>> data)
         {
             return string.Join("&", data.Select(t => $"{t.Key}={t.Value}"));
+        }
+
+        /// <summary>
+        /// 把匿名类转化成为 QueryString 格式字符串
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public static string ToQueryString(this object obj, bool urlEncode = false)
+        {
+            if (obj == null) return string.Empty;
+            List<string> list = new List<string>();
+            foreach (PropertyInfo property in obj.GetType().GetProperties())
+            {
+                string name = property.Name;
+                object? value = property.GetValue(obj);
+                if (value == null)
+                {
+                    continue;
+                }
+                if (property.PropertyType == typeof(string) && urlEncode)
+                {
+                    list.Add($"{name}={HttpUtility.UrlEncode((string)value)}");
+                }
+                else
+                {
+                    list.Add($"{name}={value}");
+                }
+            }
+            return string.Join("&", list);
         }
 
         /// <summary>

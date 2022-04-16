@@ -41,6 +41,16 @@ namespace SP.StudioCore.Model
             }
         }
 
+        public AdminMenu(string? name, string? id, string? href, string? icon, bool isChecked, List<AdminMenu>? menu)
+        {
+            Name = name;
+            ID = id;
+            Href = href;
+            Icon = icon;
+            IsChecked = isChecked;
+            this.menu = menu;
+        }
+
         /// <summary>
         /// 权限名字
         /// </summary>

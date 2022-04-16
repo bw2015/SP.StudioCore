@@ -26,7 +26,7 @@ namespace SP.StudioCore.MQ.RabbitMQ
 
     public abstract class IListenerMessage<TModel> : IListenerMessage where TModel : IMessageQueue
     {
-        protected Stopwatch sw;
+        protected Stopwatch sw { get; private set; }
 
         public void Consumer(string message, object sender, BasicDeliverEventArgs ea)
         {

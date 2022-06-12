@@ -1,4 +1,6 @@
-﻿using SP.StudioCore.Security;
+﻿using Google.Protobuf;
+using SP.StudioCore.Cache.Memory;
+using SP.StudioCore.Security;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,6 +37,42 @@ namespace SP.StudioCore.Utils
         {
             string md5 = Encryption.toMD5(key).Substring(0, 3);
             return LOCKER[md5];
+        }
+
+
+        /// <summary>
+        /// 设定对象锁定
+        /// </summary>
+        /// <param name="lockTime">默认的锁定时间（1分钟）</param>
+
+        public static void SetLock<T>(TimeSpan? lockTime = null) where T : IMessage
+        {
+            lockTime ??= TimeSpan.FromMinutes(1);
+            MemoryUtils.Set(typeof(T).Name, DateTime.Now, lockTime.Value);
+        }
+
+        /// <summary>
+        /// 解除锁定，并且得到锁定的时间点
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        public static DateTime? UnLock<T>() where T : IMessage
+        {
+            string key = typeof(T).Name;
+            if (MemoryUtils.Contains(key))
+            {
+                DateTime value = (DateTime)MemoryUtils.Get(key);
+                MemoryUtils.Remove(key);
+                return value;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// 锁定对象名
+        /// </summary>
+        public static bool IsLock<T>() where T : IMessage
+        {
+            return MemoryUtils.Contains(typeof(T).Name);
         }
     }
 }

@@ -175,6 +175,35 @@ namespace SP.StudioCore.Enums
         }
 
         /// <summary>
+        /// 获取多个资源文件内的枚举字典
+        /// </summary>
+        public static Dictionary<string, Dictionary<string, string>> GetEnums(this IEnumerable<Assembly> asses)
+        {
+            var dic = new Dictionary<string, Dictionary<string, string>>();
+            foreach (Assembly ass in asses)
+            {
+                foreach (var item in ass.GetEnums())
+                {
+                    if (dic.ContainsKey(item.Key))
+                    {
+                        foreach (var item2 in item.Value)
+                        {
+                            if (!dic[item.Key].ContainsKey(item2.Key))
+                            {
+                                dic[item.Key].Add(item2.Key, item2.Value);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        dic.Add(item.Key, item.Value);
+                    }
+                }
+            }
+            return dic;
+        }
+
+        /// <summary>
         /// 获取指定类型的枚举内容
         /// </summary>
         /// <param name="enums"></param>

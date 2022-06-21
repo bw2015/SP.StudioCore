@@ -17,7 +17,7 @@ namespace SP.StudioCore.Security
         /// <param name="str"></param>
         /// <param name="encoding">默认UTF-8</param>
         /// <returns>默认大写</returns>
-        public static string toMD5(string input, Encoding? encoding = null, int length = 32)
+        public static string toMD5(this string input, Encoding? encoding = null, int length = 32)
         {
             if (encoding == null) encoding = Encoding.UTF8;
             string md5 = toMD5(encoding.GetBytes(input ?? string.Empty));

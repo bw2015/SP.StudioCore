@@ -142,6 +142,7 @@ namespace SP.StudioCore.Cache.Redis
         /// <returns></returns>
         protected virtual int GetTokenID(string KEY, Guid token)
         {
+            if (token == Guid.Empty) return 0;
             string tokenKey = this.GetTokenKey(KEY, token);
             RedisValue value = this.NewExecutor().HashGet(tokenKey, token.GetRedisValue());
             if (value.IsNull) return 0;

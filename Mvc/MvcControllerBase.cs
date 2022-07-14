@@ -26,12 +26,12 @@ namespace SP.StudioCore.Mvc
         /// <summary>
         /// 只读数据库
         /// </summary>
-        protected virtual IReadRepository ReadDB => IocCollection.GetService<IReadRepository>();
+        protected virtual IReadRepository? ReadDB => IocCollection.GetService<IReadRepository>();
 
         /// <summary>
         /// 可读/可写数据库（不建议在Controller进行可写操作）
         /// </summary>
-        protected virtual IWriteRepository WriteDB => IocCollection.GetService<IWriteRepository>();
+        protected virtual IWriteRepository? WriteDB => IocCollection.GetService<IWriteRepository>();
 
 
 

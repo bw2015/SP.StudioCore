@@ -60,7 +60,7 @@ namespace SP.StudioCore.Tools
                 }
                 finally
                 {
-                    ws.Remove(wsClient);
+                    await ws.Remove(wsClient);
                 }
             }
             else
@@ -71,18 +71,19 @@ namespace SP.StudioCore.Tools
 
         private async Task Handler(WebSocketClient client)
         {
-            WebSocketReceiveResult result = null;
+            WebSocketReceiveResult result;
             do
             {
                 byte[] buffer = new byte[1024 * 4];
                 result = await client.WebSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None).ConfigureAwait(true);
                 if (result.MessageType == WebSocketMessageType.Text && !result.CloseStatus.HasValue)
                 {
+                    if (wsClient == null) continue;
                     string message = Encoding.UTF8.GetString(buffer, 0, result.Count);
                     if (message == "ping")
                     {
                         byte[] pong = Encoding.UTF8.GetBytes("pong");
-                        await wsClient.WebSocket.SendAsync(new ArraySegment<byte>(pong, 0, pong.Length), WebSocketMessageType.Text, true, CancellationToken.None).ConfigureAwait(true); ;
+                        await wsClient.WebSocket.SendAsync(new ArraySegment<byte>(pong, 0, pong.Length), WebSocketMessageType.Text, true, CancellationToken.None).ConfigureAwait(true);
                     }
                     else
                     {

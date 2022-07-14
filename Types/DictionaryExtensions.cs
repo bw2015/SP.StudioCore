@@ -13,7 +13,7 @@ namespace SP.StudioCore.Types
         ///  扩展 Dictionary 方法，如果没有Key值则返回默认值
         /// </summary>
         /// <returns></returns>
-        public static TValue Get<TKey, TValue>(this Dictionary<TKey, TValue> dic, TKey key, TValue defaultValue)
+        public static TValue Get<TKey, TValue>(this Dictionary<TKey, TValue> dic, TKey key, TValue defaultValue) where TKey : notnull
         {
             if (dic.ContainsKey(key)) return dic[key];
             return defaultValue;

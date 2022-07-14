@@ -59,7 +59,7 @@ namespace SP.StudioCore.Mvc
 
         protected virtual string QF(string name)
         {
-            return this.context.QF(name);
+            return this.context.QF(name) ?? string.Empty;
         }
 
         protected virtual T QF<T>(string name, T defaultValue)

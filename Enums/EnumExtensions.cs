@@ -174,6 +174,19 @@ namespace SP.StudioCore.Enums
             return dic;
         }
 
+        public static Dictionary<string, Dictionary<string, string>> GetEnums(this Assembly[] assemblies)
+        {
+            var dic = new Dictionary<string, Dictionary<string, string>>();
+            foreach (Assembly assembly in assemblies)
+            {
+                foreach (var item in assembly.GetEnums())
+                {
+                    if (!dic.ContainsKey(item.Key)) dic.Add(item.Key, item.Value);
+                }
+            }
+            return dic;
+        }
+
         /// <summary>
         /// 获取指定类型的枚举内容
         /// </summary>
@@ -234,9 +247,9 @@ namespace SP.StudioCore.Enums
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
-        public static Dictionary<T, bool> ToDictionary<T>(this T value) where T : IComparable, IFormattable, IConvertible
+        public static Dictionary<T, bool>? ToDictionary<T>(this T value) where T : IComparable, IFormattable, IConvertible
         {
-            if (!typeof(T).HasAttribute<FlagsAttribute>()) return null;
+            if (!typeof(T).HasAttribute<FlagsAttribute>() || value == null) return null;
             Dictionary<T, bool> dic = new Dictionary<T, bool>();
             foreach (T t in Enum.GetValues(typeof(T)))
             {

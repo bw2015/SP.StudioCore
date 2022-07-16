@@ -35,9 +35,12 @@ namespace SP.StudioCore.Model
             this.menu = new List<AdminMenu>();
             foreach (XElement item in root.Elements())
             {
-                if (menuOnly && (item.Name.ToString() != "menu" ||
-                      (permission != null && !permission.Contains(item.GetAttributeValue("ID"))))) continue;
-                this.menu.Add(new AdminMenu(item, menuOnly, getMenuName, permission ?? System.Array.Empty<string>()));
+                // 如果只输出菜单
+                if (menuOnly && item.Name.ToString() != "menu") continue;
+                // 如果没有权限
+                if (permission != null && !permission.Contains(item.GetAttributeValue("ID"))) continue;
+
+                this.menu.Add(new AdminMenu(item, menuOnly, getMenuName, permission));
             }
         }
 

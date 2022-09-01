@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using Microsoft.Data.SqlClient;
 using Microsoft.Data.Sqlite;
+using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -50,7 +51,7 @@ namespace SP.StudioCore.Data
             {
                 DatabaseType.SqlServer => new SqlConnection(connectionString),
                 DatabaseType.SQLite => new SqliteConnection(connectionString),
-                //DatabaseType.MySql => new MySqlConnection(connectionString),
+                DatabaseType.MySql => new MySqlConnection(connectionString),
                 _ => throw new NotSupportedException($"暂不支持数据库类型 { this.DBType }")
             };
         }

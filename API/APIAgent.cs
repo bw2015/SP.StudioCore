@@ -19,7 +19,7 @@ namespace SP.StudioCore.API
     /// </summary>
     public static class APIPathAgent
     {
-        private static APIPathConfig? Config => IocCollection.GetService<APIPathConfig>();
+        public static APIPathConfig? Config => IocCollection.GetService<APIPathConfig>();
 
 
         public static string GetImage(this string path)
@@ -44,6 +44,8 @@ namespace SP.StudioCore.API
             if (path.StartsWith("http")) return path;
             return $"{Config.ImgServer}{path}";
         }
+
+        public static string? ImgServer => Config?.ImgServer;
     }
 
     /// <summary>

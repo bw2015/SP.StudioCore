@@ -255,17 +255,20 @@ namespace SP.StudioCore.Enums
             object? res = null;
             switch (Enum.GetUnderlyingType(enumType).Name)
             {
-                case "Int64":
+                case nameof(Int64):
                     res = value;
                     break;
-                case "Int32":
+                case nameof(Int32):
                     res = (int)value;
                     break;
-                case "Int16":
+                case nameof(Int16):
                     res = (short)value;
                     break;
-                case "Byte":
+                case nameof(Byte):
                     res = (byte)value;
+                    break;
+                case nameof(SByte):
+                    res = (sbyte)value;
                     break;
             }
             return res;

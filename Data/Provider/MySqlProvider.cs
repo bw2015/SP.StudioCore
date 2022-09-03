@@ -92,7 +92,7 @@ namespace SP.StudioCore.Data.Provider
 
         public bool Exists<T>() where T : class, new()
         {
-            string sql = $"SELECT 0 EXISTS(SELECT 0 FROM {typeof(T).GetTableName()});";
+            string sql = $"SELECT 0 FROM `{typeof(T).GetTableName()}` LIMIT 1;";
             return db.ExecuteScalar(CommandType.Text, sql) != null;
         }
 
@@ -100,7 +100,7 @@ namespace SP.StudioCore.Data.Provider
         {
             IEnumerable<ColumnProperty> fields = SchemaCache.GetColumns<T>(t => t.IsKey);
             if (!fields.Any()) throw new Exception($"{ typeof(T).GetTableName() } No primary key");
-            string sql = $"SELECT 0 WHERE EXISTS(SELECT 0 FROM {typeof(T).GetTableName()} WHERE { string.Join(" AND ", fields.Select(t => $"{t.Name}=@{t.Name}")) });";
+            string sql = $"SELECT 0 FROM `{typeof(T).GetTableName()}` WHERE { string.Join(" AND ", fields.Select(t => $"{t.Name}=@{t.Name}")) } LIMIT 1;";
             DynamicParameters parameters = new DynamicParameters();
             foreach (ColumnProperty column in fields)
             {

@@ -145,22 +145,14 @@ namespace SP.StudioCore.Cache.Redis
                 default:
                     if (type.IsEnum)
                     {
-                        switch (Enum.GetUnderlyingType(type).Name)
+                        value = Enum.GetUnderlyingType(type).Name switch
                         {
-                            case "Int64":
-                                value = (long)obj;
-                                break;
-                            case "Int32":
-                                value = (int)obj;
-                                break;
-                            case "Int16":
-                                value = (short)obj;
-                                break;
-                            case "Byte":
-                            default:
-                                value = (int)(byte)obj;
-                                break;
-                        }
+                            nameof(Int64) => (RedisValue)(long)obj,
+                            nameof(Int32) => (RedisValue)(int)obj,
+                            nameof(Int16) => (RedisValue)(short)obj,
+                            nameof(SByte) => (RedisValue)(sbyte)obj,
+                            _ => (RedisValue)(int)(byte)obj,
+                        };
                     }
                     else
                     {

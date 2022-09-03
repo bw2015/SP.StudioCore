@@ -25,12 +25,28 @@ namespace SP.StudioCore.Data
         /// <summary>
         /// 只读操作对象
         /// </summary>
-        protected virtual IReadRepository? ReadDB => IocCollection.GetService<IReadRepository>();
+        protected virtual IReadRepository ReadDB
+        {
+            get
+            {
+                IReadRepository? readDb = IocCollection.GetService<IReadRepository>();
+                if (readDb == null) throw new NullReferenceException("ReadDB");
+                return readDb;
+            }
+        }
 
         /// <summary>
         /// 可写可读操作对象
         /// </summary>
-        protected virtual IWriteRepository? WriteDB => IocCollection.GetService<IWriteRepository>();
+        protected virtual IWriteRepository WriteDB
+        {
+            get
+            {
+                IWriteRepository? write = IocCollection.GetService<IWriteRepository>();
+                if (write == null) throw new NullReferenceException("WriteDB");
+                return write;
+            }
+        }
 
         /// <summary>
         /// 数据库类型

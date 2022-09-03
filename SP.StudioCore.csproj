@@ -59,10 +59,12 @@
         <Compile Remove="MQ\Configs\IRabbitManager.cs" />
         <Compile Remove="MQ\Configs\MQConfig.cs" />
         <Compile Remove="MQ\RabbitMQ\Configuration\ConsumerConfig.cs" />
-        <None Remove="Tools\Builder.bat" />
         <None Remove="Tools\curl.exe" />
         <None Remove="Tools\ffmpeg.exe" />
         <None Remove="Tools\ffplay.exe" />
+        <None Remove="Tools\libcrypto-1_1-x64.dll" />
+        <None Remove="Tools\libssl-1_1-x64.dll" />
+        <None Remove="Tools\mysql.exe" />
         <None Include="app.png">
             <Pack>True</Pack>
             <PackagePath></PackagePath>
@@ -84,6 +86,7 @@
         <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.8" />
         <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="6.0.1" />
         <PackageReference Include="MySql.Data" Version="8.0.30" />
+        <PackageReference Include="MySql.EntityFrameworkCore" Version="6.0.4" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
         <PackageReference Include="PinYinConverterCore" Version="1.0.2" />
         <PackageReference Include="RabbitMQ.Client" Version="6.4.0" />

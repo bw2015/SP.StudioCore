@@ -7,6 +7,8 @@ using System.Web;
 using SP.StudioCore.Net;
 using ThoughtWorks.QRCode.Codec.Data;
 using ThoughtWorks.QRCode.Codec;
+using SkiaSharp.QrCode;
+using SkiaSharp;
 
 namespace SP.StudioCore.Draw
 {
@@ -31,6 +33,31 @@ namespace SP.StudioCore.Draw
                 Bitmap bitmap = new Bitmap(image);
                 QRCodeBitmapImage qRCode = new QRCodeBitmapImage(bitmap);
                 return new QRCodeDecoder().decode(qRCode, encoding);
+            }
+        }
+
+        /// <summary>
+        /// 创建一个二维码
+        /// </summary>
+        public static byte[] Create(string content, int width = 256, int height = 256)
+        {
+            using (var generator = new QRCodeGenerator())
+            {
+                var qr = generator.CreateQrCode(content, ECCLevel.H);
+                var info = new SKImageInfo(width, height);
+                using (var surface = SKSurface.Create(info))
+                {
+                    var canvas = surface.Canvas;
+                    canvas.Render(qr, info.Width, info.Height);
+
+                    using (var image = surface.Snapshot())
+                    {
+                        using (SKData data = image.Encode(SKEncodedImageFormat.Png, 100))
+                        {
+                            return data.ToArray();
+                        }
+                    }
+                }
             }
         }
     }

@@ -38,7 +38,7 @@ namespace SP.StudioCore.Model
                 // 如果只输出菜单
                 if (menuOnly && item.Name.ToString() != "menu") continue;
                 // 如果没有权限
-                if (permission != null && !permission.Contains(item.GetAttributeValue("ID"))) continue;
+                if (permission != null && menuOnly && !permission.Contains(item.GetAttributeValue("ID"))) continue;
 
                 this.menu.Add(new AdminMenu(item, menuOnly, getMenuName, permission));
             }

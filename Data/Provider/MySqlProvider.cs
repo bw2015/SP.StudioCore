@@ -64,7 +64,7 @@ namespace SP.StudioCore.Data.Provider
             Stack<string> where = new Stack<string>();
             foreach (ColumnProperty column in SchemaCache.GetColumns<T>().Where(t => t.IsKey))
             {
-                where.Push($"[{column.Name}]=@{column.Name}");
+                where.Push($"`{column.Name}`=@{column.Name}");
                 parameters.Add(column.Name, column.Property.GetValue(entity));
             }
             string sql = $"DELETE FROM {typeof(T).GetTableName()} WHERE {string.Join(" AND ", where)};";
@@ -329,7 +329,7 @@ namespace SP.StudioCore.Data.Provider
                 ColumnProperty column2 = SchemaCache.GetColumnProperty(field2);
                 parameters.Add("@Value1", value1.GetSafeValue(typeof(TField1)));
                 parameters.Add("@Value2", value2.GetSafeValue(typeof(TField2)));
-                string sql = $"UPDATE {typeof(T).GetTableName()} SET [{column1.Name}] = @Value1,[{column2.Name}] = @Value2 {conditionSql};";
+                string sql = $"UPDATE {typeof(T).GetTableName()} SET `{column1.Name}` = @Value1,`{column2.Name}` = @Value2 {conditionSql};";
                 return db.ExecuteNonQuery(CommandType.Text, sql, parameters);
             }
         }
@@ -390,7 +390,7 @@ namespace SP.StudioCore.Data.Provider
                 conditionFields.Push(column.Name);
                 parameters.Add($"@{column.Name}", column.Property.GetValue(entity).GetSafeValue(column.Property.PropertyType));
             }
-            string sql = $"UPDATE [{typeof(T).GetTableName()}] SET {string.Join(",", updateFields.Select(t => $"{t}= @{t}"))} WHERE { string.Join(" AND ", conditionFields.Select(t => $"[{t}] = @{t}")) };";
+            string sql = $"UPDATE `{typeof(T).GetTableName()}` SET {string.Join(",", updateFields.Select(t => $"{t}= @{t}"))} WHERE { string.Join(" AND ", conditionFields.Select(t => $"`{t}` = @{t}")) };";
             return db.ExecuteNonQuery(CommandType.Text, sql, parameters);
         }
 

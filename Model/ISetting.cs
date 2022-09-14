@@ -66,6 +66,9 @@ namespace SP.StudioCore.Model
                         case "Byte[]":
                             result = (HttpUtility.UrlDecode(value)).GetArray<byte>().ToArray();
                             break;
+                        case "Decimal[]":
+                            result = (HttpUtility.UrlDecode(value)).GetArray<decimal>().ToArray();
+                            break;
                         case "String[]":
                             result = (HttpUtility.UrlDecode(value)).GetArray<string>().ToArray();
                             break;

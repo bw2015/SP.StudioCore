@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 
 namespace SP.StudioCore.Data.Provider
@@ -396,14 +397,48 @@ namespace SP.StudioCore.Data.Provider
 
         public int UpdatePlus<T>(T entity, Expression<Func<T, bool>> condition, params Expression<Func<T, object>>[] fields) where T : class, new()
         {
-            throw new NotImplementedException();
+            using (IExpressionCondition expression = db.GetExpressionCondition(condition))
+            {
+                string whereSql = expression.ToCondition(out DynamicParameters parameters);
+                Stack<string> updateFields = new Stack<string>();
+                foreach (PropertyInfo property in entity.GetType().GetProperties().Where(t => t.HasAttribute<UpdatePlusAttribute>()))
+                {
+                    object value = property.GetValue(entity);
+                    switch (property.PropertyType.Name)
+                    {
+                        case "Int32":
+                            if ((int)value == default) continue;
+                            break;
+                        case "Decimal":
+                            if ((decimal)value == default) continue;
+                            break;
+                        default:
+                            continue;
+                    }
+                    string fieldName = property.Name;
+                    parameters.Add($"@{fieldName}", value);
+                    updateFields.Push(fieldName);
+                }
+                string sql = $"UPDATE `{typeof(T).GetTableName()}` SET {string.Join(",", updateFields.Select(t => $"`{t}` = `{t}` + @{t}"))} {whereSql}";
+                return db.ExecuteNonQuery(CommandType.Text, sql, parameters);
+            }
         }
 
         public TValue? UpdatePlus<T, TValue>(Expression<Func<T, TValue>> field, TValue value, Expression<Func<T, bool>> condition)
             where T : class, new()
             where TValue : struct
         {
-            throw new NotImplementedException();
+            using (IExpressionCondition expression = db.GetExpressionCondition(condition))
+            {
+                string whereSql = expression.ToCondition(out DynamicParameters parameters);
+                string? fieldName = SchemaCache.GetColumnProperty(field).Name;
+                string? tableName = typeof(T).GetTableName();
+
+                parameters.Add("@Value", value);
+                string sql = $"UPDATE `{tableName}` SET `{fieldName}` = `{fieldName}` + @Value {whereSql};SELECT `{fieldName}` FROM `{tableName}` {whereSql}";
+                object result = db.ExecuteScalar(CommandType.Text, sql, parameters);
+                return (TValue?)result;
+            }
         }
 
         public int Update<T, TField1, TField2>(Expression<Func<T, TField1>> field1, TField1 value1, Expression<Func<T, TField2>> field2, TField2 value2, Expression<Func<T, bool>> condition) where T : class, new()

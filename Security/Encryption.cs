@@ -69,6 +69,18 @@ namespace SP.StudioCore.Security
         }
 
         /// <summary>
+        /// 加盐的MD5（8位）
+        /// </summary>
+        /// <param name="str">原文</param>
+        /// <param name="slat">加盐字符串</param>
+        /// <returns></returns>
+        public static string toMD5Short(this string str, string slat)
+        {
+            string md5 = toMD5($"{str}&{slat}");
+            return md5.toMD5Short();
+        }
+
+        /// <summary>
         /// 使用系统自带的SHA1加密(40位大写）
         /// </summary>
         /// <param name="text"></param>

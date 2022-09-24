@@ -157,9 +157,9 @@ namespace SP.StudioCore.Http
             return (T)context.Items[typeof(T)];
         }
 
-        public static T? SetItem<T>(this HttpContext context, T value)
+        public static void SetItem<T>(this HttpContext context, T value)
         {
-            if (context == null) return default;
+            if (context == null) return;
             Type key = typeof(T);
             if (!context.Items.ContainsKey(key))
             {
@@ -169,7 +169,6 @@ namespace SP.StudioCore.Http
             {
                 context.Items[key] = value;
             }
-            return value;
         }
 
         /// <summary>

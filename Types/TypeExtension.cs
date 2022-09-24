@@ -89,7 +89,7 @@ namespace SP.StudioCore.Types
                             obj = double.TryParse((string)value, out double doubleValue) ? doubleValue : 0.00D;
                             break;
                         case "Int64":
-                            obj = long.TryParse((string)value, out long longValue) ? longValue : 0;
+                            obj = long.TryParse((string)value, out long longValue) ? longValue : (long)0;
                             break;
                         case "Int32":
                             if (int.TryParse((string)value, out int intValue))
@@ -173,17 +173,14 @@ namespace SP.StudioCore.Types
                             }
                             else if (type.IsArray)
                             {
-                                Type? elemType = type.GetElementType();
-                                if (elemType != null)
+                                Type elemType = type.GetElementType();
+                                string[] values = ((string)value).Split(',');
+                                System.Array array = System.Array.CreateInstance(elemType, values.Length);
+                                for (int i = 0; i < array.Length; i++)
                                 {
-                                    string[] values = ((string)value).Split(',');
-                                    System.Array array = System.Array.CreateInstance(elemType, values.Length);
-                                    for (int i = 0; i < array.Length; i++)
-                                    {
-                                        array.SetValue(values[i].GetValue(elemType), i);
-                                    }
-                                    obj = array;
+                                    array.SetValue(values[i].GetValue(elemType), i);
                                 }
+                                obj = array;
                             }
                             break;
                     }
@@ -236,25 +233,32 @@ namespace SP.StudioCore.Types
             switch (type.Name)
             {
                 case "Int32":
-                    isType = int.TryParse(value, out _);
+                    int int32;
+                    isType = int.TryParse(value, out int32);
                     break;
                 case "Int16":
-                    isType = short.TryParse(value, out _);
+                    short int16;
+                    isType = short.TryParse(value, out int16);
                     break;
                 case "Int64":
-                    isType = long.TryParse(value, out _);
+                    long int64;
+                    isType = long.TryParse(value, out int64);
                     break;
                 case "Guid":
-                    isType = Guid.TryParse(value, out _);
+                    Guid guid;
+                    isType = Guid.TryParse(value, out guid);
                     break;
                 case "DateTime":
-                    isType = DateTime.TryParse(value, out _);
+                    DateTime dateTime;
+                    isType = DateTime.TryParse(value, out dateTime);
                     break;
                 case "Decimal":
-                    isType = decimal.TryParse(value, out _);
+                    decimal money;
+                    isType = Decimal.TryParse(value, out money);
                     break;
                 case "Double":
-                    isType = double.TryParse(value, out _);
+                    double doubleValue;
+                    isType = Double.TryParse(value, out doubleValue);
                     break;
                 case "String":
                     isType = true;
@@ -263,7 +267,8 @@ namespace SP.StudioCore.Types
                     isType = Regex.IsMatch(value, "1|0|true|false", RegexOptions.IgnoreCase);
                     break;
                 case "Byte":
-                    isType = byte.TryParse(value, out _);
+                    byte byteValue;
+                    isType = byte.TryParse(value, out byteValue);
                     break;
                 default:
                     if (type.IsEnum)
@@ -352,7 +357,7 @@ namespace SP.StudioCore.Types
         public static Dictionary<string, string> GetDescription<T>(this Type[] types)
         {
             return types.Where(t => t.IsBaseType<T>() && t.HasAttribute<DescriptionAttribute>())
-                .ToDictionary(t => t.Name, t => t.GetAttribute<DescriptionAttribute>()?.Description ?? t.Name);
+                .ToDictionary(t => t.Name, t => t.GetAttribute<DescriptionAttribute>().Description);
         }
 
         /// <summary>

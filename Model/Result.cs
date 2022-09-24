@@ -216,17 +216,6 @@ namespace SP.StudioCore.Model
             };
         }
 
-        public static implicit operator ActionResult(Result result)
-        {
-            ContentType type = result.Type ?? ContentType.JSON;
-            return new ContentResult()
-            {
-                StatusCode = (int)result.StatusCode,
-                ContentType = type.GetAttribute<DescriptionAttribute>()?.Description,
-                Content = result.ToString()
-            };
-        }
-
         public override string ToString()
         {
             //if (this.Success == -1) return this.Message;
@@ -247,9 +236,9 @@ namespace SP.StudioCore.Model
                     case ContentType.JS:
                     case ContentType.M3U8:
                     case ContentType.CSS:
-                        return (string)(this.Info ?? string.Empty);
+                        return (string)this.Info;
                     case ContentType.JSON:
-                        if (this.Info?.GetType().Name == "String")
+                        if (this.Info.GetType().Name == "String")
                         {
                             return (string)this.Info;
                         }

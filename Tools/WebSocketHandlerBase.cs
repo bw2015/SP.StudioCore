@@ -42,9 +42,8 @@ namespace SP.StudioCore.Tools
         /// 注销客户端
         /// </summary>
         /// <param name="wsClient"></param>
-        public virtual async Task Remove(WebSocketClient wsClient)
+        public virtual void Remove(WebSocketClient wsClient)
         {
-            await wsClient.CloseAsync();
             this.clients.Remove(wsClient);
         }
 

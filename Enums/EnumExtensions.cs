@@ -174,6 +174,48 @@ namespace SP.StudioCore.Enums
             return dic;
         }
 
+        public static Dictionary<string, Dictionary<string, string>> GetEnums(this Assembly[] assemblies)
+        {
+            var dic = new Dictionary<string, Dictionary<string, string>>();
+            foreach (Assembly assembly in assemblies)
+            {
+                foreach (var item in assembly.GetEnums())
+                {
+                    if (!dic.ContainsKey(item.Key)) dic.Add(item.Key, item.Value);
+                }
+            }
+            return dic;
+        }
+
+        /// <summary>
+        /// 获取多个资源文件内的枚举字典
+        /// </summary>
+        public static Dictionary<string, Dictionary<string, string>> GetEnums(this IEnumerable<Assembly> asses)
+        {
+            var dic = new Dictionary<string, Dictionary<string, string>>();
+            foreach (Assembly ass in asses)
+            {
+                foreach (var item in ass.GetEnums())
+                {
+                    if (dic.ContainsKey(item.Key))
+                    {
+                        foreach (var item2 in item.Value)
+                        {
+                            if (!dic[item.Key].ContainsKey(item2.Key))
+                            {
+                                dic[item.Key].Add(item2.Key, item2.Value);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        dic.Add(item.Key, item.Value);
+                    }
+                }
+            }
+            return dic;
+        }
+
         /// <summary>
         /// 获取指定类型的枚举内容
         /// </summary>
@@ -213,17 +255,20 @@ namespace SP.StudioCore.Enums
             object? res = null;
             switch (Enum.GetUnderlyingType(enumType).Name)
             {
-                case "Int64":
+                case nameof(Int64):
                     res = value;
                     break;
-                case "Int32":
+                case nameof(Int32):
                     res = (int)value;
                     break;
-                case "Int16":
+                case nameof(Int16):
                     res = (short)value;
                     break;
-                case "Byte":
+                case nameof(Byte):
                     res = (byte)value;
+                    break;
+                case nameof(SByte):
+                    res = (sbyte)value;
                     break;
             }
             return res;
@@ -234,9 +279,9 @@ namespace SP.StudioCore.Enums
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
-        public static Dictionary<T, bool> ToDictionary<T>(this T value) where T : IComparable, IFormattable, IConvertible
+        public static Dictionary<T, bool>? ToDictionary<T>(this T value) where T : IComparable, IFormattable, IConvertible
         {
-            if (!typeof(T).HasAttribute<FlagsAttribute>()) return null;
+            if (!typeof(T).HasAttribute<FlagsAttribute>() || value == null) return null;
             Dictionary<T, bool> dic = new Dictionary<T, bool>();
             foreach (T t in Enum.GetValues(typeof(T)))
             {

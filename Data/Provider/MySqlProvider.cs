@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 
 namespace SP.StudioCore.Data.Provider
@@ -64,7 +65,7 @@ namespace SP.StudioCore.Data.Provider
             Stack<string> where = new Stack<string>();
             foreach (ColumnProperty column in SchemaCache.GetColumns<T>().Where(t => t.IsKey))
             {
-                where.Push($"[{column.Name}]=@{column.Name}");
+                where.Push($"`{column.Name}`=@{column.Name}");
                 parameters.Add(column.Name, column.Property.GetValue(entity));
             }
             string sql = $"DELETE FROM {typeof(T).GetTableName()} WHERE {string.Join(" AND ", where)};";
@@ -85,22 +86,22 @@ namespace SP.StudioCore.Data.Provider
         {
             using (IExpressionCondition expression = db.GetExpressionCondition(condition))
             {
-                string sql = $"SELECT 0 WHERE EXISTS(SELECT 0 FROM {typeof(T).GetTableName()} { expression.ToCondition(out DynamicParameters parameters)} );";
+                string sql = $"SELECT 0 WHERE EXISTS(SELECT 0 FROM {typeof(T).GetTableName()} {expression.ToCondition(out DynamicParameters parameters)} );";
                 return db.ExecuteScalar(CommandType.Text, sql, parameters) != null;
             }
         }
 
         public bool Exists<T>() where T : class, new()
         {
-            string sql = $"SELECT 0 EXISTS(SELECT 0 FROM {typeof(T).GetTableName()});";
+            string sql = $"SELECT 0 FROM `{typeof(T).GetTableName()}` LIMIT 1;";
             return db.ExecuteScalar(CommandType.Text, sql) != null;
         }
 
         public bool Exists<T>(T entity) where T : class, new()
         {
             IEnumerable<ColumnProperty> fields = SchemaCache.GetColumns<T>(t => t.IsKey);
-            if (!fields.Any()) throw new Exception($"{ typeof(T).GetTableName() } No primary key");
-            string sql = $"SELECT 0 WHERE EXISTS(SELECT 0 FROM {typeof(T).GetTableName()} WHERE { string.Join(" AND ", fields.Select(t => $"{t.Name}=@{t.Name}")) });";
+            if (!fields.Any()) throw new Exception($"{typeof(T).GetTableName()} No primary key");
+            string sql = $"SELECT 0 FROM `{typeof(T).GetTableName()}` WHERE {string.Join(" AND ", fields.Select(t => $"{t.Name}=@{t.Name}"))} LIMIT 1;";
             DynamicParameters parameters = new DynamicParameters();
             foreach (ColumnProperty column in fields)
             {
@@ -129,7 +130,7 @@ namespace SP.StudioCore.Data.Provider
         public bool Insert<T>(T entity) where T : class, new()
         {
             IEnumerable<ColumnProperty> fields = SchemaCache.GetColumns<T>().Where(t => !t.Identity);
-            string sql = $"INSERT INTO {typeof(T).GetTableName()} ({ string.Join(",", fields.Select(t => $"{t.Name}")) }) VALUES({ string.Join(",", fields.Select(t => $"@{t.Name}")) });";
+            string sql = $"INSERT INTO {typeof(T).GetTableName()} ({string.Join(",", fields.Select(t => $"{t.Name}"))}) VALUES({string.Join(",", fields.Select(t => $"@{t.Name}"))});";
             DynamicParameters parameters = new DynamicParameters();
             foreach (ColumnProperty field in fields)
             {
@@ -143,7 +144,7 @@ namespace SP.StudioCore.Data.Provider
             ColumnProperty identity = SchemaCache.GetColumns<T>().FirstOrDefault(t => t.Identity);
             if (!identity) throw new InvalidOperationException();
             IEnumerable<ColumnProperty> fields = SchemaCache.GetColumns<T>().Where(t => !t.Identity);
-            string sql = $"INSERT INTO {typeof(T).GetTableName()} ({ string.Join(",", fields.Select(t => $"{t.Name}")) }) VALUES({ string.Join(",", fields.Select(t => $"@{t.Name}")) });SELECT LAST_INSERT_ID();";
+            string sql = $"INSERT INTO {typeof(T).GetTableName()} ({string.Join(",", fields.Select(t => $"{t.Name}"))}) VALUES({string.Join(",", fields.Select(t => $"@{t.Name}"))});SELECT LAST_INSERT_ID();";
             DynamicParameters parameters = new DynamicParameters();
             foreach (ColumnProperty field in fields)
             {
@@ -188,7 +189,7 @@ namespace SP.StudioCore.Data.Provider
             using (IExpressionCondition expression = db.GetExpressionCondition(condition))
             {
                 string conditionSql = expression.ToCondition(out DynamicParameters parameters);
-                string sql = $"SELECT  { SchemaCache.GetColumnProperty(field).Name } FROM {typeof(T).GetTableName()} {conditionSql}  LIMIT 0,1;";
+                string sql = $"SELECT  {SchemaCache.GetColumnProperty(field).Name} FROM {typeof(T).GetTableName()} {conditionSql}  LIMIT 0,1;";
                 object value = db.ExecuteScalar(CommandType.Text, sql, parameters);
                 if (value == null) return default;
                 return (TValue)value;
@@ -329,7 +330,7 @@ namespace SP.StudioCore.Data.Provider
                 ColumnProperty column2 = SchemaCache.GetColumnProperty(field2);
                 parameters.Add("@Value1", value1.GetSafeValue(typeof(TField1)));
                 parameters.Add("@Value2", value2.GetSafeValue(typeof(TField2)));
-                string sql = $"UPDATE {typeof(T).GetTableName()} SET [{column1.Name}] = @Value1,[{column2.Name}] = @Value2 {conditionSql};";
+                string sql = $"UPDATE {typeof(T).GetTableName()} SET `{column1.Name}` = @Value1,`{column2.Name}` = @Value2 {conditionSql};";
                 return db.ExecuteNonQuery(CommandType.Text, sql, parameters);
             }
         }
@@ -390,20 +391,54 @@ namespace SP.StudioCore.Data.Provider
                 conditionFields.Push(column.Name);
                 parameters.Add($"@{column.Name}", column.Property.GetValue(entity).GetSafeValue(column.Property.PropertyType));
             }
-            string sql = $"UPDATE [{typeof(T).GetTableName()}] SET {string.Join(",", updateFields.Select(t => $"{t}= @{t}"))} WHERE { string.Join(" AND ", conditionFields.Select(t => $"[{t}] = @{t}")) };";
+            string sql = $"UPDATE `{typeof(T).GetTableName()}` SET {string.Join(",", updateFields.Select(t => $"{t}= @{t}"))} WHERE {string.Join(" AND ", conditionFields.Select(t => $"`{t}` = @{t}"))};";
             return db.ExecuteNonQuery(CommandType.Text, sql, parameters);
         }
 
         public int UpdatePlus<T>(T entity, Expression<Func<T, bool>> condition, params Expression<Func<T, object>>[] fields) where T : class, new()
         {
-            throw new NotImplementedException();
+            using (IExpressionCondition expression = db.GetExpressionCondition(condition))
+            {
+                string whereSql = expression.ToCondition(out DynamicParameters parameters);
+                Stack<string> updateFields = new Stack<string>();
+                foreach (PropertyInfo property in entity.GetType().GetProperties().Where(t => t.HasAttribute<UpdatePlusAttribute>()))
+                {
+                    object value = property.GetValue(entity);
+                    switch (property.PropertyType.Name)
+                    {
+                        case "Int32":
+                            if ((int)value == default) continue;
+                            break;
+                        case "Decimal":
+                            if ((decimal)value == default) continue;
+                            break;
+                        default:
+                            continue;
+                    }
+                    string fieldName = property.Name;
+                    parameters.Add($"@{fieldName}", value);
+                    updateFields.Push(fieldName);
+                }
+                string sql = $"UPDATE `{typeof(T).GetTableName()}` SET {string.Join(",", updateFields.Select(t => $"`{t}` = `{t}` + @{t}"))} {whereSql}";
+                return db.ExecuteNonQuery(CommandType.Text, sql, parameters);
+            }
         }
 
         public TValue? UpdatePlus<T, TValue>(Expression<Func<T, TValue>> field, TValue value, Expression<Func<T, bool>> condition)
             where T : class, new()
             where TValue : struct
         {
-            throw new NotImplementedException();
+            using (IExpressionCondition expression = db.GetExpressionCondition(condition))
+            {
+                string whereSql = expression.ToCondition(out DynamicParameters parameters);
+                string? fieldName = SchemaCache.GetColumnProperty(field).Name;
+                string? tableName = typeof(T).GetTableName();
+
+                parameters.Add("@Value", value);
+                string sql = $"UPDATE `{tableName}` SET `{fieldName}` = `{fieldName}` + @Value {whereSql};SELECT `{fieldName}` FROM `{tableName}` {whereSql}";
+                object result = db.ExecuteScalar(CommandType.Text, sql, parameters);
+                return (TValue?)result;
+            }
         }
 
         public int Update<T, TField1, TField2>(Expression<Func<T, TField1>> field1, TField1 value1, Expression<Func<T, TField2>> field2, TField2 value2, Expression<Func<T, bool>> condition) where T : class, new()

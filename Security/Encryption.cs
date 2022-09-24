@@ -17,7 +17,7 @@ namespace SP.StudioCore.Security
         /// <param name="str"></param>
         /// <param name="encoding">默认UTF-8</param>
         /// <returns>默认大写</returns>
-        public static string toMD5(string input, Encoding? encoding = null, int length = 32)
+        public static string toMD5(this string input, Encoding? encoding = null, int length = 32)
         {
             if (encoding == null) encoding = Encoding.UTF8;
             string md5 = toMD5(encoding.GetBytes(input ?? string.Empty));
@@ -66,6 +66,18 @@ namespace SP.StudioCore.Security
                 value.Push(MathHelper.HEX_62[num % MathHelper.HEX_62.Length]);
             }
             return string.Join(string.Empty, value);
+        }
+
+        /// <summary>
+        /// 加盐的MD5（8位）
+        /// </summary>
+        /// <param name="str">原文</param>
+        /// <param name="slat">加盐字符串</param>
+        /// <returns></returns>
+        public static string toMD5Short(this string str, string slat)
+        {
+            string md5 = toMD5($"{str}&{slat}");
+            return md5.toMD5Short();
         }
 
         /// <summary>

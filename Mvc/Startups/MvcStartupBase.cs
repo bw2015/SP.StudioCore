@@ -25,10 +25,11 @@ namespace SP.StudioCore.Mvc.Startups
 
         public virtual void ConfigureServices(IServiceCollection services)
         {
-            this.Configure(
-                services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>()
-                // 消息传递注意，此处注入不支持非web环境的消息传递
-                .AddScoped<MessageResult>());
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>()
+            // 消息传递注意，此处注入不支持非web环境的消息传递
+            .AddScoped<MessageResult>();
+
+            this.Configure(services);
         }
 
         public virtual void Configure(IApplicationBuilder app, IWebHostEnvironment env)

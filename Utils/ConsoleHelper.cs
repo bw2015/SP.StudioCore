@@ -106,7 +106,21 @@ namespace SP.StudioCore.Utils
                 Console.SetCursorPosition(0, Console.CursorTop - 1);
                 Console.WriteLine(context);
             }
+        }
 
+        /// <summary>
+        /// 显示错误信息
+        /// </summary>
+        /// <param name="message"></param>
+        public static void Error(string message)
+        {
+            WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {message}", ConsoleColor.Red);
+        }
+
+        public static void Error(string message, string details)
+        {
+            WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {message}", ConsoleColor.Red);
+            WriteLine(details, ConsoleColor.DarkRed);
         }
     }
 }

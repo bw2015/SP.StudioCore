@@ -469,7 +469,7 @@ namespace SP.StudioCore.Web
         }
 
         /// <summary>
-        /// 获取当前的时间戳（毫秒，GTM+0）
+        /// 获取当前的时间戳（毫秒，GTM+0） 13位
         /// </summary>
         /// <param name="time"></param>
         /// <returns></returns>

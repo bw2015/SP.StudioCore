@@ -69,14 +69,14 @@ namespace SP.StudioCore.Security
         }
 
         /// <summary>
-        /// 加盐的MD5短码
+        /// 加盐的MD5（8位）
         /// </summary>
-        /// <param name="source"></param>
-        /// <param name="slat"></param>
+        /// <param name="str">原文</param>
+        /// <param name="slat">加盐字符串</param>
         /// <returns></returns>
-        public static string toMD5Short(this string source, string slat)
+        public static string toMD5Short(this string str, string slat)
         {
-            string md5 = toMD5(source + slat);
+            string md5 = toMD5($"{str}&{slat}");
             return md5.toMD5Short();
         }
 

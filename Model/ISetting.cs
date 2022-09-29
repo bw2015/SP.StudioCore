@@ -3,6 +3,7 @@ using SP.StudioCore.Enums;
 using SP.StudioCore.Json;
 using SP.StudioCore.Types;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -94,6 +95,18 @@ namespace SP.StudioCore.Model
                             {
                                 result = value.ToEnum(property.PropertyType);
                             }
+                            // 字典类型
+                            else if (property.PropertyType.IsBaseType<IDictionary>())
+                            {
+                                try
+                                {
+                                    result = JsonConvert.DeserializeObject(value, property.PropertyType);
+                                }
+                                catch
+                                {
+                                    result = Activator.CreateInstance(property.PropertyType);
+                                }
+                            }
                             else
                             {
                                 result = value.GetValue(property.PropertyType);
@@ -118,34 +131,43 @@ namespace SP.StudioCore.Model
             foreach (PropertyInfo property in this.GetType().GetProperties())
             {
                 if (!property.CanWrite || property.HasAttribute<IgnoreAttribute>()) continue;
-                object? value = property.GetValue(this, null);
-                if (value != null)
-                {
-                    switch (property.PropertyType.Name)
-                    {
-                        case "Int32[]":
-                            value = string.Join(",", (int[])value);
-                            break;
-                        case "String[]":
-                            value = string.Join(",", (string[])value);
-                            break;
-                        default:
-                            if (property.PropertyType.IsArray)
-                            {
-                                System.Array array = (System.Array)value;
-                                string[] arrayValue = new string[array.Length];
-                                for (int i = 0; i < array.Length; i++)
-                                {
-                                    arrayValue[i] = array.GetValue(i)?.ToString() ?? string.Empty;
-                                }
-                                value = string.Join(",", arrayValue);
-                            }
-                            break;
-                    }
-                }
-                list.Add(string.Format("{0}={1}", property.Name, value == null ? "" : HttpUtility.UrlEncode(value.ToString())));
+                string value = this.GetValue(property);
+                list.Add(string.Format("{0}={1}", property.Name, HttpUtility.UrlEncode(value)));
             }
             return string.Join("&", list);
+        }
+
+        private string GetValue(PropertyInfo property)
+        {
+            object? value = property.GetValue(this, null);
+            if (value == null) return string.Empty;
+
+            switch (property.PropertyType.Name)
+            {
+                case "Int32[]":
+                    value = string.Join(",", (int[])value);
+                    break;
+                case "String[]":
+                    value = string.Join(",", (string[])value);
+                    break;
+                default:
+                    if (property.PropertyType.IsArray)
+                    {
+                        System.Array array = (System.Array)value;
+                        string[] arrayValue = new string[array.Length];
+                        for (int i = 0; i < array.Length; i++)
+                        {
+                            arrayValue[i] = array.GetValue(i)?.ToString() ?? string.Empty;
+                        }
+                        value = string.Join(",", arrayValue);
+                    }
+                    else if (property.PropertyType.IsBaseType<IDictionary>())
+                    {
+                        value = value == null ? "" : JsonConvert.SerializeObject(value);
+                    }
+                    break;
+            }
+            return value.ToString() ?? string.Empty;
         }
 
         /// <summary>
@@ -173,13 +195,7 @@ namespace SP.StudioCore.Model
         /// <returns></returns>
         public virtual object ToSettingObject()
         {
-            return this.GetType().GetProperties().Where(t => t.HasAttribute<DescriptionAttribute>()).Select(t => new
-            {
-                t.Name,
-                Value = t.GetValue(this, null),
-                Type = t.PropertyType.FullName,
-                t.GetAttribute<DescriptionAttribute>()?.Description
-            });
+            return this.ToSettingObject(t => t.HasAttribute<DescriptionAttribute>());
         }
 
         /// <summary>
@@ -198,12 +214,18 @@ namespace SP.StudioCore.Model
         /// <returns></returns>
         public virtual object ToSettingObject(Func<PropertyInfo, bool> where)
         {
-            return this.GetType().GetProperties().Where(where).Select(t => new
+            return this.GetType().GetProperties().Where(where).Select(t =>
             {
-                t.Name,
-                Value = t.GetValue(this, null),
-                Type = t.PropertyType.FullName,
-                t.GetAttribute<DescriptionAttribute>()?.Description
+                string type = t.PropertyType.FullName ?? string.Empty;
+                string value = this.GetValue(t);
+
+                return new
+                {
+                    t.Name,
+                    Value = value,
+                    Type = type,
+                    t.GetAttribute<DescriptionAttribute>()?.Description
+                };
             });
         }
 

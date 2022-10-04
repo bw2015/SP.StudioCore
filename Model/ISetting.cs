@@ -76,6 +76,9 @@ namespace SP.StudioCore.Model
                         case "Guid":
                             result = value.GetValue<Guid>();
                             break;
+                        case nameof(TimeSpan):
+                            result = value.GetValue<TimeSpan>();
+                            break;
                         default:
                             if (property.PropertyType.IsArray)
                             {

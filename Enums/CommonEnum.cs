@@ -130,9 +130,56 @@ namespace SP.StudioCore.Enums
         [Description("金币"), CurrencyExchange(1)]
         COIN = 15,
         [Description("港币"), CurrencyExchange(0.82)]
-        HKD,
+        HKD = 16,
         [Description("USDT"),CurrencyExchange(7)]
-        USDT
+        USDT = 17,
+        [Description("新加坡元"), CurrencyExchange(5)]
+        SGD = 18,
+        /// <summary>
+        /// 英镑
+        /// </summary>
+        [Description("英镑"), CurrencyExchange(5)]
+        GBP = 19,
+        /// <summary>
+        /// 比特币
+        /// </summary>
+        [Description("比特币"), CurrencyExchange(135699.07)]
+        BTC = 20,
+        /// <summary>
+        /// 澳元
+        /// </summary>
+        [Description("澳元"), CurrencyExchange(4.67)]
+        AUD = 21,
+        /// <summary>
+        /// 加拿大元
+        /// </summary>
+        [Description("加拿大元"), CurrencyExchange(5.25)]
+        CAD = 22,
+        /// <summary>
+        /// 埃及镑
+        /// </summary>
+        [Description("埃及镑"), CurrencyExchange(0.36)]
+        EGP = 23,
+        /// <summary>
+        /// 阿曼里亚尔
+        /// </summary>
+        [Description("阿曼里亚尔"), CurrencyExchange(18.51)]
+        OMR = 24,
+        /// <summary>
+        /// 阿尔及利亚第纳尔
+        /// </summary>
+        [Description("阿尔及利亚第纳尔"), CurrencyExchange(0.051)]
+        DZD = 25,
+        /// <summary>
+        /// 澳门元
+        /// </summary>
+        [Description("澳门元"), CurrencyExchange(0.88)]
+        MOP = 26,
+        /// <summary>
+        /// 阿联酋迪拉姆
+        /// </summary>
+        [Description("阿联酋迪拉姆"), CurrencyExchange(1.94)]
+        AED = 27
     }
 
     /// <summary>

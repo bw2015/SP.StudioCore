@@ -98,6 +98,8 @@ namespace SP.StudioCore.Web
             return sum % 10;
         }
 
+
+
         /// <summary>
         /// 验证校验位
         /// </summary>
@@ -121,6 +123,18 @@ namespace SP.StudioCore.Web
             if (string.IsNullOrEmpty(username)) return false;
             Regex regex = new Regex(@$"^[a-zA-Z0-9_\-]{{{min},{max}}}$");
             return regex.IsMatch(username);
+        }
+
+        /// <summary>
+        /// 判断是否正确域名
+        /// </summary>
+        /// <param name="domain"></param>
+        /// <returns></returns>
+        public static bool IsDomain(string domain)
+        {
+            if (string.IsNullOrWhiteSpace(domain)) return false;
+            Regex regex = new Regex(@$"^(?=^.{3,255}$)(http(s)?:\/\/)?(www\.)?[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+(:\d+)*(\/\w+\.\w+)*$");
+            return regex.IsMatch(domain);
         }
 
         /// <summary>

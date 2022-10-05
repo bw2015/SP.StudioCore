@@ -145,6 +145,16 @@ namespace SP.StudioCore.Types
                                 obj = new DateTime(1900, 1, 1);
                             }
                             break;
+                        case nameof(TimeSpan):
+                            if (TimeSpan.TryParse((string)value, out TimeSpan timeSpan))
+                            {
+                                obj = timeSpan;
+                            }
+                            else
+                            {
+                                obj = new TimeSpan();
+                            }
+                            break;
                         case "Int32[]":
                         case "System.Int32[]":
                             obj = ((string)value).GetArray<int>().ToArray();

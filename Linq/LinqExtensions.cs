@@ -45,7 +45,7 @@ namespace SP.StudioCore.Linq
         public static IQueryable<T> Where<T>(this IQueryable<T> list, object value, Expression<Func<T, bool>> predicate)
         {
             if (value == null) return list;
-            bool isValue = false;
+            bool isValue = true;
             switch (value.GetType().Name)
             {
                 case "String":

@@ -125,6 +125,9 @@ namespace SP.StudioCore.Enums
         MYR = 12,
         [Description("千越南盾"), CurrencyExchange(0.3)]
         KVND = 13,
+        /// <summary>
+        /// 千印尼盾
+        /// </summary>
         [Description("千印尼盾"), CurrencyExchange(0.47)]
         KIDR = 14,
         [Description("金币"), CurrencyExchange(1)]
@@ -179,7 +182,136 @@ namespace SP.StudioCore.Enums
         /// 阿联酋迪拉姆
         /// </summary>
         [Description("阿联酋迪拉姆"), CurrencyExchange(1.94)]
-        AED = 27
+        AED = 27,
+        /// <summary>
+        /// 孟加拉国塔卡
+        /// </summary>
+        [Description("孟加拉国塔卡")]
+        BDT = 28,
+        /// <summary>
+        /// 汶莱元
+        /// </summary>
+        BND = 29,
+        /// <summary>
+        /// 巴西雷亚尔
+        /// </summary>
+        [Description("巴西雷亚尔")]
+        BRL = 30,
+        /// <summary>
+        /// 瑞士法郎
+        /// </summary>
+        [Description("瑞士法郎")]
+        CHF = 31,
+        /// <summary>
+        /// 哥伦比亚比索
+        /// </summary>
+        [Description("哥伦比亚比索")]
+        COP = 32,
+        /// <summary>
+        /// 哈萨克坦吉
+        /// </summary>
+        [Description("哈萨克坦吉")]
+        KZT = 33,
+        /// <summary>
+        /// 千柬埔寨瑞尔
+        /// </summary>
+        [Description("千柬埔寨瑞尔")]
+        KKHR = 34,
+        /// <summary>
+        /// 柬埔寨老挝基普
+        /// </summary>
+        [Description("柬埔寨老挝基普")]
+        LAK = 35,
+        /// <summary>
+        /// 千柬埔寨老挝基普
+        /// </summary>
+        [Description("千柬埔寨老挝基普")]
+        KLAK = 36,
+        /// <summary>
+        /// 斯里兰卡卢比
+        /// </summary>
+        [Description("斯里兰卡卢比")]
+        LKR = 37,
+        /// <summary>
+        /// 缅甸元
+        /// </summary>
+        [Description("缅甸元")]
+        MMK = 38,
+        /// <summary>
+        /// 千缅甸元
+        /// </summary>
+        [Description("千缅甸元")]
+        KMMK = 39,
+        /// <summary>
+        /// 墨西哥比索
+        /// </summary>
+        [Description("墨西哥比索")]
+        MXN = 40,
+        /// <summary>
+        /// 蒙古图格里克
+        /// </summary>
+        [Description("蒙古图格里克")]
+        MNT = 41,
+        /// <summary>
+        /// 挪威克朗
+        /// </summary>
+        [Description("挪威克朗")]
+        NOK = 42,
+        /// <summary>
+        /// 新西兰元
+        /// </summary>
+        [Description("新西兰元")]
+        NZD = 43,
+        /// <summary>
+        /// 尼泊尔卢比
+        /// </summary>
+        [Description("尼泊尔卢比")]
+        NPR = 44,
+        /// <summary>
+        /// 奈及利亚奈拉
+        /// </summary>
+        [Description("奈及利亚奈拉")]
+        NGN = 45,
+        /// <summary>
+        /// 巴基斯坦卢比
+        /// </summary>
+        [Description("巴基斯坦卢比")]
+        PKR = 46,
+        /// <summary>
+        /// 秘鲁新索尔
+        /// </summary>
+        [Description("秘鲁新索尔")]
+        PEN = 47,
+        /// <summary>
+        /// 瑞典克朗
+        /// </summary>
+        [Description("瑞典克朗")]
+        SEK = 48,
+        /// <summary>
+        /// 土耳其里拉
+        /// </summary>
+        [Description("土耳其里拉")]
+        TRY = 49,
+        /// <summary>
+        /// 突尼斯第纳尔
+        /// </summary>
+        [Description("突尼斯第纳尔")]
+        TND = 50,
+        /// <summary>
+        /// 乌克兰赫夫纳
+        /// </summary>
+        [Description("乌克兰赫夫纳")]
+        UAH = 51,
+        /// <summary>
+        /// 南非兰特
+        /// </summary>
+        [Description("南非兰特")]
+        ZAR = 52,
+        /// <summary>
+        /// 津巴布韦元
+        /// </summary>
+        [Description("津巴布韦元")]
+        ZWD = 53
     }
 
     /// <summary>

@@ -11,6 +11,7 @@ using System.Data;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Web;
 
 namespace SP.StudioCore.Model
@@ -78,6 +79,9 @@ namespace SP.StudioCore.Model
                             break;
                         case nameof(TimeSpan):
                             result = value.GetValue<TimeSpan>();
+                            break;
+                        case nameof(Regex):
+                            result = value.GetValue<Regex>();
                             break;
                         default:
                             if (property.PropertyType.IsArray)

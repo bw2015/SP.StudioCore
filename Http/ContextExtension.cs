@@ -202,9 +202,11 @@ namespace SP.StudioCore.Http
         public static string GetLog(this HttpContext context)
         {
             if (context == null) return null;
-            Dictionary<string, object> data = new Dictionary<string, object>();
-            data.Add("URL", context.Request.Host + context.Request.Path.ToString());
-            data.Add("Headers", context.Request.Headers.Keys.ToDictionary(t => t, t => context.Request.Headers[t].ToString()));
+            Dictionary<string, object> data = new Dictionary<string, object>
+            {
+                { "URL", context.Request.Host + context.Request.Path.ToString() },
+                { "Headers", context.Request.Headers.Keys.ToDictionary(t => t, t => context.Request.Headers[t].ToString()) }
+            };
             if (context.Request.HasFormContentType)
             {
                 data.Add("Data", context.Request.Form.Keys.ToDictionary(t => t, t => context.Request.Form[t].ToString()));

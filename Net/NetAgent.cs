@@ -264,7 +264,8 @@ namespace SP.StudioCore.Net
             string? strResult = null;
             try
             {
-                byte[] data = wc.DownloadData(RequestConfig.GetUrl(url));
+                url = RequestConfig.GetUrl(url);
+                byte[] data = wc.DownloadData(url);
                 if (wc.ResponseHeaders?[HttpResponseHeader.ContentEncoding] == "gzip")
                 {
                     data = UnGZip(data);

@@ -43,7 +43,6 @@ namespace SP.StudioCore.Model
                 this.menu.Add(new AdminMenu(item, menuOnly, getMenuName, permission));
             }
         }
-
         public AdminMenu(string? name, string? id, string? href, string? icon, bool isChecked, List<AdminMenu>? menu)
         {
             Name = name;

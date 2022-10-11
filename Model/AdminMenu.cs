@@ -43,23 +43,6 @@ namespace SP.StudioCore.Model
                 this.menu.Add(new AdminMenu(item, menuOnly, getMenuName, permission));
             }
         }
-        public AdminMenu(XElement root)
-        {
-            this.ID = root.GetAttributeValue("ID");
-            this.Href = root.GetAttributeValue("href");
-            this.Icon = root.GetAttributeValue("icon");
-            string? name = root.GetAttributeValue("name");
-         
-            this.Name = name;
-            this.menu = new List<AdminMenu>();
-            foreach (XElement item in root.Elements())
-            {
-                // 如果只输出菜单
-                if ( item.Name.ToString() != "menu") continue;
-                this.menu.Add(new AdminMenu(item));
-            }
-        }
-
         public AdminMenu(string? name, string? id, string? href, string? icon, bool isChecked, List<AdminMenu>? menu)
         {
             Name = name;

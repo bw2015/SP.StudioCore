@@ -33,7 +33,7 @@ namespace SP.StudioCore.Web.IPRule
                 }
                 if (!string.IsNullOrEmpty(ip)) break;
             }
-            return ip ?? IPAgent.NO_IP;
+            return ip ?? context.Connection.RemoteIpAddress?.AddressFamily.ToString() ?? IPAgent.NO_IP;
         }
     }
 }

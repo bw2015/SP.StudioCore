@@ -42,16 +42,10 @@ namespace SP.StudioCore.Linq
             return list.Where(predicate);
         }
 
-        public static IQueryable<T> Where<T, TValue>(this IQueryable<T> list, TValue? value, Expression<Func<T, bool>> predicate) where TValue : struct
-        {
-            if (!value.HasValue) return list;
-            return list.Where(predicate);
-        }
-
         public static IQueryable<T> Where<T>(this IQueryable<T> list, object value, Expression<Func<T, bool>> predicate)
         {
             if (value == null) return list;
-            bool isValue = false;
+            bool isValue = true;
             switch (value.GetType().Name)
             {
                 case "String":

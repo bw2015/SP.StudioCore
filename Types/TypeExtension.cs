@@ -162,8 +162,18 @@ namespace SP.StudioCore.Types
                         case "String[]":
                             obj = ((string)value).GetArray<string>().ToArray();
                             break;
-                        case "String":
+                        case nameof(String):
                             obj = str;
+                            break;
+                        case nameof(Regex):
+                            try
+                            {
+                                obj = new Regex(str);
+                            }
+                            catch
+                            {
+                                obj = null;
+                            }
                             break;
                         default:
                             if (type.IsBaseType<ISetting>())

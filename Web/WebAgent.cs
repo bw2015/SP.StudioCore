@@ -126,14 +126,14 @@ namespace SP.StudioCore.Web
         }
 
         /// <summary>
-        /// 判断是否正确域名
+        /// 判断是否正确域名（必须是小写）
         /// </summary>
         /// <param name="domain"></param>
         /// <returns></returns>
         public static bool IsDomain(string domain)
         {
             if (string.IsNullOrWhiteSpace(domain)) return false;
-            Regex regex = new Regex(@$"^(?=^.{3,255}$)(http(s)?:\/\/)?(www\.)?[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+(:\d+)*(\/\w+\.\w+)*$");
+            Regex regex = new Regex(@"^[0-9a-z\.]{4,}$");
             return regex.IsMatch(domain);
         }
 

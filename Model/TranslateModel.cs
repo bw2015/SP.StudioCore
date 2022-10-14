@@ -33,6 +33,15 @@ namespace SP.StudioCore.Model
             }
         }
 
+        public TranslateModel(Dictionary<Language, string> data)
+        {
+            this.Clear();
+            foreach (var item in data)
+            {
+                this.Add(item.Key, item.Value);
+            }
+        }
+
         /// <summary>
         /// 全部语种的默认值（只写入英文和中文）
         /// </summary>

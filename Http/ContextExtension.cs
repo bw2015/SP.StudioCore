@@ -195,7 +195,7 @@ namespace SP.StudioCore.Http
 
 
         /// <summary>
-        /// 获取日志数据
+        /// 获取日志数据（JSON格式）
         /// </summary>
         /// <param name="context"></param>
         /// <returns></returns>

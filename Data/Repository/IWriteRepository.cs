@@ -85,9 +85,9 @@ namespace SP.StudioCore.Data.Repository
         /// <typeparam name="TValue"></typeparam>
         /// <param name="field"></param>
         /// <param name="value"></param>
-        /// <param name="condition"></param>
+        /// <param name="updateCondition"></param>
         /// <returns></returns>
-        TValue? UpdatePlus<T, TValue>(Expression<Func<T, TValue>> field, TValue value, Expression<Func<T, bool>> condition) where T : class, new() where TValue : struct;
+        TValue? UpdatePlus<T, TValue>(Expression<Func<T, TValue>> field, TValue value, Expression<Func<T, bool>> updateCondition, Expression<Func<T, bool>>? condition = null) where T : class, new() where TValue : struct;
 
         /// <summary>
         /// 批量修改 IN 方式

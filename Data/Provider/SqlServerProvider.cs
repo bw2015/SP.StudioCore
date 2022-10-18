@@ -522,13 +522,13 @@ namespace SP.StudioCore.Data.Provider
         /// <typeparam name="TValue"></typeparam>
         /// <param name="field"></param>
         /// <param name="value"></param>
-        /// <param name="condition"></param>
+        /// <param name="updateCondition"></param>
         /// <returns></returns>
-        public TValue? UpdatePlus<T, TValue>(Expression<Func<T, TValue>> field, TValue value, Expression<Func<T, bool>> condition)
+        public TValue? UpdatePlus<T, TValue>(Expression<Func<T, TValue>> field, TValue value, Expression<Func<T, bool>> updateCondition, Expression<Func<T, bool>>? condition = null)
             where T : class, new()
             where TValue : struct
         {
-            using (IExpressionCondition expression = db.GetExpressionCondition(condition))
+            using (IExpressionCondition expression = db.GetExpressionCondition(updateCondition))
             {
                 string whereSql = expression.ToCondition(out DynamicParameters parameters);
                 string? fieldName = SchemaCache.GetColumnProperty(field).Name;

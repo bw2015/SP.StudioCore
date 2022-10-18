@@ -53,6 +53,12 @@ namespace SP.StudioCore.Model
             this.Add(Language.ENG, value);
         }
 
+        public TranslateModel(Language language, string value) : this()
+        {
+            this.Clear();
+            this.Add(language, value);
+        }
+
         /// <summary>
         /// 获取语言内容（本身语种/英文/中文）
         /// </summary>
@@ -77,7 +83,22 @@ namespace SP.StudioCore.Model
         }
 
         /// <summary>
-        /// JSON格式输出
+        /// 写入语种内容
+        /// </summary>
+        public void Set(Language language, string content)
+        {
+            if (this.ContainsKey(language))
+            {
+                this[language] = content;
+            }
+            else
+            {
+                this.Add(language, content);
+            }
+        }
+
+        /// <summary>
+        /// JSON格式输出（可被反序列化）
         /// </summary>
         /// <returns></returns>
         public override string ToString()
@@ -233,5 +254,6 @@ namespace SP.StudioCore.Model
             }
             return this;
         }
+
     }
 }

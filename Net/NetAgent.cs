@@ -10,6 +10,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Security;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -186,7 +187,9 @@ namespace SP.StudioCore.Net
                     {
                         wc.Headers.Add(HttpRequestHeader.ContentType, "text/plain;charset=UTF-8");
                     }
-                    byte[] dataResult = wc.UploadData(RequestConfig.GetUrl(url), "POST", data);
+                    url = RequestConfig.GetUrl(url);
+                    // Console.WriteLine($"URL => {url}");
+                    byte[] dataResult = wc.UploadData(url, "POST", data);
                     strResult = encoding.GetString(dataResult);
                     wc.Headers.Remove("Content-Type");
                 }

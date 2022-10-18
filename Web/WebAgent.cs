@@ -518,6 +518,21 @@ namespace SP.StudioCore.Web
         {
             return GetTimestamps(timestamp + 1577808000000);
         }
+        /// <summary>
+        /// 获取年纪
+        /// </summary>
+        /// <param name="birth"></param>
+        /// <returns></returns>
+        public static int GetAge(DateTime birth)
+        {
+            DateTime now = DateTime.Now;
+            int age = now.Year - birth.Year;
+            if (now.Month < birth.Month || (now.Month == birth.Month && now.Day < birth.Day))
+            {
+                age--;
+            }
+            return age < 0 ? 0 : age;
+        }
 
         #endregion
 

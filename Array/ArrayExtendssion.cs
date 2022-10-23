@@ -44,10 +44,11 @@ namespace SP.StudioCore.Array
         /// <typeparam name="TKey"></typeparam>
         /// <typeparam name="TValue"></typeparam>
         /// <param name="data"></param>
+        /// <param name="urlEncode">是否进行URL转换</param>
         /// <returns></returns>
-        public static string ToQueryString<TKey, TValue>(this IEnumerable<KeyValuePair<TKey, TValue>> data)
+        public static string ToQueryString<TKey, TValue>(this IEnumerable<KeyValuePair<TKey, TValue>> data, bool urlEncode = false)
         {
-            return string.Join("&", data.Select(t => $"{t.Key}={t.Value}"));
+            return string.Join("&", data.Select(t => $"{t.Key}={ (t.Value == null ? string.Empty : (urlEncode ? t.Value.ToString() : HttpUtility.UrlEncode(t.Value.ToString()))) }"));
         }
 
         /// <summary>

@@ -190,6 +190,11 @@ namespace SP.StudioCore.Net
                     url = RequestConfig.GetUrl(url);
                     // Console.WriteLine($"URL => {url}");
                     byte[] dataResult = wc.UploadData(url, "POST", data);
+                    // 如果返回内容使用了gzip编码
+                    if (wc.ResponseHeaders?[HttpRequestHeader.ContentEncoding] == "gzip")
+                    {
+                        dataResult = UnGZip(dataResult);
+                    }
                     strResult = encoding.GetString(dataResult);
                     wc.Headers.Remove("Content-Type");
                 }

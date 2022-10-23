@@ -126,6 +126,7 @@
 
     <ItemGroup>
         <Folder Include="Libiary\ThoughtWorks.QRCode.Codec\" />
+        <Folder Include="Libiary\PusherServer\" />
         <Folder Include="MQ\RabbitMQ\" />
     </ItemGroup>
 

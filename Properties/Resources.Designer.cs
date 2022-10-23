@@ -79,6 +79,29 @@ namespace SP.StudioCore.Properties {
         }
         
         /// <summary>
+        ///   查找类似 &lt;root&gt;
+        ///  &lt;item code=&quot;103000&quot; bank=&quot;ABC&quot; /&gt;
+        ///  &lt;item code=&quot;103001&quot; bank=&quot;ABC&quot; /&gt;
+        ///  &lt;item code=&quot;103002&quot; bank=&quot;ABC&quot; /&gt;
+        ///  &lt;item code=&quot;103003&quot; bank=&quot;ABC&quot; /&gt;
+        ///  &lt;item code=&quot;103004&quot; bank=&quot;ABC&quot; /&gt;
+        ///  &lt;item code=&quot;103005&quot; bank=&quot;ABC&quot; /&gt;
+        ///  &lt;item code=&quot;103006&quot; bank=&quot;ABC&quot; /&gt;
+        ///  &lt;item code=&quot;103007&quot; bank=&quot;ABC&quot; /&gt;
+        ///  &lt;item code=&quot;103008&quot; bank=&quot;ABC&quot; /&gt;
+        ///  &lt;item code=&quot;103009&quot; bank=&quot;ABC&quot; /&gt;
+        ///  &lt;item code=&quot;103010&quot; bank=&quot;ABC&quot; /&gt;
+        ///  &lt;item code=&quot;103011&quot; bank=&quot;ABC&quot; /&gt;
+        ///  &lt;item code=&quot;103012&quot; bank=&quot;ABC&quot; /&gt;
+        ///  &lt;item code=&quot;103013&quot; b [字符串的其余部分被截断]&quot;; 的本地化字符串。
+        /// </summary>
+        internal static string Bank {
+            get {
+                return ResourceManager.GetString("Bank", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
         ///&lt;!--顶级域名列表--&gt;
         ///&lt;root&gt;

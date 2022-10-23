@@ -26,10 +26,12 @@ namespace SP.StudioCore.Mvc.Exceptions
         /// <param name="errorCode"></param>
         public ResultException(Enum errorCode, string? message = null)
         {
-            this.result = new Result(false, message ?? errorCode.GetDescription(), new
+            Dictionary<string, string> data = new Dictionary<string, string>()
             {
-                Error = errorCode
-            });
+                {errorCode.GetType().Name, errorCode.ToString() }
+            };
+
+            this.result = new Result(false, message ?? errorCode.GetDescription(), data);
         }
 
         public override string Message => this.result.ToString();

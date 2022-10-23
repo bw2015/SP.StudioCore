@@ -6,6 +6,7 @@ using SP.StudioCore.Enums;
 using SP.StudioCore.Model;
 using SP.StudioCore.Properties;
 using SP.StudioCore.Types;
+using SP.StudioCore.Xml;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -105,7 +106,7 @@ namespace SP.StudioCore.Web
         /// </summary>
         public static bool IsValidNumver(string input)
         {
-            var orderPre17 = input.Substring(0, input.Length - 1);
+            var orderPre17 = input[..^1];
             int validNumber = GetValidNumber(orderPre17);
             return input.Last() == validNumber.ToString().First();
         }
@@ -359,6 +360,37 @@ namespace SP.StudioCore.Web
         }
 
         /// <summary>
+        /// 获取一个指定长度的数字（非0开头）
+        /// </summary>
+        /// <param name="length"></param>
+        /// <returns></returns>
+        public static string GetRandomNumber(int length)
+        {
+            string number = "0123456789";
+            List<char> list = new List<char>();
+            for (int i = 0; i < length; i++)
+            {
+                string random = Guid.NewGuid().ToString("N");
+                foreach (char rnd in random)
+                {
+                    if (number.Contains(rnd))
+                    {
+                        if (!list.Any())
+                        {
+                            if (rnd != '0') { list.Add(rnd); }
+                        }
+                        else
+                        {
+                            list.Add(rnd);
+                        }
+                    }
+                    if (list.Count >= length) return string.Join("", list);
+                }
+            }
+            return string.Join("", list);
+        }
+
+        /// <summary>
         /// 判断是否是英文和数字组成的字符串
         /// </summary>
         /// <param name="input"></param>
@@ -571,6 +603,65 @@ namespace SP.StudioCore.Web
                 }
             }
             return null;
+        }
+
+        #endregion
+
+        #region ========  银行卡处理  ========
+
+        /// <summary>
+        /// 判断银行卡号是否正确
+        /// </summary>
+        /// <param name="input">银行卡号</param>
+        /// <returns></returns>
+        public static bool IsBankAccount(string input)
+        {
+            if (!Regex.IsMatch(input, @"^\d{6,}$")) return false;
+            int[] cardArr = new int[input.Length];
+            for (int i = 0; i < cardArr.Length; i++)
+            {
+                cardArr[i] = int.Parse(input[i].ToString());
+            }
+
+            for (int i = cardArr.Length - 2; i >= 0; i -= 2)
+            {
+                cardArr[i] <<= 1;
+                cardArr[i] = cardArr[i] / 10 + cardArr[i] % 10;
+            }
+
+            int sum = 0;
+            for (int i = 0; i < cardArr.Length; i++)
+            {
+                sum += cardArr[i];
+            }
+            return sum % 10 == 0;
+        }
+
+        private static Dictionary<string, BankType> _bankType;
+
+        /// <summary>
+        /// 获取中国的银行卡类型
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public static BankType GetBankType(string input)
+        {
+            if (!Regex.IsMatch(input, @"^\d{6,}$")) return 0;
+            input = input[..6];
+            if (_bankType == null)
+            {
+                _bankType = new Dictionary<string, BankType>();
+                XElement root = XElement.Parse(Resources.Bank);
+                foreach (XElement item in root.Elements())
+                {
+                    string? code = item.GetAttributeValue("code");
+                    string? bank = item.GetAttributeValue("bank");
+                    if (string.IsNullOrEmpty(code) || string.IsNullOrEmpty(bank) || _bankType.ContainsKey(code)) continue;
+                    _bankType.Add(code, code.ToEnum<BankType>());
+                }
+            }
+            if (_bankType.ContainsKey(input)) return _bankType[input];
+            return 0;
         }
 
         #endregion

@@ -76,7 +76,7 @@ namespace SP.StudioCore.Net
             wc.Headers.Add("Accept", "*/*");
             if (!string.IsNullOrEmpty(url))
             {
-                if (url.Contains('?')) url = url.Substring(0, url.IndexOf('?'));
+                if (url.Contains('?')) url = url[..url.IndexOf('?')];
                 wc.Headers.Add("Referer", url);
             }
             wc.Headers.Add("Cookie", "");

@@ -53,8 +53,12 @@ namespace SP.StudioCore.Enums
         /// </summary>
         [Description("不支持")]
         NoSupport,
+        [Description("维护中")]
         Maintain,
-        USERLOCK
+        [Description("当前账号被锁定")]
+        UserLock,
+        [Description("未绑定谷歌验证码")]
+        SecretKey
     }
 
     /// <summary>
@@ -312,6 +316,52 @@ namespace SP.StudioCore.Enums
         /// </summary>
         [Description("津巴布韦元")]
         ZWD = 53
+    }
+
+    /// <summary>
+    /// 区块链网络类型
+    /// </summary>
+    public enum ChainType : byte
+    {
+        /// <summary>
+        /// 波场
+        /// </summary>
+        [Description("波场")]
+        TRC = 1,
+        /// <summary>
+        /// 以太坊
+        /// </summary>
+        [Description("以太坊")]
+        ERC = 2,
+        /// <summary>
+        /// 币安
+        /// </summary>
+        [Description("币安")]
+        BSC = 3,
+    }
+
+    /// <summary>
+    /// 银行卡的类型
+    /// </summary>
+    public enum BankCardType : byte
+    {
+        /// <summary>
+        /// 储蓄卡/借记卡
+        /// </summary>
+        [Description("储蓄卡")]
+        DC = 1,
+        /// <summary>
+        /// 信用卡/借记卡
+        /// </summary>
+        [Description("信用卡")]
+        CC = 2,
+        /// <summary>
+        /// 准贷记卡
+        /// 准贷记卡(Secured Credit Card)准贷记卡指持卡人在银行存一定备用金，不足支付时在信用额度内透支
+        /// </summary>
+        [Description("准贷记卡")]
+        SCC = 3,
+
     }
 
     /// <summary>

@@ -8,7 +8,7 @@
         <StartupObject />
         <SignAssembly>false</SignAssembly>
         <Nullable>enable</Nullable>
-        <Version>1.0.8</Version>
+        <Version>6.0.2</Version>
         <Authors>betwin2015</Authors>
         <Company>BetWin</Company>
         <PackageProjectUrl>https://github.com/bw2015/SP.StudioCore</PackageProjectUrl>
@@ -72,7 +72,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Aliyun.OSS.SDK.NetCore" Version="2.13.0" />
         <PackageReference Include="BouncyCastle.NetCore" Version="1.9.0" />
         <PackageReference Include="Dapper" Version="2.0.123" />
         <PackageReference Include="Google.Protobuf" Version="3.21.5" />
@@ -88,18 +87,21 @@
         <PackageReference Include="MySql.Data" Version="8.0.30" />
         <PackageReference Include="MySql.EntityFrameworkCore" Version="6.0.4" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-        <PackageReference Include="PinYinConverterCore" Version="1.0.2" />
         <PackageReference Include="RabbitMQ.Client" Version="6.4.0" />
-        <PackageReference Include="SkiaSharp.QrCode" Version="0.6.0" />
+        <PackageReference Include="SkiaSharp" Version="2.88.3" />
         <!--<PackageReference Include="Simple.Elasticsearch" Version="1.0.2" />-->
         <PackageReference Include="StackExchange.Redis" Version="2.6.48" />
         <PackageReference Include="System.Composition" Version="6.0.0" />
-        <PackageReference Include="Snowflake.Core" Version="2.0.0" />
         <PackageReference Include="System.Drawing.Common" Version="6.0.0" />
         <PackageReference Include="System.Resources.Extensions" Version="6.0.0" />
     </ItemGroup>
 
     <ItemGroup>
+        <Compile Update="Libiary\Aliyun.OSS\Properties\Resources.Designer.cs">
+          <DesignTime>True</DesignTime>
+          <AutoGen>True</AutoGen>
+          <DependentUpon>Resources.resx</DependentUpon>
+        </Compile>
         <Compile Update="Libiary\ThoughtWorks.QRCode.Codec\Properties\Resources.Designer.cs">
           <DesignTime>True</DesignTime>
           <AutoGen>True</AutoGen>
@@ -113,6 +115,10 @@
     </ItemGroup>
 
     <ItemGroup>
+        <EmbeddedResource Update="Libiary\Aliyun.OSS\Properties\Resources.resx">
+          <Generator>ResXFileCodeGenerator</Generator>
+          <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+        </EmbeddedResource>
         <EmbeddedResource Update="Libiary\ThoughtWorks.QRCode.Codec\Properties\Resources.resx">
           <Generator>ResXFileCodeGenerator</Generator>
           <LastGenOutput>Resources.Designer.cs</LastGenOutput>

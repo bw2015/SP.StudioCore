@@ -65,6 +65,29 @@ namespace SP.StudioCore.Linq
             return list.Where(predicate);
         }
 
+        public static IEnumerable<T> Where<T>(this IEnumerable<T> list, object value, Func<T, bool> predicate)
+        {
+            if (value == null) return list;
+            bool isValue = true;
+            switch (value.GetType().Name)
+            {
+                case "String":
+                    isValue = !string.IsNullOrEmpty((string)value);
+                    break;
+                case "Int32":
+                    isValue = (int)value != 0;
+                    break;
+                case "Int64":
+                    isValue = (long)value != 0;
+                    break;
+                case "Byte":
+                    isValue = (byte)value != 0;
+                    break;
+            }
+            if (!isValue) return list;
+            return list.Where(predicate);
+        }
+
         /// <summary>
         /// 排序
         /// </summary>
@@ -120,7 +143,7 @@ namespace SP.StudioCore.Linq
         /// <returns></returns>
         public static Expression<Func<T, TKey>> ToKeySelector<T, TKey>(this string field)
         {
-            PropertyInfo property = typeof(T).GetProperty(field);
+            PropertyInfo? property = typeof(T).GetProperty(field);
             if (property == null) return null;
             ParameterExpression parameter = Expression.Parameter(typeof(T), "p");
             MemberExpression propertyAccess = Expression.MakeMemberAccess(parameter, property);
@@ -162,7 +185,7 @@ namespace SP.StudioCore.Linq
         {
             if (query == null)
             {
-                throw new ArgumentNullException("query");
+                throw new ArgumentNullException(nameof(query));
             }
             if (page <= 0) page = 1;
             if (limit <= 0) limit = 20;

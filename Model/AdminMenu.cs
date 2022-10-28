@@ -134,5 +134,26 @@ namespace SP.StudioCore.Model
                 }
             }
         }
+
+        /// <summary>
+        /// 获取权限列表
+        /// </summary>
+        /// <param name="root"></param>
+        /// <param name="filter">过滤器</param>
+        /// <returns></returns>
+        public static IEnumerable<string> GetPermissions(XElement root, Func<XElement, bool> filter)
+        {
+            foreach (XElement item in root.Elements())
+            {
+                string? id = item.GetAttributeValue("ID");
+                if(string.IsNullOrEmpty(id)) continue;
+                if (!filter(item)) continue;
+                if (!string.IsNullOrEmpty(id)) yield return id;
+                foreach (string itemId in GetPermissions(item, filter))
+                {
+                    yield return itemId;
+                }
+            }
+        }
     }
 }

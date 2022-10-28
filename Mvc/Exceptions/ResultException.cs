@@ -28,7 +28,8 @@ namespace SP.StudioCore.Mvc.Exceptions
         {
             Dictionary<string, string> data = new Dictionary<string, string>()
             {
-                {errorCode.GetType().Name, errorCode.ToString() }
+                { errorCode.GetType().Name, errorCode.ToString() },
+                { errorCode.GetType().FullName ?? "", errorCode.ToString() }
             };
 
             this.result = new Result(false, message ?? errorCode.GetDescription(), data);

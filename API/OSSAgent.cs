@@ -302,24 +302,24 @@ namespace SP.StudioCore.API
         /// EndPoint（地域节点）
         /// </summary>
         [Description("EndPoint")]
-        public string? endpoint { get; set; }
+        public string endpoint { get; set; }
 
         /// <summary>
         /// 授权账户（RAM管理内）
         /// </summary>
         [Description("授权账户")]
-        public string? accessKeyId { get; set; }
+        public string accessKeyId { get; set; }
 
         /// <summary>
         /// 授权密钥（RAM管理内）
         /// </summary>
         [Description("授权密钥")]
-        public string? accessKeySecret { get; set; }
+        public string accessKeySecret { get; set; }
 
         /// <summary>
         /// 存储对象名字（backet的名字）
         /// </summary>
         [Description("backetName")]
-        public string? bucketName { get; set; }
+        public string bucketName { get; set; }
     }
 }

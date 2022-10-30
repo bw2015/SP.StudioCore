@@ -45,12 +45,16 @@ namespace SP.StudioCore.Model
     public enum SettingCustomType
     {
         /// <summary>
-        /// 上传控件
+        /// 图片上传控件
         /// </summary>
-        Upload,
+        Image,
         /// <summary>
         /// 链接对象
         /// </summary>
-        Link
+        Link,
+        /// <summary>
+        /// 图标
+        /// </summary>
+        Ico
     }
 }

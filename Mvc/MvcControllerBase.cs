@@ -311,9 +311,14 @@ namespace SP.StudioCore.Mvc
         /// <param name="successMessage"></param>
         /// <param name="info">如果状态为成功需要输出的对象</param>
         /// <returns></returns>
-        protected virtual Result GetResultContent(bool success, string successMessage = "处理成功", object? info = null)
+        protected virtual Result GetResultContent(bool success, string? successMessage = null, object? info = null)
         {
-            if (success) return new Result(success, successMessage, info);
+            // 如果为空则从注入服务中查找语言翻译对象（找到调用的Controller方法）
+            if (string.IsNullOrEmpty(successMessage))
+            {
+
+            }
+            if (success) return new Result(success, successMessage ?? "处理成功", info);
             string? message = this.context.RequestServices.GetService<MessageResult>();
             if (string.IsNullOrEmpty(message)) message = "发生不可描述的错误";
             return new Result(false, message);
@@ -378,7 +383,7 @@ namespace SP.StudioCore.Mvc
             string resultData = this.GetResultContent(list, converter, data);
             return this.GetResultContent(resultData);
         }
-        
+
 
 
         /// <summary>
@@ -424,10 +429,10 @@ namespace SP.StudioCore.Mvc
                 }
             }
             return this.GetResultContent(string.Concat("{",
-                $"\"RecordCount\":{ list.Count() },",
+                $"\"RecordCount\":{list.Count()},",
                 $"\"PageIndex\":{this.PageIndex},",
                 $"\"PageSize\":{this.PageSize},",
-                $"\"data\":{ (data == null ? "null" : data.ToJson()) },",
+                $"\"data\":{(data == null ? "null" : data.ToJson())},",
                 $"\"list\":{json}",
                 "}"));
         }
@@ -477,10 +482,10 @@ namespace SP.StudioCore.Mvc
                 }
             }
             return string.Concat("{",
-                $"\"RecordCount\":{ recordCount },",
+                $"\"RecordCount\":{recordCount},",
                 $"\"PageIndex\":{this.PageIndex},",
                 $"\"PageSize\":{this.PageSize},",
-                $"\"data\":{ (data == null ? "null" : data.ToJson()) },",
+                $"\"data\":{(data == null ? "null" : data.ToJson())},",
                 $"\"list\":{json}",
                 "}");
         }
@@ -524,7 +529,7 @@ namespace SP.StudioCore.Mvc
             string json = convert(query).ToJson();
 
             return GetResultContent(string.Concat("{",
-               $"\"RecordCount\":{ recordCount },",
+               $"\"RecordCount\":{recordCount},",
                $"\"PageIndex\":{this.PageIndex},",
                $"\"PageSize\":{this.PageSize},",
                $"\"list\":{json}",

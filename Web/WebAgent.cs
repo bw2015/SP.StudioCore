@@ -5,6 +5,7 @@ using SP.StudioCore.Cache.Memory;
 using SP.StudioCore.Enums;
 using SP.StudioCore.Model;
 using SP.StudioCore.Properties;
+using SP.StudioCore.Security;
 using SP.StudioCore.Types;
 using SP.StudioCore.Xml;
 using System;
@@ -406,6 +407,16 @@ namespace SP.StudioCore.Web
         }
 
         /// <summary>
+        /// 产生一个随机的字符串
+        /// </summary>
+        /// <param name="length"></param>
+        public static string GetRandomString(int length)
+        {
+            string rnd = Guid.NewGuid().ToString("N").toMD5Short(Guid.NewGuid().ToString("N"));
+            return rnd.Substring(0, length);
+        }
+
+        /// <summary>
         /// 判断是否是英文和数字组成的字符串
         /// </summary>
         /// <param name="input"></param>
@@ -678,6 +689,42 @@ namespace SP.StudioCore.Web
             if (_bankType.ContainsKey(input)) return _bankType[input];
             return 0;
         }
+
+
+        #endregion
+
+        #region ========  中国日历处理  ========
+
+        /// <summary>
+        /// 得到年份的生肖
+        /// </summary>
+        /// <param name="year">农历的年份</param>
+        /// <returns></returns>
+        public static Zodiac GetZodiac(this int year)
+        {
+            return (Zodiac)((year - 4) % 12);
+        }
+
+        /// <summary>
+        /// 得到年份的天干
+        /// </summary>
+        /// <param name="year">农历的年份</param>
+        public static CelestialStems GetCelestialStem(this int year)
+        {
+            return (CelestialStems)((year - 4) % 10);
+        }
+
+        /// <summary>
+        /// 得到年份的地支
+        /// </summary>
+        /// <param name="year"></param>
+        /// <returns></returns>
+        public static TerrestrialBranches GetTerrestrialBranche(this int year)
+        {
+            return (TerrestrialBranches)((year - 4) % 12);
+        }
+
+
 
         #endregion
     }

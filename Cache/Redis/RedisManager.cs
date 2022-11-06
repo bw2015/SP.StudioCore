@@ -1,4 +1,5 @@
-﻿using StackExchange.Redis;
+﻿using SP.StudioCore.Array;
+using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -7,7 +8,7 @@ namespace SP.StudioCore.Cache.Redis
 {
     public class RedisManager
     {
-        private static ConnectionMultiplexer instance;
+        private static Dictionary<string, ConnectionMultiplexer> instance;
         private static readonly object locker = new object();
 
 
@@ -15,24 +16,27 @@ namespace SP.StudioCore.Cache.Redis
         {
             lock (locker)
             {
-                if (instance == null)
+                if (instance == null) instance = new Dictionary<string, ConnectionMultiplexer>();
+
+                if (!instance.ContainsKey(connection))
                 {
                     ConfigurationOptions opt = ConfigurationOptions.Parse(connection);
                     opt.SyncTimeout = int.MaxValue;
                     opt.AllowAdmin = true;
-                    instance = ConnectionMultiplexer.Connect(opt);
+                    instance.Add(connection, ConnectionMultiplexer.Connect(opt));
                 }
+
             }
         }
 
-        public ConnectionMultiplexer Instance()
+        public ConnectionMultiplexer Instance(string connection)
         {
-            return instance;
+            return instance.Get(connection);
         }
 
-        public virtual IDatabase NewExecutor(int db = -1)
+        public virtual IDatabase NewExecutor(string connection, int db = -1)
         {
-            return this.Instance().GetDatabase(db);
+            return this.Instance(connection).GetDatabase(db);
         }
     }
 }

@@ -48,7 +48,7 @@ namespace SP.StudioCore.Array
         /// <returns></returns>
         public static string ToQueryString<TKey, TValue>(this IEnumerable<KeyValuePair<TKey, TValue>> data, bool urlEncode = false)
         {
-            return string.Join("&", data.Select(t => $"{t.Key}={ (t.Value == null ? string.Empty : (urlEncode ? t.Value.ToString() : HttpUtility.UrlEncode(t.Value.ToString()))) }"));
+            return string.Join("&", data.Select(t => $"{t.Key}={(t.Value == null ? string.Empty : (urlEncode ? t.Value.ToString() : HttpUtility.UrlEncode(t.Value.ToString())))}"));
         }
 
         /// <summary>
@@ -301,6 +301,19 @@ namespace SP.StudioCore.Array
             if (array.Length == 1) return array[0];
 
             return array[WebAgent.GetRandom(0, array.Length)];
+        }
+
+        /// <summary>
+        /// 在数组内获取随机的数量
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="list"></param>
+        /// <param name="count"></param>
+        /// <returns></returns>
+        public static T[] GetRandom<T>(this IEnumerable<T> list, int count)
+        {
+            if (!list.Any()) return System.Array.Empty<T>();
+            return list.OrderBy(t => Guid.NewGuid()).Take(count).ToArray();
         }
     }
 }

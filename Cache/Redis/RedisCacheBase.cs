@@ -17,14 +17,17 @@ namespace SP.StudioCore.Cache.Redis
         /// </summary>
         private readonly RedisManager db;
 
+        private string connectionString;
+
         public RedisCacheBase(string connectionString)
         {
+            this.connectionString = connectionString;
             this.db = new RedisManager(connectionString);
         }
 
         protected IConnectionMultiplexer Connection()
         {
-            return this.db.Instance();
+            return this.db.Instance(this.connectionString);
         }
 
         /// <summary>
@@ -34,7 +37,7 @@ namespace SP.StudioCore.Cache.Redis
         /// <returns></returns>
         protected IDatabase NewExecutor()
         {
-            return this.db.NewExecutor(this.DB_INDEX);
+            return this.db.NewExecutor(this.connectionString, this.DB_INDEX);
         }
 
         /// <summary>

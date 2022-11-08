@@ -13,7 +13,7 @@ namespace SP.StudioCore.Jobs
     /// </summary>
     public abstract class IJobBase
     {
-        protected ILogger Logger => IocCollection.GetService<ILogger>();
+        protected static ILogger? Logger => IocCollection.GetService<ILogger>();
 
         /// <summary>
         /// 时间执行间隔（毫秒）
@@ -29,5 +29,6 @@ namespace SP.StudioCore.Jobs
         /// 执行任务
         /// </summary>
         public abstract object Execute();
+
     }
 }

@@ -16,6 +16,16 @@ namespace SP.StudioCore.Jobs
         protected static ILogger? Logger => IocCollection.GetService<ILogger>();
 
         /// <summary>
+        /// 外部传入的参数
+        /// </summary>
+        protected string[] args { get; private set; }
+
+        public IJobBase(string[] args)
+        {
+            this.args = args;
+        }
+
+        /// <summary>
         /// 时间执行间隔（毫秒）
         /// </summary>
         public abstract int Interval { get; }
@@ -28,7 +38,7 @@ namespace SP.StudioCore.Jobs
         /// <summary>
         /// 执行任务
         /// </summary>
-        public abstract object Execute();
+        public abstract JobResult Execute();
 
     }
 }

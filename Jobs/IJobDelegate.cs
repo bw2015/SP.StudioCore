@@ -12,6 +12,7 @@ namespace SP.StudioCore.Jobs
         /// 锁定任务
         /// </summary>
         /// <param name="key"></param>
+        /// <param name="time">锁定的时间（毫秒）</param>
         /// <returns></returns>
         public bool LockJob(string key, int time);
 
@@ -30,9 +31,9 @@ namespace SP.StudioCore.Jobs
         /// <summary>
         /// 保存服务日志
         /// </summary>
-        /// <param name="type"></param>
-        /// <param name="content"></param>
-        /// <param name="time"></param>
-        public void ServiceLog(string type, object content, long time);
+        /// <param name="jobName"></param>
+        /// <param name="result"></param>
+        /// <param name="time">运行耗时</param>
+        public void ServiceLog(string jobName, JobResult result, long time);
     }
 }

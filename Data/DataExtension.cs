@@ -200,6 +200,7 @@ namespace SP.StudioCore.Data
         /// <param name="obj"></param>
         /// <param name="db"></param>
         /// <returns></returns>
+        [Obsolete]
         public static bool Add<T>(this T obj, DbExecutor db) where T : class, new()
         {
             // 获取所有要插入的字段

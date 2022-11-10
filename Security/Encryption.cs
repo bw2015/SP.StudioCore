@@ -184,10 +184,10 @@ namespace SP.StudioCore.Security
         {
             if (string.IsNullOrEmpty(str)) return null;
             byte[] toEncryptArray = Encoding.UTF8.GetBytes(str);
-
+            byte[] keyData = Encoding.UTF8.GetBytes(key);
             using (RijndaelManaged rm = new()
             {
-                Key = Encoding.UTF8.GetBytes(key),
+                Key = keyData,
                 Mode = CipherMode.ECB,
                 Padding = PaddingMode.PKCS7
             })

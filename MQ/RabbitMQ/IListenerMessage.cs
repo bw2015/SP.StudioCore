@@ -28,13 +28,20 @@ namespace SP.StudioCore.MQ.RabbitMQ
     {
         protected Stopwatch sw { get; private set; }
 
-        public void Consumer(string message, object sender, BasicDeliverEventArgs ea)
+        public virtual void Consumer(string message, object sender, BasicDeliverEventArgs ea)
         {
             sw = Stopwatch.StartNew();
             if (string.IsNullOrEmpty(message)) return;
             TModel? model = JsonConvert.DeserializeObject<TModel>(message);
             if (model == null) return;
-            this.Consumer(model, sender, ea);
+            try
+            {
+                this.Consumer(model, sender, ea);
+            }
+            catch
+            {
+                this.FailureHandling(message, sender, ea);
+            }
         }
 
         public abstract void Consumer(TModel model, object sender, BasicDeliverEventArgs ea);

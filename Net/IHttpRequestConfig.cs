@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace SP.StudioCore.Net
@@ -19,6 +20,14 @@ namespace SP.StudioCore.Net
     /// </summary>
     public class HttpRequestConfig : IHttpRequestConfig
     {
-        public string GetUrl(string url) => url;
+        public string GetUrl(string url)
+        {
+            Regex regex = new Regex(@"^link", RegexOptions.IgnoreCase);
+            if (regex.IsMatch(url))
+            {
+                url = regex.Replace(url, "http");
+            }
+            return url;
+        }
     }
 }

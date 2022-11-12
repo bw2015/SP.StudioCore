@@ -17,12 +17,12 @@ namespace SP.StudioCore.API.BaiduAI
         /// <summary>
         /// 必须参数，应用的API Key
         /// </summary>
-        public string client_id { get; set; } = "SDCAiT76wrGC35Tl1LiMf7o6";
+        public string client_id { get; set; } = "";
 
         /// <summary>
         /// 必须参数，应用的Secret Key
         /// </summary>
-        public string client_secret { get; set; } = "Re9riydSjzBW9dg0SmiRzLojqwoNgSDr";
+        public string client_secret { get; set; } = "";
 
 
     }

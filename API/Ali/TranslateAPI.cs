@@ -9,14 +9,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SP.StudioCore.API.TranslateAPI
+namespace SP.StudioCore.API.Ali
 {
     /// <summary>
     /// 翻译接口设定
     /// </summary>
-    public class TranslateAPISetting : ISetting
+    public class TranslateAPI : ISetting
     {
-        public TranslateAPISetting(string queryString) : base(queryString)
+        public TranslateAPI(string queryString) : base(queryString)
         {
         }
 
@@ -32,17 +32,22 @@ namespace SP.StudioCore.API.TranslateAPI
         /// <summary>
         /// 执行翻译
         /// </summary>
+        /// <param name="content">要翻译的内容</param>
+        /// <param name="source">来源语种</param>
+        /// <param name="target">目标语种</param>
+        /// <param name="result">翻译结果</param>
+        /// <returns>是否执行成功</returns>
         public bool Execute(string content, Language source, Language target, out string result)
         {
-            if (this.Gateway == null) throw new NullReferenceException("the gateway is null");
+            if (Gateway == null) throw new NullReferenceException("the gateway is null");
             if (source == target) { result = content; return true; }
             string? s = source.GetAttribute<ISO6391Attribute>()?.Code;
             string? d = target.GetAttribute<ISO6391Attribute>()?.Code;
             if (s == null || d == null || string.IsNullOrEmpty(content)) throw new FormatException();
 
-            string json = NetAgent.UploadData(this.Gateway, $"s={s}&d={d}&q={content}", Encoding.UTF8, headers: new()
+            string json = NetAgent.UploadData(Gateway, $"s={s}&d={d}&q={content}", Encoding.UTF8, headers: new()
             {
-                { "Authorization", $"APPCODE {this.AppCode}" }
+                { "Authorization", $"APPCODE {AppCode}" }
             });
 
             try

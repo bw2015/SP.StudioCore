@@ -33,14 +33,19 @@ namespace SP.StudioCore.Jobs
 
             string? service = assembly?.GetName().Name;
             int index = 0;
-            foreach (var job in jobs)
+            List<IJobBase> joblist = new List<IJobBase>();
+            foreach (IJobBase? job in jobs)
             {
                 if (job == null) continue;
-                index++;
-                ConsoleHelper.WriteLine($"{index}.{job.GetType().Name}", ConsoleColor.DarkGreen);
+                for (int i = 0; i < job.ThreadCount; i++)
+                {
+                    index++;
+                    joblist.Add(job);
+                    ConsoleHelper.WriteLine($"{index}.{job.GetType().Name}", ConsoleColor.DarkGreen);
+                }
             }
 
-            Parallel.ForEach(jobs, async job =>
+            Parallel.ForEach(joblist, async job =>
              {
                  if (job == null) return;
 
@@ -49,11 +54,12 @@ namespace SP.StudioCore.Jobs
                      string jobName = $"{service}:{job.GetType().Name}";
                      bool isRun = false;
                      Stopwatch sw = Stopwatch.StartNew();
+                     JobResult? result = null;
                      try
                      {
                          if (job.IsTheard || (JobDelegate != null && JobDelegate.LockJob(jobName, job.Interval)))
                          {
-                             JobResult result = await Task.Run(job.Execute);
+                             result = await Task.Run(job.Execute);
                              JobDelegate?.ServiceLog(result.JobName, result, sw.ElapsedMilliseconds);
                              isRun = true;
                          }
@@ -67,7 +73,7 @@ namespace SP.StudioCore.Jobs
                      {
                          if (isRun)
                          {
-                             ConsoleHelper.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {jobName} => 执行完毕\t{sw.ElapsedMilliseconds}ms", ConsoleColor.Green);
+                             ConsoleHelper.WriteLine($"{result?.ToString()} => 执行完毕\t{sw.ElapsedMilliseconds}ms", ConsoleColor.Green);
                          }
                          else
                          {

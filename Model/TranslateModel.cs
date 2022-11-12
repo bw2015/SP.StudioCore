@@ -1,5 +1,5 @@
 ﻿using Newtonsoft.Json;
-using SP.StudioCore.API.TranslateAPI;
+using SP.StudioCore.API.Ali;
 using SP.StudioCore.Array;
 using SP.StudioCore.Cache.Redis;
 using SP.StudioCore.Enums;
@@ -236,7 +236,7 @@ namespace SP.StudioCore.Model
         /// <param name="source">来源语言</param>
         /// <param name="languages">要翻译的语言</param>
         /// <returns></returns>
-        public TranslateModel Translate(TranslateAPISetting setting, Language source, params Language[] languages)
+        public TranslateModel Translate(TranslateAPI setting, Language source, params Language[] languages)
         {
             string content = this.Get(source, string.Empty);
             if (string.IsNullOrWhiteSpace(content)) return this;

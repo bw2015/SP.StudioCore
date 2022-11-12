@@ -31,6 +31,11 @@ namespace SP.StudioCore.Jobs
         public abstract int Interval { get; }
 
         /// <summary>
+        /// 线程数量
+        /// </summary>
+        public virtual int ThreadCount => 1;
+
+        /// <summary>
         /// 是否允许并发执行
         /// </summary>
         public virtual bool IsTheard => false;

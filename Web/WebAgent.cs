@@ -46,9 +46,20 @@ namespace SP.StudioCore.Web
         /// <returns></returns>
         public static string Hidden(string text, int length)
         {
-            if (string.IsNullOrEmpty(text)) return null;
+            if (string.IsNullOrEmpty(text)) return string.Empty;
             if (text.Length <= length) return Hidden(text);
-            return text.Substring(0, length) + string.Empty.PadRight(text.Length - length, '*');
+            return string.Concat(text.AsSpan(0, length), string.Empty.PadRight(text.Length - length, '*'));
+        }
+
+        /// <summary>
+        /// 隐藏中间段
+        /// </summary>
+        public static string Hidden(string text, int start, int length, char code = '*')
+        {
+            if (string.IsNullOrEmpty(text)) return string.Empty;
+            if (text.Length < start + length) return Hidden(text);
+
+            return string.Concat(text[..start], "".PadLeft(length, code), text[(start + length)..]);
         }
 
         /// <summary>
@@ -74,6 +85,26 @@ namespace SP.StudioCore.Web
                 return string.Join(":", ips);
             }
         }
+
+
+        /// <summary>
+        /// 隐藏邮箱
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public static string HiddenEmail(string email)
+        {
+            if (string.IsNullOrEmpty(email) || !IsEMail(email)) return string.Empty;
+
+            Regex regex = new Regex(@"^(?<Name>.+)\@(?<Domain>.+?)\.(?<Host>.+)$");
+            string name = regex.Match(email).Groups["Name"].Value;
+            string domain = regex.Match(email).Groups["Domain"].Value;
+            string host = regex.Match(email).Groups["Host"].Value;
+
+            return string.Concat(Hidden(name), "@", Hidden(domain), ".", host);
+        }
+
 
         /// <summary>
         /// 生成校验位

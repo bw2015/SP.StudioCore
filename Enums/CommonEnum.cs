@@ -19,6 +19,17 @@ namespace SP.StudioCore.Enums
     }
 
     /// <summary>
+    /// 性别
+    /// </summary>
+    public enum Gender : byte
+    {
+        [Description("男")]
+        Male = 1,
+        [Description("女")]
+        Female = 2
+    }
+
+    /// <summary>
     /// 审核状态
     /// </summary>
     public enum CheckStatus : byte

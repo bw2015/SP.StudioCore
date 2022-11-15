@@ -34,6 +34,7 @@ namespace SP.StudioCore.Web
         /// <returns></returns>
         public static string Hidden(string text)
         {
+            if (string.IsNullOrEmpty(text)) return text;
             if (text.Length < 3) return "*".PadLeft(text.Length, '*');
             return string.Concat(text.First(), "*".PadLeft(text.Length - 2, '*'), text.Last());
         }

@@ -14,20 +14,11 @@ namespace SP.StudioCore.API.Ali
     /// <summary>
     /// 翻译接口设定
     /// </summary>
-    public class TranslateAPI : ISetting
+    public class TranslateAPI : AliAPIBase<TranslateAPI>
     {
         public TranslateAPI(string queryString) : base(queryString)
         {
         }
-
-        /// <summary>
-        /// 网关
-        /// </summary>
-        [Description("网关")]
-        public string? Gateway { get; set; }
-
-        [Description("密钥")]
-        public string? AppCode { get; set; }
 
         /// <summary>
         /// 执行翻译

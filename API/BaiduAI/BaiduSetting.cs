@@ -14,6 +14,10 @@ namespace SP.StudioCore.API.BaiduAI
     {
         private const string grant_type = "client_credentials";
 
+        public BaiduSetting(string queryString) : base(queryString)
+        {
+        }
+
         /// <summary>
         /// 必须参数，应用的API Key
         /// </summary>

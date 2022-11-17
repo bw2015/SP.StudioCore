@@ -193,7 +193,12 @@ namespace SP.StudioCore.Enums
         /// 缅甸文
         /// </summary>
         [Description("မြန်မာ"), ISO6391("my", "bur")]
-        MY = 22
+        MY = 22,
+        /// <summary>
+        /// 阿拉伯语
+        /// </summary>
+        [Description("العربية"), ISO6391("ar", "ara")]
+        AR = 23
     }
 
     /// <summary>

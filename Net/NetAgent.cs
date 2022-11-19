@@ -1,4 +1,5 @@
-﻿using SP.StudioCore.Ioc;
+﻿using SP.StudioCore.Array;
+using SP.StudioCore.Ioc;
 using SP.StudioCore.Utils;
 using System;
 using System.Collections;
@@ -8,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Net.Security;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -151,13 +153,6 @@ namespace SP.StudioCore.Net
             return response;
         }
 
-        public static async Task PostAsync(string url, string data)
-        {
-            StringContent content = new StringContent(data, Encoding.UTF8);
-            content.Headers.Add("User-Agent", USER_AGENT);
-            content.Headers.Add("Content-Type", "application/x-www-form-urlencoded");
-            await new HttpClient().PostAsync(new Uri(url), content).ConfigureAwait(false);
-        }
 
         /// <summary>
         /// 上传二进制流
@@ -168,7 +163,7 @@ namespace SP.StudioCore.Net
         /// <param name="wc"></param>
         /// <param name="headers"></param>
         /// <returns></returns>
-        public static string UploadData(string url, byte[] data, Encoding encoding = null, WebClient wc = null, Dictionary<string, string> headers = null)
+        public static string UploadData(string url, byte[] data, Encoding? encoding = null, WebClient? wc = null, Dictionary<string, string>? headers = null)
         {
             encoding ??= Encoding.UTF8;
             using (wc ??= CreateWebClient(url))
@@ -345,19 +340,6 @@ namespace SP.StudioCore.Net
             return data;
         }
 
-        private static HttpClient? httpClient;
-
-        /// <summary>
-        /// 异步返回内容
-        /// </summary>
-        public static async Task<string> GetString(string url, Encoding? encoding = null)
-        {
-            if (httpClient == null) httpClient = new HttpClient();
-            encoding ??= Encoding.UTF8;
-            byte[] data = await httpClient.GetByteArrayAsync(RequestConfig.GetUrl(url)).ConfigureAwait(false);
-            return encoding.GetString(data);
-        }
-
         /// <summary>
         /// 上传文件
         /// </summary>
@@ -378,7 +360,74 @@ namespace SP.StudioCore.Net
                 byte[] data = wc.UploadData(url, stream.ToArray());
                 return encoding.GetString(data);
             }
-
         }
+
+        #region ========  异步方法  ========
+
+
+        private static HttpClient? _httpClient;
+
+        /// <summary>
+        /// 创建一个HttpClient对象
+        /// </summary>
+        /// <returns></returns>
+        private static HttpClient CreateHttpClient()
+        {
+            _httpClient ??= new HttpClient();
+            return _httpClient;
+        }
+
+        /// <summary>
+        /// 添加默认的Header头
+        /// </summary>
+        /// <param name="headers"></param>
+        private static void AddDefaultHeader(this HttpHeaders headers, Dictionary<string, string>? header = null)
+        {
+            header ??= new Dictionary<string, string>();
+            if (!header.ContainsStringKey("User-Agent")) header.Add("User-Agent", USER_AGENT);
+            foreach (var item in header)
+            {
+                headers.Add(item.Key, item.Value);
+            }
+        }
+
+        /// <summary>
+        /// 异步返回内容
+        /// </summary>
+        public static async Task<string> GetAsync(string url, Encoding? encoding = null, Dictionary<string, string>? header = null)
+        {
+            HttpClient httpClient = CreateHttpClient();
+            encoding ??= Encoding.UTF8;
+            header ??= new Dictionary<string, string>();
+            url = RequestConfig.GetUrl(url);
+
+            using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, RequestConfig.GetUrl(url)))
+            {
+                request.Headers.AddDefaultHeader(header);
+                HttpResponseMessage response = await httpClient.SendAsync(request);
+                byte[] resultData = await response.Content.ReadAsByteArrayAsync();
+                return encoding.GetString(resultData);
+            }
+        }
+
+        public static async Task<string> PostAsync(string url, string data, Encoding? encoding = null, Dictionary<string, string>? header = null)
+        {
+            HttpClient httpClient = CreateHttpClient();
+            encoding ??= Encoding.UTF8;
+            header ??= new Dictionary<string, string>();
+            if (!header.ContainsStringKey("User-Agent")) header.Add("User-Agent", USER_AGENT);
+            if (!header.ContainsStringKey("Referer")) header.Add("Referer", url);
+            if (!header.ContainsStringKey("Content-Type")) header.Add("Content-Type", "application/x-www-form-urlencoded");
+
+            url = RequestConfig.GetUrl(url);
+            StringContent content = new StringContent(data, encoding);
+            content.Headers.AddDefaultHeader(header);
+            HttpResponseMessage response = await httpClient.PostAsync(new Uri(url), content);
+            byte[] resultData = await response.Content.ReadAsByteArrayAsync();
+            return encoding.GetString(resultData);
+        }
+
+        #endregion
+
     }
 }

@@ -55,6 +55,10 @@ namespace SP.StudioCore.Model
         /// <summary>
         /// 图标
         /// </summary>
-        Ico
+        Ico,
+        /// <summary>
+        /// 图片列表
+        /// </summary>
+        Images
     }
 }

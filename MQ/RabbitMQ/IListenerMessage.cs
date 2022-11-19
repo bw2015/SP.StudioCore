@@ -26,7 +26,7 @@ namespace SP.StudioCore.MQ.RabbitMQ
 
     public abstract class IListenerMessage<TModel> : IListenerMessage where TModel : IMessageQueue
     {
-        protected Stopwatch sw { get; private set; }
+        protected Stopwatch sw { get; private set; } = new Stopwatch();
 
         public virtual void Consumer(string message, object sender, BasicDeliverEventArgs ea)
         {
@@ -38,7 +38,7 @@ namespace SP.StudioCore.MQ.RabbitMQ
             {
                 this.Consumer(model, sender, ea);
             }
-            catch
+            catch 
             {
                 this.FailureHandling(message, sender, ea);
             }

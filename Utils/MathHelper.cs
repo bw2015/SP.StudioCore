@@ -12,6 +12,19 @@ namespace SP.StudioCore.Utils
     public static class MathHelper
     {
         /// <summary>
+        /// 乘法积
+        /// </summary>
+        public static decimal Multiplication(this IEnumerable<decimal> list)
+        {
+            decimal result = decimal.One;
+            foreach (decimal item in list)
+            {
+                result *= item;
+            }
+            return result;
+        }
+
+        /// <summary>
         /// 阶乘
         /// 一个正整数的阶乘（factorial）是所有小于及等于该数的正整数的积，并且0的阶乘为1。自然数n的阶乘写作n!
         /// </summary>

@@ -109,7 +109,7 @@ namespace SP.StudioCore.Array
             foreach (string? key in request.AllKeys)
             {
                 if (key == null) continue;
-                TKey tKey = key.GetValue<TKey>();
+                TKey? tKey = key.GetValue<TKey>();
                 string value = request?[key] ?? String.Empty;
                 if (!data.ContainsKey(tKey)) data.Add(tKey, value.GetValue<TValue>());
             }
@@ -119,6 +119,17 @@ namespace SP.StudioCore.Array
         public static Dictionary<string, string> ToDictionary(this string queryString)
         {
             return queryString.ToDictionary<string, string>();
+        }
+
+        /// <summary>
+        /// 忽略大小写的Key判断
+        /// </summary>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="dictionary"></param>
+        /// <returns></returns>
+        public static bool ContainsStringKey<TValue>(this Dictionary<string, TValue> dictionary, string key)
+        {
+            return dictionary.Keys.Any(t => t.Equals(key, StringComparison.InvariantCultureIgnoreCase));
         }
 
         /// <summary>
@@ -183,21 +194,7 @@ namespace SP.StudioCore.Array
             return default;
         }
 
-        /// <summary>
-        /// 乘法积
-        /// </summary>
-        /// <typeparam name="TValue"></typeparam>
-        /// <param name="list"></param>
-        /// <returns></returns>
-        public static decimal Multiplication(this IEnumerable<decimal> list)
-        {
-            decimal result = decimal.One;
-            foreach (decimal item in list)
-            {
-                result *= item;
-            }
-            return result;
-        }
+
 
         /// <summary>
         /// 合并后的输出

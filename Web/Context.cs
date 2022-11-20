@@ -27,7 +27,7 @@ namespace SP.StudioCore.Web
             return builder = app;
         }
 
-        public static HttpContext Current
+        public static HttpContext? Current
         {
             get
             {

@@ -148,7 +148,7 @@ namespace SP.StudioCore.Enums
         /// 印尼语
         /// </summary>
         [Description("indonesia"), ISO6391("id", "id")]
-        ID = 13,
+        IND = 13,
         /// <summary>
         /// 丹麦语
         /// </summary>
@@ -198,7 +198,12 @@ namespace SP.StudioCore.Enums
         /// 阿拉伯语
         /// </summary>
         [Description("العربية"), ISO6391("ar", "ara")]
-        AR = 23
+        AR = 23,
+        /// <summary>
+        /// 印地语
+        /// </summary>
+        [Description("हिन्दी"), ISO6391("hi", "hi")]
+        HI = 24
     }
 
     /// <summary>

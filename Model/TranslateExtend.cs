@@ -10,7 +10,7 @@ namespace SP.StudioCore.Model
     public static class TranslateExtend
     {
         /// <summary>
-        /// 转换成为多语种对象
+        /// 序列化成为多语种对象
         /// </summary>
         /// <param name="content"></param>
         /// <returns></returns>

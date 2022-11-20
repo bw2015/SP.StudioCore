@@ -1,4 +1,5 @@
-﻿using SP.StudioCore.Types;
+﻿using SP.StudioCore.Ioc;
+using SP.StudioCore.Types;
 using SP.StudioCore.Utils;
 using System;
 using System.Collections.Generic;
@@ -83,63 +84,25 @@ namespace SP.StudioCore.Enums
         /// <summary>
         /// 获取枚举的备注信息（可读取语言包）
         /// </summary>
-        public static string GetDescription(this Enum em)
-        {
-            string fullName = $"{em.GetType().FullName}";
-            string key = $"{fullName}.{em}";
-            string enumKey = $"{key}";
-
-            if (_enumDescription.ContainsKey(enumKey)) return _enumDescription[enumKey];
-
-            lock (LockHelper.GetLoker(fullName))
-            {
-                foreach (FieldInfo field in em.GetType().GetFields())
-                {
-                    if (field.IsSpecialName) continue;
-                    DescriptionAttribute? description = field.GetAttribute<DescriptionAttribute>();
-                    string value = string.Empty;
-                    if (description == null)
-                    {
-                        value = field.Name;
-                    }
-                    else
-                    {
-                        value = description.Description;
-                    }
-                    if (!_enumDescription.ContainsKey($"{fullName}.{field.Name}"))
-                    {
-                        _enumDescription.Add($"{fullName}.{field.Name}", value);
-                    }
-                }
-                if (_enumDescription.ContainsKey(enumKey)) return _enumDescription[enumKey];
-            }
-            return em.ToString();
-        }
+        public static string GetDescription(this Enum @enum)
+            => IocAccessor.EnumExtensionHandler.GetDescription(@enum);
 
         /// <summary>
         ///  获取枚举的属性值
         /// </summary>
         /// <typeparam name="TAttributes"></typeparam>
-        /// <param name="em"></param>
+        /// <param name="enum"></param>
         /// <returns></returns>
-        public static TAttributes? GetAttribute<TAttributes>(this Enum em) where TAttributes : Attribute
+        public static TAttributes? GetAttribute<TAttributes>(this Enum @enum) where TAttributes : Attribute
         {
-            foreach (FieldInfo field in em.GetType().GetFields().Where(t => t.Name == em.ToString()))
-            {
-                if (field.IsSpecialName) continue;
-                return field.GetAttribute<TAttributes>();
-            }
-            return default;
+            FieldInfo? field = @enum.GetType().GetField(@enum.ToString());
+            return field?.GetAttribute<TAttributes>();
         }
 
-        public static bool HasAttribute<TAttributes>(this Enum em) where TAttributes : Attribute
+        public static bool HasAttribute<TAttributes>(this Enum @enum) where TAttributes : Attribute
         {
-            foreach (FieldInfo field in em.GetType().GetFields().Where(t => t.Name == em.ToString()))
-            {
-                if (field.IsSpecialName) continue;
-                return field.HasAttribute<TAttributes>();
-            }
-            return false;
+            FieldInfo? field = @enum.GetType().GetField(@enum.ToString());
+            return field?.HasAttribute<TAttributes>() ?? false;
         }
 
         /// <summary>

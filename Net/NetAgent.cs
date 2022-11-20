@@ -1,5 +1,6 @@
 ﻿using SP.StudioCore.Array;
 using SP.StudioCore.Ioc;
+using SP.StudioCore.Net.Models;
 using SP.StudioCore.Utils;
 using System;
 using System.Collections;
@@ -394,37 +395,61 @@ namespace SP.StudioCore.Net
         /// <summary>
         /// 异步返回内容
         /// </summary>
-        public static async Task<string> GetAsync(string url, Encoding? encoding = null, Dictionary<string, string>? header = null)
+        public static async Task<HttpResult> GetAsync(string url, Encoding? encoding = null, Dictionary<string, string>? header = null)
         {
-            HttpClient httpClient = CreateHttpClient();
-            encoding ??= Encoding.UTF8;
-            header ??= new Dictionary<string, string>();
-            url = RequestConfig.GetUrl(url);
-
-            using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, RequestConfig.GetUrl(url)))
-            {
-                request.Headers.AddDefaultHeader(header);
-                HttpResponseMessage response = await httpClient.SendAsync(request);
-                byte[] resultData = await response.Content.ReadAsByteArrayAsync();
-                return encoding.GetString(resultData);
-            }
+            return await SendAsync(url, null, HttpMethod.Get, encoding, header);
         }
 
-        public static async Task<string> PostAsync(string url, string data, Encoding? encoding = null, Dictionary<string, string>? header = null)
+        public static async Task<HttpResult> PostAsync(string url, string data, Encoding? encoding = null, Dictionary<string, string>? header = null)
+        {
+            encoding ??= Encoding.UTF8;
+            header ??= new Dictionary<string, string>();
+            if (!header.ContainsStringKey("Content-Type")) header.Add("Content-Type", "application/x-www-form-urlencoded");
+            return await SendAsync(url, encoding.GetBytes(data), HttpMethod.Post, encoding, header);
+        }
+
+        /// <summary>
+        /// 发送信息
+        /// </summary>
+        public static async Task<HttpResult> SendAsync(string url, byte[]? data, HttpMethod method, Encoding? encoding, Dictionary<string, string>? header = null)
         {
             HttpClient httpClient = CreateHttpClient();
             encoding ??= Encoding.UTF8;
             header ??= new Dictionary<string, string>();
             if (!header.ContainsStringKey("User-Agent")) header.Add("User-Agent", USER_AGENT);
             if (!header.ContainsStringKey("Referer")) header.Add("Referer", url);
-            if (!header.ContainsStringKey("Content-Type")) header.Add("Content-Type", "application/x-www-form-urlencoded");
-
             url = RequestConfig.GetUrl(url);
-            StringContent content = new StringContent(data, encoding);
-            content.Headers.AddDefaultHeader(header);
-            HttpResponseMessage response = await httpClient.PostAsync(new Uri(url), content);
-            byte[] resultData = await response.Content.ReadAsByteArrayAsync();
-            return encoding.GetString(resultData);
+
+            try
+            {
+                using (HttpRequestMessage request = new HttpRequestMessage(method, RequestConfig.GetUrl(url)))
+                {
+                    if (data != null)
+                    {
+                        StringContent content = new StringContent(encoding.GetString(data), encoding);
+                        request.Content = content;
+                    }
+                    request.Headers.AddDefaultHeader(header);
+                    HttpResponseMessage response = await httpClient.SendAsync(request);
+                    byte[] resultData = await response.Content.ReadAsByteArrayAsync();
+                    return new HttpResult
+                    {
+                        StatusCode = response.StatusCode,
+                        Headers = response.Headers,
+                        Data = resultData,
+                        Content = encoding.GetString(resultData)
+                    };
+                }
+            }
+            // 发生网络错误
+            catch (HttpRequestException ex)
+            {
+                return new HttpResult(ex);
+            }
+            catch (Exception ex)
+            {
+                return new HttpResult(ex);
+            }
         }
 
         #endregion

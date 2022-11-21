@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SP.StudioCore.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -14,9 +15,14 @@ namespace SP.StudioCore.Net.Models
     /// </summary>
     public struct HttpResult
     {
-        public HttpResult(Exception ex)
+        public HttpResult(Exception ex, string url)
         {
-
+            this.StatusCode = 0;
+            this.Content = new
+            {
+                _url = url,
+                _exception = ex.Message
+            }.ToJson();
         }
 
         /// <summary>
@@ -25,7 +31,11 @@ namespace SP.StudioCore.Net.Models
         public HttpResult(HttpRequestException ex, string url)
         {
             this.StatusCode = HttpStatusCode.RequestTimeout;
-            this.Content = $"URL:{url},{ex.Message}";
+            this.Content = new
+            {
+                _url = url,
+                _exception = ex.Message
+            }.ToJson();
         }
 
         /// <summary>

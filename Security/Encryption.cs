@@ -85,13 +85,26 @@ namespace SP.StudioCore.Security
         /// </summary>
         /// <param name="text"></param>
         /// <returns>大写</returns>
-        public static string toSHA1(string text, Encoding encoding = null)
+        public static string toSHA1(string text, Encoding? encoding = null)
         {
-            if (encoding == null) encoding = Encoding.UTF8;
+            encoding ??= Encoding.UTF8;
             SHA1 algorithm = SHA1.Create();
             byte[] data = algorithm.ComputeHash(encoding.GetBytes(text));
             string sh1 = string.Join(string.Empty, data.Select(t => t.ToString("x2")));
             return sh1.ToUpper();
+        }
+
+        /// <summary>
+        /// SHA256加密（）
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns></returns>
+        public static string toSHA256(string text, Encoding? encoding = null)
+        {
+            encoding ??= Encoding.UTF8;
+            byte[] bytes = encoding.GetBytes(text);
+            byte[] hash = SHA256.Create().ComputeHash(bytes);
+            return string.Concat(hash.Select(t => t.ToString("x2")));
         }
 
         /// <summary>

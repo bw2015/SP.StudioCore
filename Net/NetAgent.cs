@@ -1,5 +1,6 @@
 ﻿using SP.StudioCore.Array;
 using SP.StudioCore.Ioc;
+using SP.StudioCore.Json;
 using SP.StudioCore.Net.Models;
 using SP.StudioCore.Utils;
 using System;
@@ -196,15 +197,21 @@ namespace SP.StudioCore.Net
                 }
                 catch (WebException ex)
                 {
-                    strResult = string.Format("Error:{0},Url:{1}", ex.Message, url);
+                    string? response = null;
                     if (ex.Response != null)
                     {
                         StreamReader reader = new StreamReader(ex.Response.GetResponseStream(), Encoding.UTF8);
                         if (reader != null)
                         {
-                            strResult = reader.ReadToEnd();
+                            response = reader.ReadToEnd();
                         }
                     }
+                    strResult = new
+                    {
+                        _url = url,
+                        _message = ex.Message,
+                        _response = response
+                    }.ToJson();
                 }
                 return strResult;
             }
@@ -404,7 +411,7 @@ namespace SP.StudioCore.Net
         {
             encoding ??= Encoding.UTF8;
             header ??= new Dictionary<string, string>();
-            if (!header.ContainsStringKey("Content-Type")) header.Add("Content-Type", "application/x-www-form-urlencoded");
+            //if (!header.ContainsStringKey("Content-Type")) header.Add("Content-Type", "application/x-www-form-urlencoded");
             return await SendAsync(url, encoding.GetBytes(data), HttpMethod.Post, encoding, header);
         }
 
@@ -422,11 +429,14 @@ namespace SP.StudioCore.Net
 
             try
             {
-                using (HttpRequestMessage request = new HttpRequestMessage(method, RequestConfig.GetUrl(url)))
+                using (HttpRequestMessage request = new HttpRequestMessage(method, RequestConfig.GetUrl(url))
+                {
+                    Version = new Version(2, 0)
+                })
                 {
                     if (data != null)
                     {
-                        StringContent content = new StringContent(encoding.GetString(data), encoding);
+                        StringContent content = new StringContent(encoding.GetString(data), encoding, header.Get("Content-Type", "application/x-www-form-urlencoded"));
                         request.Content = content;
                     }
                     request.Headers.AddDefaultHeader(header);
@@ -444,11 +454,11 @@ namespace SP.StudioCore.Net
             // 发生网络错误
             catch (HttpRequestException ex)
             {
-                return new HttpResult(ex);
+                return new HttpResult(ex, url);
             }
             catch (Exception ex)
             {
-                return new HttpResult(ex);
+                return new HttpResult(ex, url);
             }
         }
 

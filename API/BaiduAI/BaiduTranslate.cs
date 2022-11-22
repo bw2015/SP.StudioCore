@@ -43,11 +43,11 @@ namespace SP.StudioCore.API.BaiduAI
             string sign = $"{data["appid"]}{data["q"]}{data["salt"]}{this.client_secret}";
             data.Add("sign", sign.toMD5().ToLower());
 
-            result = NetAgent.UploadData(this.Gateway, data.ToQueryString());
+            result = NetAgent.PostAsync(this.Gateway, data.ToQueryString()).Result;
 
             try
             {
-                result = JObject.Parse(result)["trans_result"][0]["dst"].Value<string>();
+                result = JObject.Parse(result)?["trans_result"]?[0]?["dst"]?.Value<string>();
                 return true;
             }
             catch

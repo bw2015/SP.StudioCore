@@ -48,7 +48,7 @@ namespace SP.StudioCore.Array
         /// <returns></returns>
         public static string ToQueryString<TKey, TValue>(this IEnumerable<KeyValuePair<TKey, TValue>> data, bool urlEncode = false)
         {
-            return string.Join("&", data.Select(t => $"{t.Key}={(t.Value == null ? string.Empty : (urlEncode ? t.Value.ToString() : HttpUtility.UrlEncode(t.Value.ToString())))}"));
+            return string.Join("&", data.Select(t => $"{t.Key}={(t.Value == null ? string.Empty : (urlEncode ? HttpUtility.UrlEncode(t.Value.ToString()) : t.Value.ToString()))}"));
         }
 
         /// <summary>

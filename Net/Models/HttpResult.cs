@@ -15,7 +15,7 @@ namespace SP.StudioCore.Net.Models
     /// </summary>
     public struct HttpResult
     {
-        public HttpResult(Exception ex, string url)
+        public HttpResult(Exception ex, string url) : this()
         {
             this.StatusCode = 0;
             this.Content = new
@@ -28,7 +28,7 @@ namespace SP.StudioCore.Net.Models
         /// <summary>
         /// 发生网络错误
         /// </summary>
-        public HttpResult(HttpRequestException ex, string url)
+        public HttpResult(HttpRequestException ex, string url) : this()
         {
             this.StatusCode = HttpStatusCode.RequestTimeout;
             this.Content = new

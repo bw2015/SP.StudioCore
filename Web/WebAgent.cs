@@ -55,12 +55,16 @@ namespace SP.StudioCore.Web
         /// <summary>
         /// 隐藏中间段
         /// </summary>
-        public static string Hidden(string text, int start, int length, char code = '*')
+        /// <param name="start">开始要显示的位数</param>
+        /// <param name="end">最后要显示的位数</param>
+        /// <param name="maxlength">中间隐藏之后的最多显示位数（默认为全部显示）</param>
+        public static string Hidden(string text, int start, int end, char code = '*', int maxlength = 0)
         {
             if (string.IsNullOrEmpty(text)) return string.Empty;
-            if (text.Length < start + length) return Hidden(text);
-
-            return string.Concat(text[..start], "".PadLeft(length, code), text[(start + length)..]);
+            if (text.Length < start + end) return Hidden(text);
+            int length = text.Length - (start + end);
+            if (maxlength != 0) length = Math.Min(length, maxlength);
+            return string.Concat(text[..start], "".PadLeft(length, code), text[^end..]);
         }
 
         /// <summary>

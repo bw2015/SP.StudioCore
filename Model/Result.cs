@@ -275,7 +275,7 @@ namespace SP.StudioCore.Model
             switch (this.StatusCode)
             {
                 case HttpStatusCode.Unauthorized:
-                    context.Response.ContentType = ContentType.HTML.GetDescription();
+                    context.Response.ContentType = "text/html";
                     context.Response.Headers.Add("WWW-Authenticate", $"Basic realm=\"{this.Message}\"");
                     task = context.Response.WriteAsync(Resources._401, Encoding.UTF8);
                     break;
@@ -286,7 +286,7 @@ namespace SP.StudioCore.Model
             {
                 if (this.Type == null)
                 {
-                    context.Response.ContentType = ContentType.JSON.GetDescription();
+                    context.Response.ContentType = ContentType.JSON.GetAttribute<DescriptionAttribute>()?.Description ?? "application/json";
                     result = this.ToString();
                     task = context.Response.WriteAsync(result);
                 }

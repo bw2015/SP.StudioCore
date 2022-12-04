@@ -407,12 +407,12 @@ namespace SP.StudioCore.Net
             return await SendAsync(url, null, HttpMethod.Get, encoding, header);
         }
 
-        public static async Task<HttpResult> PostAsync(string url, string data, Encoding? encoding = null, Dictionary<string, string>? header = null)
+        public static async Task<HttpResult> PostAsync(string url, string data, Encoding? encoding = null, Dictionary<string, string>? headers = null)
         {
             encoding ??= Encoding.UTF8;
-            header ??= new Dictionary<string, string>();
+            headers ??= new Dictionary<string, string>();
             //if (!header.ContainsStringKey("Content-Type")) header.Add("Content-Type", "application/x-www-form-urlencoded");
-            return await SendAsync(url, encoding.GetBytes(data), HttpMethod.Post, encoding, header);
+            return await SendAsync(url, encoding.GetBytes(data), HttpMethod.Post, encoding, headers);
         }
 
         /// <summary>

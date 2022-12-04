@@ -218,7 +218,7 @@ namespace SP.StudioCore.Security
         /// <param name="str">明文（待解密）</param>
         /// <param name="key">密文</param>
         /// <returns></returns>
-        public static string? AesDecrypt(string str, string key)
+        public static string? AesDecrypt(string str, string key, string iv = null)
         {
             if (string.IsNullOrEmpty(str)) return null;
             try
@@ -229,7 +229,8 @@ namespace SP.StudioCore.Security
                 {
                     Key = Encoding.UTF8.GetBytes(key),
                     Mode = CipherMode.ECB,
-                    Padding = PaddingMode.PKCS7
+                    Padding = PaddingMode.PKCS7,
+                    IV = iv == null ? null : Encoding.UTF8.GetBytes(iv)
                 })
                 {
 

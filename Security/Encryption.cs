@@ -193,7 +193,7 @@ namespace SP.StudioCore.Security
         /// <param name="str">明文（待加密）</param>
         /// <param name="key">密文</param>
         /// <returns></returns>
-        public static string? AesEncrypt(string str, string key)
+        public static string? AesEncrypt(string str, string key, string? iv = null)
         {
             if (string.IsNullOrEmpty(str)) return null;
             byte[] toEncryptArray = Encoding.UTF8.GetBytes(str);
@@ -205,6 +205,10 @@ namespace SP.StudioCore.Security
                 Padding = PaddingMode.PKCS7
             })
             {
+                if (iv != null)
+                {
+                    rm.IV = Encoding.UTF8.GetBytes(iv);
+                }
 
                 ICryptoTransform cTransform = rm.CreateEncryptor();
                 byte[] resultArray = cTransform.TransformFinalBlock(toEncryptArray, 0, toEncryptArray.Length);
@@ -218,7 +222,7 @@ namespace SP.StudioCore.Security
         /// <param name="str">明文（待解密）</param>
         /// <param name="key">密文</param>
         /// <returns></returns>
-        public static string? AesDecrypt(string str, string key, string iv = null)
+        public static string? AesDecrypt(string str, string key, string? iv = null)
         {
             if (string.IsNullOrEmpty(str)) return null;
             try
@@ -229,11 +233,13 @@ namespace SP.StudioCore.Security
                 {
                     Key = Encoding.UTF8.GetBytes(key),
                     Mode = CipherMode.ECB,
-                    Padding = PaddingMode.PKCS7,
-                    IV = iv == null ? null : Encoding.UTF8.GetBytes(iv)
+                    Padding = PaddingMode.PKCS7
                 })
                 {
-
+                    if (iv != null)
+                    {
+                        rm.IV = Encoding.UTF8.GetBytes(iv);
+                    }
                     ICryptoTransform cTransform = rm.CreateDecryptor();
                     byte[] resultArray = cTransform.TransformFinalBlock(toEncryptArray, 0, toEncryptArray.Length);
 

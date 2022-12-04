@@ -38,7 +38,7 @@ namespace SP.StudioCore.MQ.RabbitMQ
             {
                 this.Consumer(model, sender, ea);
             }
-            catch 
+            catch          
             {
                 this.FailureHandling(message, sender, ea);
             }

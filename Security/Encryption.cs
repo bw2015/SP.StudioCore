@@ -224,16 +224,28 @@ namespace SP.StudioCore.Security
             try
             {
                 byte[] toEncryptArray = Convert.FromBase64String(str);
-
-                using (RijndaelManaged rm = new()
+                RijndaelManaged rijndael;
+                if (iv == null)
                 {
-                    Key = Encoding.UTF8.GetBytes(key),
-                    Mode = CipherMode.ECB,
-                    Padding = PaddingMode.PKCS7,
-                    IV = iv == null ? null : Encoding.UTF8.GetBytes(iv)
-                })
+                    rijndael = new()
+                    {
+                        Key = Encoding.UTF8.GetBytes(key),
+                        Mode = CipherMode.ECB,
+                        Padding = PaddingMode.PKCS7,
+                    };
+                }
+                else
                 {
-
+                    rijndael = new()
+                    {
+                        Key = Encoding.UTF8.GetBytes(key),
+                        Mode = CipherMode.ECB,
+                        Padding = PaddingMode.PKCS7,
+                        IV = Encoding.UTF8.GetBytes(iv)
+                    };
+                }
+                using (RijndaelManaged rm = rijndael)
+                {
                     ICryptoTransform cTransform = rm.CreateDecryptor();
                     byte[] resultArray = cTransform.TransformFinalBlock(toEncryptArray, 0, toEncryptArray.Length);
 

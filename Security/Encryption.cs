@@ -193,7 +193,7 @@ namespace SP.StudioCore.Security
         /// <param name="str">明文（待加密）</param>
         /// <param name="key">密文</param>
         /// <returns></returns>
-        public static string? AesEncrypt(string str, string key, string? iv = null)
+        public static string? AesEncrypt(string str, string key, string? iv = null, CipherMode mode = CipherMode.ECB)
         {
             if (string.IsNullOrEmpty(str)) return null;
             byte[] toEncryptArray = Encoding.UTF8.GetBytes(str);
@@ -201,7 +201,7 @@ namespace SP.StudioCore.Security
             using (RijndaelManaged rm = new()
             {
                 Key = keyData,
-                Mode = CipherMode.ECB,
+                Mode = mode,
                 Padding = PaddingMode.PKCS7
             })
             {
@@ -222,7 +222,7 @@ namespace SP.StudioCore.Security
         /// <param name="str">明文（待解密）</param>
         /// <param name="key">密文</param>
         /// <returns></returns>
-        public static string? AesDecrypt(string str, string key, string? iv = null)
+        public static string? AesDecrypt(string str, string key, string? iv = null, CipherMode mode = CipherMode.ECB)
         {
             if (string.IsNullOrEmpty(str)) return null;
             try
@@ -232,7 +232,7 @@ namespace SP.StudioCore.Security
                 using (RijndaelManaged rm = new()
                 {
                     Key = Encoding.UTF8.GetBytes(key),
-                    Mode = CipherMode.ECB,
+                    Mode = mode,
                     Padding = PaddingMode.PKCS7
                 })
                 {

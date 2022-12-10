@@ -73,7 +73,8 @@ namespace SP.StudioCore.Jobs
                      {
                          if (isRun)
                          {
-                             ConsoleHelper.WriteLine($"{result?.ToString()} => 执行完毕\t{sw.ElapsedMilliseconds}ms", ConsoleColor.Green);
+                             ConsoleHelper.WriteLine($"{result?.ToString()} => 执行完毕\t{sw.ElapsedMilliseconds}ms",
+                                 (result ?? false) ? ConsoleColor.Green : ConsoleColor.DarkGreen);
                          }
                          else
                          {

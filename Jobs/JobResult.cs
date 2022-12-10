@@ -40,5 +40,10 @@ namespace SP.StudioCore.Jobs
         {
             return $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] - {this.JobName} => {this.logs.ToJson()}";
         }
+
+        public static implicit operator bool(JobResult result)
+        {
+            return result != null && result.logs != null && result.logs.Any();
+        }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.Extensions.Primitives;
 using Newtonsoft.Json;
 using SP.StudioCore.Json;
 using System;
@@ -27,14 +28,14 @@ namespace SP.StudioCore.Mvc
     {
         public Task BindModelAsync(ModelBindingContext bindingContext)
         {
-            string data = bindingContext.HttpContext.Request.Form[bindingContext.FieldName];
+            StringValues data = bindingContext.HttpContext.Request.Form[bindingContext.FieldName];
             if (string.IsNullOrEmpty(data)) return Task.CompletedTask;
             Type type = bindingContext.ModelType;
             // 判断是否包含 string 构造，如果存在则调用构造转换
-            ConstructorInfo? constructor = type.GetConstructor(new[] { typeof(string) });
+            ConstructorInfo? constructor = type.GetConstructor(new[] { typeof(StringValues) });
             if (constructor != null)
             {
-                bindingContext.Result = ModelBindingResult.Success(constructor.Invoke(new[] { data }));
+                bindingContext.Result = ModelBindingResult.Success(constructor.Invoke(new object[] { data }));
             }
             else
             {

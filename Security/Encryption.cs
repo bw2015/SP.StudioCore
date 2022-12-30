@@ -74,7 +74,7 @@ namespace SP.StudioCore.Security
         /// <param name="str">原文</param>
         /// <param name="slat">加盐字符串</param>
         /// <returns></returns>
-        public static string toMD5Short(this string str, string slat)
+        public static string toMD5Short(this string str, object slat)
         {
             string md5 = toMD5($"{str}&{slat}");
             return md5.toMD5Short();

@@ -393,8 +393,9 @@ namespace SP.StudioCore.Net
         {
             header ??= new Dictionary<string, string>();
             if (!header.ContainsStringKey("User-Agent")) header.Add("User-Agent", USER_AGENT);
-            foreach (var item in header)
+            foreach (KeyValuePair<string, string> item in header)
             {
+                if (new[] { "Content-Type" }.Contains(item.Key)) continue;
                 headers.Add(item.Key, item.Value);
             }
         }

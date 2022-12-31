@@ -299,7 +299,7 @@ namespace SP.StudioCore.Web
         /// <returns></returns>
         public static bool IsName(string name)
         {
-            return Regex.IsMatch(name, @"^[\u4E00-\u9FA5A-Za-z\s]+(·[\u4E00-\u9FA5A-Za-z]+)*$");
+            return Regex.IsMatch(name ?? string.Empty, @"^[\u4E00-\u9FA5A-Za-z\s]+(·[\u4E00-\u9FA5A-Za-z]+)*$");
         }
 
         /// <summary>

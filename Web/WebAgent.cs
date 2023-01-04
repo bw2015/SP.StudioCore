@@ -320,7 +320,7 @@ namespace SP.StudioCore.Web
             if (string.IsNullOrEmpty(address)) return false;
             Regex regex = chain switch
             {
-                ChainType.TRC => new Regex(@"^T[0-9a-zA-Z]{32}$"),
+                ChainType.TRC => new Regex(@"^T[0-9a-zA-Z]{33}$"),
                 // 默认是以太坊规则
                 _ => new Regex(@"^0x[0-9a-fA-f]{40}$")
             };
@@ -759,7 +759,6 @@ namespace SP.StudioCore.Web
         {
             return (TerrestrialBranches)((year - 4) % 12);
         }
-
 
 
         #endregion

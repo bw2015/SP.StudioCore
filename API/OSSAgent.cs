@@ -287,6 +287,15 @@ namespace SP.StudioCore.API
             OssClient client = new(setting.endpoint, setting.accessKeyId, setting.accessKeySecret);
             return client.DoesObjectExist(setting.bucketName, file);
         }
+        /// <summary>
+        /// 获取后缀名
+        /// </summary>
+        /// <param name="file"></param>
+        /// <returns></returns>
+        public static string GetFileExt(this IFormFile file)
+        {
+            return file.FileName.Substring(file.FileName.LastIndexOf('.'), file.FileName.Length - file.FileName.LastIndexOf('.')).Substring(1);
+        }
     }
 
     /// <summary>

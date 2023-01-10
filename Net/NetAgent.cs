@@ -430,7 +430,7 @@ namespace SP.StudioCore.Net
 
             try
             {
-                using (HttpRequestMessage request = new HttpRequestMessage(method, RequestConfig.GetUrl(url))
+                using (HttpRequestMessage request = new HttpRequestMessage(method, url)
                 {
                     Version = new Version(2, 0)
                 })

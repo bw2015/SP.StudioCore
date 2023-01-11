@@ -238,6 +238,9 @@ namespace SP.StudioCore.Enums
         KRW = 10,
         [Description("印度卢比"), CurrencyExchange(0.1)]
         INR = 11,
+        /// <summary>
+        /// 马来西亚林吉特
+        /// </summary>
         [Description("马来西亚林吉特"), CurrencyExchange(1.66)]
         MYR = 12,
         [Description("千越南盾"), CurrencyExchange(0.3)]
@@ -253,6 +256,9 @@ namespace SP.StudioCore.Enums
         HKD = 16,
         [Description("USDT"), CurrencyExchange(7)]
         USDT = 17,
+        /// <summary>
+        /// 新加坡元
+        /// </summary>
         [Description("新加坡元"), CurrencyExchange(5)]
         SGD = 18,
         /// <summary>

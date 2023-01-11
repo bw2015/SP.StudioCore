@@ -545,6 +545,11 @@ namespace SP.StudioCore.Web
             return (time.Subtract(timeZone.BaseUtcOffset).Ticks - 621355968000000000) / 10000;
         }
 
+        public static long GetTimestamps(TimeZoneInfo timeZone)
+        {
+            return GetTimestamps(DateTime.Now, timeZone);
+        }
+
         public static long GetTimestamps(DateTime time, TimeSpan offsetTime)
         {
             return (time.Subtract(offsetTime).Ticks - 621355968000000000) / 10000;

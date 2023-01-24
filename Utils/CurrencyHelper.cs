@@ -76,11 +76,11 @@ namespace SP.StudioCore.Utils
             if (rate == null) throw new NotSupportedException();
             if (!rate.ContainsKey(source))
             {
-                rate.Add(source, source.GetAttribute<CurrencyExchangeAttribute>().Exchange);
+                rate.Add(source, source.GetAttribute<CurrencyExchangeAttribute>()?.Exchange ?? 0M);
             }
             if (!rate.ContainsKey(target))
             {
-                rate.Add(target, target.GetAttribute<CurrencyExchangeAttribute>().Exchange);
+                rate.Add(target, target.GetAttribute<CurrencyExchangeAttribute>()?.Exchange ?? 0M);
             }
 
             value *= rate[source];

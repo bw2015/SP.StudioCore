@@ -14,7 +14,7 @@ namespace SP.StudioCore.API.Ali
     /// <summary>
     /// 翻译接口设定
     /// </summary>
-    public class TranslateAPI : AliAPIBase<TranslateAPI>
+    public class TranslateAPI : AliAPIBase<TranslateAPI>, ITranslateAPI
     {
         public TranslateAPI(string queryString) : base(queryString)
         {

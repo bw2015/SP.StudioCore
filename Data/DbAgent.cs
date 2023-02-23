@@ -30,7 +30,7 @@ namespace SP.StudioCore.Data
             get
             {
                 IReadRepository? readDb = IocCollection.GetService<IReadRepository>();
-                if (readDb == null) throw new NullReferenceException("ReadDB");
+                if (readDb == null) throw new NullReferenceException("ReadDB is null");
                 return readDb;
             }
         }
@@ -43,7 +43,7 @@ namespace SP.StudioCore.Data
             get
             {
                 IWriteRepository? write = IocCollection.GetService<IWriteRepository>();
-                if (write == null) throw new NullReferenceException("WriteDB");
+                if (write == null) throw new NullReferenceException("WriteDB is null");
                 return write;
             }
         }

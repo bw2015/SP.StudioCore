@@ -17,7 +17,7 @@ namespace SP.StudioCore.API.BaiduAI
     /// <summary>
     /// 百度翻译
     /// </summary>
-    public class BaiduTranslate : BaiduSetting
+    public class BaiduTranslate : BaiduSetting, ITranslateAPI
     {
         /// <summary>
         /// 通用翻译API HTTPS 地址

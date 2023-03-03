@@ -885,6 +885,15 @@ namespace SP.StudioCore.Enums
     }
 
     /// <summary>
+    /// 国家和地区
+    /// </summary>
+    public enum Country : byte
+    {
+        [Description("中国")]
+        China = 1
+    }
+
+    /// <summary>
     /// ISO-639-1 语言代码
     /// </summary>
     [AttributeUsage(AttributeTargets.Field)]

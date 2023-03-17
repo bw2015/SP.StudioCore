@@ -56,11 +56,12 @@ namespace SP.StudioCore.Tools
 
                 ConsoleHelper.WriteLine(info, ConsoleColor.Red);
 
-                await context.ShowError(ErrorType.Exception, ex.Message, new Dictionary<string, object>()
+                await context.Response.WriteAsJsonAsync(new Result(false, ex.Message, new
                 {
-                    {"RequestID", logId},
-                    {"Track", new JsonString(info) }
-                }).WriteAsync(context).ConfigureAwait(true);
+                    ErrorType.Exception,
+                    requestId = logId,
+                    track = info
+                }));
             }
         }
     }

@@ -19,22 +19,27 @@ namespace SP.StudioCore.Jobs
     {
         private static IJobDelegate? JobDelegate = IocCollection.GetService<IJobDelegate>();
 
+        public static async Task Run(Assembly? assembly, string[] args, params string[] runjob)
+        {
+            await Run<IJobBase>(assembly, args, runjob);
+        }
+
         /// <summary>
         /// 
         /// </summary>
         /// <param name="runjob">需要被执行的Job</param>
-        public static async Task Run(Assembly? assembly, string[] args, params string[] runjob)
+        public static async Task Run<TJob>(Assembly? assembly, string[] args, params string[] runjob) where TJob : IJobBase
         {
             if (assembly == null) return;
-            IEnumerable<IJobBase?> jobs = assembly.GetTypes()
-                .Where(t => !t.IsAbstract && t.IsSubclassOf(typeof(IJobBase)) && (!runjob.Any() || runjob.Contains(t.Name)))
-                .Select(t => (IJobBase?)Activator.CreateInstance(t, new[] { args }))
+            IEnumerable<TJob?> jobs = assembly.GetTypes()
+                .Where(t => !t.IsAbstract && t.IsSubclassOf(typeof(TJob)) && (!runjob.Any() || runjob.Contains(t.Name)))
+                .Select(t => (TJob?)Activator.CreateInstance(t, new[] { args }))
                 .Where(t => t != null);
 
             string? service = assembly?.GetName().Name;
             int index = 0;
-            List<IJobBase> joblist = new List<IJobBase>();
-            foreach (IJobBase? job in jobs)
+            List<TJob> joblist = new List<TJob>();
+            foreach (TJob? job in jobs)
             {
                 if (job == null) continue;
                 for (int i = 0; i < job.ThreadCount; i++)

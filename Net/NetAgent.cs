@@ -443,6 +443,11 @@ namespace SP.StudioCore.Net
                     request.Headers.AddDefaultHeader(header);
                     HttpResponseMessage response = await httpClient.SendAsync(request);
                     byte[] resultData = await response.Content.ReadAsByteArrayAsync();
+                    // 如果启用了gzip压缩
+                    if (response.Content.Headers.ContentEncoding.Contains("gzip"))
+                    {
+                        resultData = UnGZip(resultData);
+                    }
                     return new HttpResult
                     {
                         StatusCode = response.StatusCode,

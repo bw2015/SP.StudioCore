@@ -1,5 +1,6 @@
 ﻿using Microsoft.Data.SqlClient;
 using SP.StudioCore.Ioc;
+using SP.StudioCore.Types;
 using SP.StudioCore.Utils;
 using System;
 using System.Collections.Generic;
@@ -32,7 +33,8 @@ namespace SP.StudioCore.Jobs
         {
             if (assembly == null) return;
             IEnumerable<TJob?> jobs = assembly.GetTypes()
-                .Where(t => !t.IsAbstract && t.IsSubclassOf(typeof(TJob)) && (!runjob.Any() || runjob.Contains(t.Name)))
+                .Where(t => !t.IsAbstract && t.IsSubclassOf(typeof(TJob)) && 
+                    ((!runjob.Any() && !t.HasAttribute<ObsoleteAttribute>()) || runjob.Contains(t.Name)))
                 .Select(t => (TJob?)Activator.CreateInstance(t, new[] { args }))
                 .Where(t => t != null);
 

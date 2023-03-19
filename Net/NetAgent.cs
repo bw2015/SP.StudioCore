@@ -37,7 +37,7 @@ namespace SP.StudioCore.Net
         /// <summary>
         /// 默认的用户代理字符串
         /// </summary>
-        private static string USER_AGENT
+        internal static string USER_AGENT
         {
             get
             {
@@ -403,12 +403,12 @@ namespace SP.StudioCore.Net
         /// <summary>
         /// 异步返回内容
         /// </summary>
-        public static async Task<HttpResult> GetAsync(string url, Encoding? encoding = null, Dictionary<string, string>? header = null)
+        public static async Task<HttpResult> GetAsync(string url, Encoding? encoding = null, HttpClientOption? header = null)
         {
             return await SendAsync(url, null, HttpMethod.Get, encoding, header);
         }
 
-        public static async Task<HttpResult> PostAsync(string url, string data, Encoding? encoding = null, Dictionary<string, string>? headers = null)
+        public static async Task<HttpResult> PostAsync(string url, string data, Encoding? encoding = null, HttpClientOption? headers = null)
         {
             encoding ??= Encoding.UTF8;
             headers ??= new Dictionary<string, string>();
@@ -419,15 +419,13 @@ namespace SP.StudioCore.Net
         /// <summary>
         /// 发送信息
         /// </summary>
-        public static async Task<HttpResult> SendAsync(string url, byte[]? data, HttpMethod method, Encoding? encoding, Dictionary<string, string>? header = null)
+        public static async Task<HttpResult> SendAsync(string url, byte[]? data, HttpMethod method, Encoding? encoding, HttpClientOption? options = null)
         {
             HttpClient httpClient = CreateHttpClient();
             encoding ??= Encoding.UTF8;
-            header ??= new Dictionary<string, string>();
-            if (!header.ContainsStringKey("User-Agent")) header.Add("User-Agent", USER_AGENT);
-            if (!header.ContainsStringKey("Referer")) header.Add("Referer", url);
+            options ??= new HttpClientOption();
+            if (!options.Headers.ContainsStringKey("Referer")) options.Referrer = url;
             url = RequestConfig.GetUrl(url);
-
             try
             {
                 using (HttpRequestMessage request = new HttpRequestMessage(method, url)
@@ -437,10 +435,11 @@ namespace SP.StudioCore.Net
                 {
                     if (data != null)
                     {
-                        StringContent content = new StringContent(encoding.GetString(data), encoding, header.Get("Content-Type", "application/x-www-form-urlencoded"));
+                        StringContent content = new StringContent(encoding.GetString(data), encoding, options.ContentType);
                         request.Content = content;
                     }
-                    request.Headers.AddDefaultHeader(header);
+                    request.Headers.AddDefaultHeader(options.Headers);
+                    //request.Headers.AddDefaultHeader(header);
                     HttpResponseMessage response = await httpClient.SendAsync(request);
                     byte[] resultData = await response.Content.ReadAsByteArrayAsync();
                     // 如果启用了gzip压缩

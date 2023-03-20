@@ -9,6 +9,7 @@ using System.Net;
 using System.Net.Sockets;
 using SP.StudioCore.Web.ipv6wry;
 using SP.StudioCore.Web.IPRule;
+using SP.StudioCore.Array;
 
 namespace SP.StudioCore.Web
 {
@@ -34,6 +35,20 @@ namespace SP.StudioCore.Web
         /// IPv6数据库
         /// </summary>
         private const string IPV6_PATH = "ipv6wry.db";
+
+        /// <summary>
+        /// 生成一个随机的中国IP
+        /// </summary>
+        /// <returns></returns>
+        public static string CreateRandomChinaIPv4()
+        {
+            string[] prefix = new[]
+            {
+                "36.56","61.232","106.80","121.76","123.232","139.196","171.8","182.80","210.25","222.16"
+            };
+
+            return string.Concat(prefix.GetRandom(), ".", WebAgent.GetRandom(0, 255), ".", WebAgent.GetRandom(0, 255));
+        }
 
         /// <summary>
         /// 获取当前访问的IP（支持IPv6）
@@ -191,7 +206,7 @@ namespace SP.StudioCore.Web
         public static string IntToIPv4(this int ipv4)
         {
             byte[] bs = BitConverter.GetBytes(ipv4);
-            return $"{ bs[3] }.{ bs[2] }.{ bs[1] }.{ bs[0] }";
+            return $"{bs[3]}.{bs[2]}.{bs[1]}.{bs[0]}";
         }
 
         /// <summary>

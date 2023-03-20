@@ -25,6 +25,19 @@ namespace SP.StudioCore.Json
         }
 
         /// <summary>
+        /// 字符串反序列化成为对象
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="json"></param>
+        /// <returns></returns>
+        public static T? ToJson<T>(this string json)
+        {
+            if (string.IsNullOrEmpty(json)) return default;
+            if (!json.StartsWith("{") && !json.StartsWith("[")) return default;
+            return JsonConvert.DeserializeObject<T>(json);
+        }
+
+        /// <summary>
         /// 转换指定的字段
         /// </summary>
         /// <typeparam name="T"></typeparam>

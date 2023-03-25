@@ -151,6 +151,7 @@ namespace SP.StudioCore.Data.Expressions
             this.Visit(node.Object);
             this.Visit(node.Arguments[0]);
 
+            this.Sql.Pop();
             string left = this.Sql.Pop();
             var value = this.parameter.LastOrDefault();
 

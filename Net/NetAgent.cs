@@ -422,6 +422,11 @@ namespace SP.StudioCore.Net
         public static async Task<HttpResult> SendAsync(string url, byte[]? data, HttpMethod method, Encoding? encoding, HttpClientOption? options = null)
         {
             HttpClient httpClient = CreateHttpClient();
+            if (options?.Proxy != null)
+            {
+                HttpClient.DefaultProxy = options?.Proxy;
+            }
+
             encoding ??= Encoding.UTF8;
             options ??= new HttpClientOption();
             if (!options.Headers.ContainsStringKey("Referer")) options.Referrer = url;
@@ -440,6 +445,8 @@ namespace SP.StudioCore.Net
                     }
                     request.Headers.AddDefaultHeader(options.Headers);
                     //request.Headers.AddDefaultHeader(header);
+
+
                     HttpResponseMessage response = await httpClient.SendAsync(request);
                     byte[] resultData = await response.Content.ReadAsByteArrayAsync();
                     // 如果启用了gzip压缩

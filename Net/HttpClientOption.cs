@@ -19,6 +19,7 @@ namespace SP.StudioCore.Net
     {
         public HttpClientOption()
         {
+            this.Headers = new Dictionary<string, string>();
         }
 
         /// <summary>
@@ -49,6 +50,11 @@ namespace SP.StudioCore.Net
                 }
             }
         }
+
+        /// <summary>
+        /// 使用代理
+        /// </summary>
+        public IWebProxy? Proxy { get; set; }
 
         public static implicit operator HttpClientOption(Dictionary<string, string> headers)
         {

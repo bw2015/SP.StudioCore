@@ -448,7 +448,25 @@ namespace SP.StudioCore.Data.Provider
 
         public IEnumerable<T> ReadList<T>(int top, string condition, string sort, object? parameters = null, params Expression<Func<T, object>>[] fields) where T : class, new()
         {
-            throw new NotImplementedException();
+            string field = string.Join(",", SchemaCache.GetColumns(fields).Select(t => $"`{t.Name}`"));
+            string sql = $"SELECT {field} FROM `{typeof(T).GetTableName()}` WHERE  {condition} ORDER BY {sort} LIMIT {top}";
+
+            List<T> list = new List<T>();
+            using (IDataReader reader = db.ReadData(CommandType.Text, sql))
+            {
+                try
+                {
+                    while (reader.Read())
+                    {
+                        list.Add((T)Activator.CreateInstance(typeof(T), reader));
+                    }
+                }
+                finally
+                {
+                    if (!reader.IsClosed) reader.Close();
+                }
+            }
+            return list;
         }
 
         public IQueryable<TEntity> Query<TEntity>() where TEntity : class, new()

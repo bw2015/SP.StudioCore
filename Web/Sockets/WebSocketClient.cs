@@ -25,7 +25,7 @@ namespace SP.StudioCore.Web.Sockets
             this.Query = context.Request.Query.ToDictionary(t => t.Key, t => t.Value.ToString());
             this.Headers = context.Request.Headers.ToDictionary(t => t.Key, t => t.Value.ToString());
             this.IpAddress = IPAgent.GetIP(context);
-            this.Join = WebAgent.GetTimestamps();
+            this.Timestamps = WebAgent.GetTimestamps();
         }
 
         /// <summary>
@@ -59,7 +59,7 @@ namespace SP.StudioCore.Web.Sockets
         /// <summary>
         /// 连接时间
         /// </summary>
-        public long Join { get; set; }
+        public long Timestamps { get; set; }
 
         /// <summary>
         /// 发送消息
@@ -128,6 +128,11 @@ namespace SP.StudioCore.Web.Sockets
         public void Dispose()
         {
             this.WebSocket?.Dispose();
+        }
+
+        public static implicit operator WebSocket(WebSocketClient client)
+        {
+            return client.WebSocket;
         }
     }
 }

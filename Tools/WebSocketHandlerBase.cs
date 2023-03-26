@@ -9,10 +9,19 @@ using System.Threading.Tasks;
 
 namespace SP.StudioCore.Tools
 {
+
+    /// <summary>
+    /// 标记这是一个WebSocket处理对象
+    /// </summary>
+    public interface IWebSocketHandler
+    {
+
+    }
+
     /// <summary>
     /// WebSocket 处理的基类
     /// </summary>
-    public abstract class WebSocketHandlerBase
+    public abstract class WebSocketHandlerBase : IWebSocketHandler
     {
         private List<WebSocketClient>? _clients;
 
@@ -28,13 +37,10 @@ namespace SP.StudioCore.Tools
             }
         }
 
-        /// <summary>
-        /// 注册客户端
-        /// </summary>
-        /// <param name="wsClient"></param>
-        public virtual WebSocketClient Register(WebSocketClient wsClient)
+        public virtual WebSocketClient Register(WebSocketClient wsClient, TaskCompletionSource<object> socketFinishedTcs)
         {
             this.clients.Add(wsClient);
+            socketFinishedTcs.SetResult(wsClient.ID);
             return wsClient;
         }
 
@@ -73,7 +79,8 @@ namespace SP.StudioCore.Tools
     {
         public static T Instance()
         {
-            string name = typeof(T).Assembly.GetName().Name;
+            string? name = typeof(T).Assembly.GetName().Name?.ToLower();
+            if (name == null) throw new NullReferenceException($"未能找到处理类型 {name}");
             if (ToolsFactory.WebSocketHandlerCache.ContainsKey(name)) return (T)ToolsFactory.WebSocketHandlerCache[name];
             lock (typeof(T))
             {

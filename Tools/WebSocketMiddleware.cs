@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using NativeWebSocket;
 using SP.StudioCore.Mvc.Exceptions;
 using SP.StudioCore.Web;
 using SP.StudioCore.Web.Sockets;
@@ -9,6 +10,7 @@ using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using WebSocket = System.Net.WebSockets.WebSocket;
 
 namespace SP.StudioCore.Tools
 {
@@ -28,39 +30,41 @@ namespace SP.StudioCore.Tools
         /// <summary>
         /// websocket的逻辑处理
         /// </summary>
-        private WebSocketHandlerBase? ws;
+        private WebSocketHandlerBase? wsHandler;
 
         public async Task Invoke(HttpContext context)
         {
+            // 如果是websocket的请求
             if (context.WebSockets.IsWebSocketRequest)
             {
-                ws = ToolsFactory.GetWebSocket(context);
-                if (ws == null)
+                wsHandler = ToolsFactory.GetWebSocket(context);
+                if (wsHandler == null)
                 {
-                    throw new ResultException("不支持WebSocket连接");
+                    context.Response.StatusCode = StatusCodes.Status400BadRequest;
+                    return;
                 }
-                //后台成功接收到连接请求并建立连接后，前台的webSocket.onopen = function (event){}才执行
-                WebSocket webSocket = await context.WebSockets.AcceptWebSocketAsync().ConfigureAwait(true); ;
-                Dictionary<string, string> data = context.Request.Query.ToDictionary(t => t.Key, t => t.Value.ToString());
-                if (!data.ContainsKey("IP")) data.Add("IP", IPAgent.GetIP(context));
-                if (!data.ContainsKey("IPAddress")) data.Add("IPAddress", IPAgent.GetAddress(IPAgent.GetIP(context)));
-                wsClient = ws.Register(new WebSocketClient
+
+                using (WebSocket webSocket = await context.WebSockets.AcceptWebSocketAsync(new WebSocketAcceptContext
                 {
-                    ID = Guid.NewGuid(),
-                    WebSocket = webSocket,
-                    Query = data
-                });
-                try
+                    DangerousEnableCompression = true
+                }))
                 {
-                    await Handler(wsClient);
-                }
-                catch (Exception ex)
-                {
-                    await context.Response.WriteAsync(ex.Message).ConfigureAwait(true); ;
-                }
-                finally
-                {
-                    await ws.Remove(wsClient);
+                    TaskCompletionSource<object> socketFinishedTcs = new TaskCompletionSource<object>();
+                    wsClient = wsHandler.Register(new WebSocketClient(context, webSocket), socketFinishedTcs);
+                    await socketFinishedTcs.Task;
+
+                    try
+                    {
+                        await Handler(wsClient);
+                    }
+                    catch (Exception ex)
+                    {
+                        await context.Response.WriteAsync(ex.Message).ConfigureAwait(true); ;
+                    }
+                    finally
+                    {
+                        await wsHandler.Remove(wsClient);
+                    }
                 }
             }
             else
@@ -71,26 +75,30 @@ namespace SP.StudioCore.Tools
 
         private async Task Handler(WebSocketClient client)
         {
-            WebSocketReceiveResult result;
-            do
+            WebSocket webSocket = client.WebSocket;
+            byte[] buffer = new byte[1024 * 4];
+            WebSocketReceiveResult receiveResult = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+            while (!receiveResult.CloseStatus.HasValue)
             {
-                byte[] buffer = new byte[1024 * 4];
-                result = await client.WebSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None).ConfigureAwait(true);
-                if (result.MessageType == WebSocketMessageType.Text && !result.CloseStatus.HasValue)
+                if (receiveResult.MessageType == WebSocketMessageType.Text)
                 {
-                    if (wsClient == null) continue;
-                    string message = Encoding.UTF8.GetString(buffer, 0, result.Count);
+                    string message = Encoding.UTF8.GetString(buffer, 0, receiveResult.Count);
                     if (message == "ping")
                     {
-                        byte[] pong = Encoding.UTF8.GetBytes("pong");
-                        await wsClient.WebSocket.SendAsync(new ArraySegment<byte>(pong, 0, pong.Length), WebSocketMessageType.Text, true, CancellationToken.None).ConfigureAwait(true);
+                        await webSocket.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes("pong"), 0, receiveResult.Count),
+                            receiveResult.MessageType, receiveResult.EndOfMessage, CancellationToken.None);
                     }
                     else
                     {
-                        await ws.Receive(wsClient, message).ConfigureAwait(true); ;
+                        if (wsHandler != null && wsClient != null)
+                        {
+                            await wsHandler.Receive(wsClient, message);
+                        }
                     }
                 }
-            } while (!result.CloseStatus.HasValue);
+                receiveResult = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+            }
+            await webSocket.CloseAsync(receiveResult.CloseStatus.Value, receiveResult.CloseStatusDescription, CancellationToken.None);
         }
     }
 }

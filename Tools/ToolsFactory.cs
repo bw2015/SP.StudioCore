@@ -67,12 +67,13 @@ namespace SP.StudioCore.Tools
                 {
                     return context.ShowError(HttpStatusCode.MethodNotAllowed, path);
                 }
-                string controller = regex.Match(path).Groups["Controller"].Value;
-                string methodName = regex.Match(path).Groups["Method"].Value;
+                string controller = regex.Match(path).Groups["Controller"].Value,
+                    methodName = regex.Match(path).Groups["Method"].Value,
+                    assemblyName = $"Tools.{controller}".ToLower();
 
-                if (!_assembly.TryGetValue($"Tools.{controller}", out Assembly? assembly))
+                if (!_assembly.TryGetValue(assemblyName, out Assembly? assembly))
                 {
-                    _assembly.TryAdd($"Tools.{controller}", assembly = Assembly.Load($"Tools.{controller}"));
+                    _assembly.TryAdd(assemblyName, assembly = Assembly.Load(assemblyName));
                 }
                 logs.Add($"资源加载完毕，耗时：{sw.ElapsedMilliseconds}ms");
 
@@ -239,13 +240,16 @@ namespace SP.StudioCore.Tools
             {
                 return null;
             }
-            string controller = regex.Match(path).Groups["Controller"].Value;
-            string assemblyName = $"Tools.{controller}";
-            if (WebSocketHandlerCache.ContainsKey(assemblyName)) return WebSocketHandlerCache[assemblyName];
+            string controller = regex.Match(path).Groups["Controller"].Value,
+                assemblyName = $"Tools.{controller}".ToLower();
+            if(WebSocketHandlerCache.ContainsKey(assemblyName)) return WebSocketHandlerCache[assemblyName];
 
-            Assembly? assembly = Assembly.Load(assemblyName);
+            if (!_assembly.TryGetValue(assemblyName, out Assembly? assembly))
+            {
+                _assembly.TryAdd(assemblyName, assembly = Assembly.Load(assemblyName));
+            }
             if (assembly == null) return null;
-            Type? handlerType = assembly.GetType($"{assemblyName}.WebSocketHandler");
+            Type? handlerType = assembly.GetType($"{assemblyName}.WebSocketHandler", false, true);
             if (handlerType == null) return null;
 
             WebSocketHandlerBase? ws = (WebSocketHandlerBase?)Activator.CreateInstance(handlerType);

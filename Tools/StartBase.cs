@@ -20,8 +20,7 @@ namespace SP.StudioCore.Tools
         public StartBase(HttpContext context)
         {
             this.context = context;
-            sw = new Stopwatch();
-            sw.Start();
+            sw = Stopwatch.StartNew();
         }
 
         /// <summary>
@@ -37,9 +36,9 @@ namespace SP.StudioCore.Tools
         /// <summary>
         /// 输出一个成功的JSON数据
         /// </summary>
-        protected virtual Result GetResultContent(object data, string msg = "操作成功")
+        protected virtual Result GetResultContent(object data, string? msg = null)
         {
-            return new Result(true, msg, data);
+            return new Result(true, msg ?? $"{this.sw.ElapsedMilliseconds}ms", data);
         }
 
         protected virtual Result GetResultContent(bool success, object data, string successMessage = "操作成功")
@@ -84,10 +83,10 @@ namespace SP.StudioCore.Tools
                 }
             }
             return this.GetResultContent(string.Concat("{",
-                $"\"RecordCount\":{ list.Count() },",
+                $"\"RecordCount\":{list.Count()},",
                 $"\"PageIndex\":{this.PageIndex},",
                 $"\"PageSize\":{this.PageSize},",
-                $"\"data\":{ (data == null ? "null" : data.ToJson()) },",
+                $"\"data\":{(data == null ? "null" : data.ToJson())},",
                 $"\"list\":{json}",
                 "}"));
         }

@@ -181,9 +181,10 @@ namespace SP.StudioCore.Data.Provider
         /// <returns></returns>
         public IEnumerable<TValue> ReadList<T, TValue>(Expression<Func<T, TValue>> field, Expression<Func<T, bool>> condition) where T : class, new()
         {
-            string fieldName = SchemaCache.GetColumnProperty(field).Name;
+            string? fieldName = SchemaCache.GetColumnProperty(field).Name;
             List<TValue> list = new List<TValue>();
-            using (IExpressionCondition expression = db.GetExpressionCondition(condition))
+            if (string.IsNullOrEmpty(fieldName)) return list;
+                using (IExpressionCondition expression = db.GetExpressionCondition(condition))
             {
                 string conditionSql = expression.ToCondition(out DynamicParameters parameters);
                 string sql = $"SELECT [{fieldName}] FROM [{typeof(T).GetTableName()}] {conditionSql}";

@@ -1,21 +1,36 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using SP.StudioCore.Array;
 using SP.StudioCore.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SP.StudioCore.Tools
 {
     public abstract class ToolsProgram
     {
+        private static void SetThreads(int minThreads, int maxThreads)
+        {
+            if (minThreads != 0 && ThreadPool.SetMinThreads(minThreads, minThreads))
+            {
+                ConsoleHelper.WriteLine($"设定最小线程数量为:{minThreads}", ConsoleColor.Green);
+            }
+            if (maxThreads != 0 && ThreadPool.SetMaxThreads(maxThreads, maxThreads))
+            {
+                ConsoleHelper.WriteLine($"设定最大线程数量为:{maxThreads}", ConsoleColor.Green);
+            }
+        }
+
         protected static bool WebStartup(string[] args)
         {
             if (!args.Contains("--urls")) return false;
+            SetThreads(args.Get("-minThreads", 0), args.Get("-maxThreads", 0));
             CreateWebHostBuilder<ToolsStartup>(args).Build().Run();
             return true;
         }
@@ -23,6 +38,7 @@ namespace SP.StudioCore.Tools
         protected static bool WebStartup<TStartup>(string[] args) where TStartup : ToolsStartup
         {
             if (!args.Contains("--urls")) return false;
+            SetThreads(args.Get("-minThreads",0), args.Get("-maxThreads", 0));
             CreateWebHostBuilder<TStartup>(args).Build().Run();
             return true;
         }

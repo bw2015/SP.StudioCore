@@ -403,9 +403,9 @@ namespace SP.StudioCore.Net
         /// <summary>
         /// 异步返回内容
         /// </summary>
-        public static async Task<HttpResult> GetAsync(string url, Encoding? encoding = null, HttpClientOption? header = null)
+        public static async Task<HttpResult> GetAsync(string url, Encoding? encoding = null, HttpClientOption? options = null)
         {
-            return await SendAsync(url, null, HttpMethod.Get, encoding, header);
+            return await SendAsync(url, null, HttpMethod.Get, encoding, options);
         }
 
         public static async Task<HttpResult> PostAsync(string url, string data, Encoding? encoding = null, HttpClientOption? headers = null)

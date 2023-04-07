@@ -33,7 +33,7 @@ namespace SP.StudioCore.Jobs
         {
             if (assembly == null) return;
             IEnumerable<TJob?> jobs = assembly.GetTypes()
-                .Where(t => !t.IsAbstract && t.IsSubclassOf(typeof(TJob)) && 
+                .Where(t => !t.IsAbstract && t.IsSubclassOf(typeof(TJob)) &&
                     ((!runjob.Any() && !t.HasAttribute<ObsoleteAttribute>()) || runjob.Contains(t.Name)))
                 .Select(t => (TJob?)Activator.CreateInstance(t, new[] { args }))
                 .Where(t => t != null);
@@ -52,50 +52,51 @@ namespace SP.StudioCore.Jobs
                 }
             }
 
-            Parallel.ForEach(joblist, async job =>
-             {
-                 if (job == null) return;
+            await Parallel.ForEachAsync(joblist, async (job, CancellationToken) =>
+              {
+                  if (job != null)
+                  {
+                      while (true)
+                      {
+                          string jobName = $"{service}:{job.GetType().Name}";
+                          bool isRun = false;
+                          Stopwatch sw = Stopwatch.StartNew();
+                          JobResult? result = null;
+                          try
+                          {
+                              if (job.IsTheard || (JobDelegate != null && JobDelegate.LockJob(jobName, job.Interval)))
+                              {
+                                  result = await Task.Run(job.Execute);
+                                  JobDelegate?.ServiceLog(result.JobName, result, sw.ElapsedMilliseconds);
+                                  isRun = true;
+                              }
+                          }
+                          catch (Exception ex)
+                          {
+                              ConsoleHelper.Error($" {jobName} {ex.Message}", ErrorHelper.GetExceptionContent(ex));
+                              JobDelegate?.Exception(ex);
+                          }
+                          finally
+                          {
+                              if (isRun)
+                              {
+                                  ConsoleHelper.WriteLine($"{result?.ToString()} => 执行完毕\t{sw.ElapsedMilliseconds}ms",
+                                      (result ?? false) ? ConsoleColor.Green : ConsoleColor.DarkGreen);
+                              }
+                              else
+                              {
+                                  ConsoleHelper.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {jobName} => 跳过执行\t{sw.ElapsedMilliseconds}ms", ConsoleColor.DarkYellow);
+                              }
+                              //if (!job.IsTheard)
+                              //{
+                              //    JobDelegate.UnlockJob(jobName);
+                              //}
+                          }
 
-                 while (true)
-                 {
-                     string jobName = $"{service}:{job.GetType().Name}";
-                     bool isRun = false;
-                     Stopwatch sw = Stopwatch.StartNew();
-                     JobResult? result = null;
-                     try
-                     {
-                         if (job.IsTheard || (JobDelegate != null && JobDelegate.LockJob(jobName, job.Interval)))
-                         {
-                             result = await Task.Run(job.Execute);
-                             JobDelegate?.ServiceLog(result.JobName, result, sw.ElapsedMilliseconds);
-                             isRun = true;
-                         }
-                     }
-                     catch (Exception ex)
-                     {
-                         ConsoleHelper.Error($" {jobName} {ex.Message}");
-                         JobDelegate?.Exception(ex);
-                     }
-                     finally
-                     {
-                         if (isRun)
-                         {
-                             ConsoleHelper.WriteLine($"{result?.ToString()} => 执行完毕\t{sw.ElapsedMilliseconds}ms",
-                                 (result ?? false) ? ConsoleColor.Green : ConsoleColor.DarkGreen);
-                         }
-                         else
-                         {
-                             ConsoleHelper.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {jobName} => 跳过执行\t{sw.ElapsedMilliseconds}ms", ConsoleColor.DarkYellow);
-                         }
-                         //if (!job.IsTheard)
-                         //{
-                         //    JobDelegate.UnlockJob(jobName);
-                         //}
-                     }
-
-                     await Task.Delay(job.Interval);
-                 }
-             });
+                          await Task.Delay(job.Interval);
+                      }
+                  }
+              });
         }
 
     }

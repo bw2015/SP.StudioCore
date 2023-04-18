@@ -427,6 +427,8 @@ namespace SP.StudioCore.Net
                 HttpClient.DefaultProxy = options?.Proxy;
             }
 
+            if (options?.Timeout != null) httpClient.Timeout = options.Timeout.Value;
+
             encoding ??= Encoding.UTF8;
             options ??= new HttpClientOption();
             if (!options.Headers.ContainsStringKey("Referer")) options.Referrer = url;

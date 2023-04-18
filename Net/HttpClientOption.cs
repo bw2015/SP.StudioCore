@@ -23,6 +23,11 @@ namespace SP.StudioCore.Net
         }
 
         /// <summary>
+        /// 超时时间
+        /// </summary>
+        public TimeSpan? Timeout { get; set; }
+
+        /// <summary>
         /// 头部参数设定
         /// </summary>
         public Dictionary<string, string> Headers { get; set; }

@@ -42,8 +42,9 @@ namespace SP.StudioCore.Tools
         /// 执行工具包内方法
         /// </summary>
         /// <param name="context"></param>
+        /// <param name="extend">扩展信息</param>
         /// <returns></returns>
-        public static Result Invote(HttpContext context)
+        public static Result Invote(HttpContext context, HttpContextExtend? extend = null)
         {
             //logs.Add(context.GetString(), ConsoleColor.Blue);
             //foreach (var item in context.Request.Headers)
@@ -53,11 +54,16 @@ namespace SP.StudioCore.Tools
 
             //return new Result();
 
+            if (extend != null)
+            {
+                context.SetItem(extend);
+            }
+
             Stopwatch sw = Stopwatch.StartNew();
             List<string> logs = new List<string>();
             try
             {
-                string path = context.Request.Path.ToString();
+                string path = extend?.Path ?? context.Request.Path.ToString();
                 if (Regex.IsMatch(path, @"^/\w+$", RegexOptions.IgnoreCase))
                 {
                     path += "/Index";
@@ -134,7 +140,7 @@ namespace SP.StudioCore.Tools
 
                 if (result.HasValue) return result.Value;
 
-                return context.ShowError(HttpStatusCode.InternalServerError, $"{path},{  string.Join(",", parameters.Select(t => t.ParameterType.Name)) }");
+                return context.ShowError(HttpStatusCode.InternalServerError, $"{path},{string.Join(",", parameters.Select(t => t.ParameterType.Name))}");
             }
             finally
             {
@@ -144,16 +150,17 @@ namespace SP.StudioCore.Tools
 
         private static object? GetParameterValue(this HttpContext context, ParameterInfo parameter)
         {
+            HttpContextExtend? extend = context.GetItem<HttpContextExtend>();
             string? name = parameter.Name;
             if (name == null) return null;
             object? value;
             if (parameter.HasAttribute<FromQueryAttribute>())
             {
-                value = context.QS(name).GetValue(parameter.ParameterType);
+                value = (extend?.QS(name) ?? context.QS(name)).GetValue(parameter.ParameterType);
             }
             else if (parameter.HasAttribute<FromFormAttribute>())
             {
-                value = context.QF(name).GetValue(parameter.ParameterType);
+                value = (extend?.QF(name) ?? context.QF(name)).GetValue(parameter.ParameterType);
             }
             else if (parameter.HasAttribute<FromBodyAttribute>())
             {
@@ -161,7 +168,7 @@ namespace SP.StudioCore.Tools
             }
             else if (parameter.HasAttribute<FromJsonAttribute>())
             {
-                value = JsonConvert.DeserializeObject(context.QF(name) ?? String.Empty, parameter.ParameterType);
+                value = JsonConvert.DeserializeObject(extend?.QF(name) ?? context.QF(name) ?? string.Empty, parameter.ParameterType);
             }
             else if (parameter.HasAttribute<FromProtobufAttribute>())
             {
@@ -242,7 +249,7 @@ namespace SP.StudioCore.Tools
             }
             string controller = regex.Match(path).Groups["Controller"].Value,
                 assemblyName = $"Tools.{controller}".ToLower();
-            if(WebSocketHandlerCache.ContainsKey(assemblyName)) return WebSocketHandlerCache[assemblyName];
+            if (WebSocketHandlerCache.ContainsKey(assemblyName)) return WebSocketHandlerCache[assemblyName];
 
             if (!_assembly.TryGetValue(assemblyName, out Assembly? assembly))
             {

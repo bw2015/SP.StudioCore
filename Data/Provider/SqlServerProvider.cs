@@ -305,13 +305,18 @@ namespace SP.StudioCore.Data.Provider
         /// </summary>
         public IEnumerable<T> ReadList<T>(Expression<Func<T, bool>> condition, params Expression<Func<T, object>>[] fields) where T : class, new()
         {
+            List<T> list = new();
             using (IDataReader reader = this.ReadData(condition, fields))
             {
                 try
                 {
                     while (reader.Read())
                     {
-                        yield return (T)Activator.CreateInstance(typeof(T), reader);
+                        T? t = (T?)Activator.CreateInstance(typeof(T), reader);
+                        if (t != null)
+                        {
+                            list.Add(t);
+                        }
                     }
                 }
                 finally
@@ -319,6 +324,7 @@ namespace SP.StudioCore.Data.Provider
                     if (!reader.IsClosed) reader.Close();
                 }
             }
+            return list;
         }
 
         /// <summary>

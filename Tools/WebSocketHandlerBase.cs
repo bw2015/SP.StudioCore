@@ -1,5 +1,6 @@
 ﻿using SP.StudioCore.Web.Sockets;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.WebSockets;
@@ -23,23 +24,23 @@ namespace SP.StudioCore.Tools
     /// </summary>
     public abstract class WebSocketHandlerBase : IWebSocketHandler
     {
-        private List<WebSocketClient>? _clients;
+        private ConcurrentDictionary<Guid, WebSocketClient> _clients = new();
 
         /// <summary>
         /// 所有的客户端
         /// </summary>
-        public List<WebSocketClient> clients
+        public IEnumerable<WebSocketClient> clients
         {
             get
             {
                 if (this._clients == null) this._clients = new();
-                return this._clients;
+                return this._clients.Values;
             }
         }
 
         public virtual WebSocketClient Register(WebSocketClient wsClient, TaskCompletionSource<object> socketFinishedTcs)
         {
-            this.clients.Add(wsClient);
+            this._clients.TryAdd(wsClient.ID, wsClient);
             socketFinishedTcs.SetResult(wsClient.ID);
             return wsClient;
         }
@@ -51,7 +52,7 @@ namespace SP.StudioCore.Tools
         public virtual async Task Remove(WebSocketClient wsClient)
         {
             await wsClient.CloseAsync();
-            this.clients.Remove(wsClient);
+            this._clients.TryRemove(wsClient.ID, out _);
         }
 
         /// <summary>

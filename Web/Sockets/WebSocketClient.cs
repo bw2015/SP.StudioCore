@@ -17,8 +17,11 @@ namespace SP.StudioCore.Web.Sockets
     {
         public WebSocketClient() { }
 
+        public HttpContext HttpContext { get; private set; }
+
         public WebSocketClient(HttpContext context, WebSocket webSocket)
         {
+            this.HttpContext = context;
             this.ID = Guid.NewGuid();
             this.WebSocket = webSocket;
             this.Host = context.Request.Host.Value;

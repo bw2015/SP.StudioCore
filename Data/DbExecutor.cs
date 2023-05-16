@@ -52,7 +52,7 @@ namespace SP.StudioCore.Data
                 DatabaseType.SqlServer => new SqlConnection(connectionString),
                 DatabaseType.SQLite => new SqliteConnection(connectionString),
                 DatabaseType.MySql => new MySqlConnection(connectionString),
-                _ => throw new NotSupportedException($"暂不支持数据库类型 { this.DBType }")
+                _ => throw new NotSupportedException($"暂不支持数据库类型 {this.DBType}")
             };
         }
 
@@ -150,7 +150,11 @@ namespace SP.StudioCore.Data
             if (tran != null) comm.Transaction = tran;
             try
             {
-                adapter.SelectCommand = (SqlCommand)comm;
+                adapter.SelectCommand = this.DBType switch
+                {
+                    DatabaseType.MySql => (MySqlCommand)comm,
+                    _ => (DbCommand)comm
+                };
                 DataSet ds = new DataSet();
                 adapter.Fill(ds);
                 return ds;
@@ -229,8 +233,8 @@ namespace SP.StudioCore.Data
         private string ThrowException(Exception ex, string cmdText, object param)
         {
             StringBuilder sb = new StringBuilder("{")
-                .Append($"\"Message\":\"{ HttpUtility.JavaScriptStringEncode(ex.Message) }\"")
-                .Append($",\"Command\":\"{ HttpUtility.JavaScriptStringEncode(cmdText) }\"");
+                .Append($"\"Message\":\"{HttpUtility.JavaScriptStringEncode(ex.Message)}\"")
+                .Append($",\"Command\":\"{HttpUtility.JavaScriptStringEncode(cmdText)}\"");
             if (param != null)
             {
                 sb.Append(",\"Params\":{");
@@ -243,7 +247,7 @@ namespace SP.StudioCore.Data
                     {
                         object value = dynamicParameters.Get<object>(paramName);
                         if (value == null) value = string.Empty;
-                        parameters.Add($"\"{ paramName }\":\"{ HttpUtility.JavaScriptStringEncode(value.ToString()) }\"");
+                        parameters.Add($"\"{paramName}\":\"{HttpUtility.JavaScriptStringEncode(value.ToString())}\"");
                     }
                 }
                 else
@@ -252,7 +256,7 @@ namespace SP.StudioCore.Data
                     {
                         object value = property.GetValue(param);
                         if (value == null) value = string.Empty;
-                        parameters.Add($"\"{ property.Name }\":\"{ HttpUtility.JavaScriptStringEncode(value.ToString()) }\"");
+                        parameters.Add($"\"{property.Name}\":\"{HttpUtility.JavaScriptStringEncode(value.ToString())}\"");
                     }
                 }
                 sb.Append(string.Join(",", parameters))
@@ -272,13 +276,13 @@ namespace SP.StudioCore.Data
         private string ThrowException(Exception ex, string cmdText, params DbParameter[] parameters)
         {
             StringBuilder sb = new StringBuilder("{")
-               .Append($"\"Message\":\"{ HttpUtility.JavaScriptStringEncode(ex.Message) }\"")
+               .Append($"\"Message\":\"{HttpUtility.JavaScriptStringEncode(ex.Message)}\"")
                .Append($",\"Command\":\"{HttpUtility.JavaScriptStringEncode(cmdText)}\"");
             sb.Append(",\"Params\":{");
             List<string> list = new();
             foreach (DbParameter param in parameters)
             {
-                list.Add($"\"{ param.ParameterName }\":\"{ HttpUtility.JavaScriptStringEncode(param.Value.ToString()) }\"");
+                list.Add($"\"{param.ParameterName}\":\"{HttpUtility.JavaScriptStringEncode(param.Value.ToString())}\"");
             }
             sb.Append(string.Join(",", list))
                 .Append('}').Append('}');

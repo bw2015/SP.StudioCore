@@ -28,7 +28,7 @@ namespace SP.StudioCore.Web.Sockets
             this.Query = context.Request.Query.ToDictionary(t => t.Key, t => t.Value.ToString());
             this.Headers = context.Request.Headers.ToDictionary(t => t.Key, t => t.Value.ToString());
             this.IpAddress = IPAgent.GetIP(context);
-            this.Timestamps = WebAgent.GetTimestamps();
+            this.StartTime = this.OnlineTime = WebAgent.GetTimestamps();
         }
 
         /// <summary>
@@ -62,7 +62,12 @@ namespace SP.StudioCore.Web.Sockets
         /// <summary>
         /// 连接时间
         /// </summary>
-        public long Timestamps { get; set; }
+        public long StartTime { get; set; }
+
+        /// <summary>
+        /// 在线时间
+        /// </summary>
+        public long OnlineTime { get; set; }
 
         /// <summary>
         /// 发送消息

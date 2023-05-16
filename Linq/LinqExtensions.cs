@@ -8,6 +8,7 @@ using System.Text;
 using System.Reflection;
 using SP.StudioCore.Enums;
 using SP.StudioCore.Data;
+using System.Runtime.InteropServices;
 
 namespace SP.StudioCore.Linq
 {
@@ -64,6 +65,7 @@ namespace SP.StudioCore.Linq
             if (!isValue) return list;
             return list.Where(predicate);
         }
+
 
         public static IEnumerable<T> Where<T>(this IEnumerable<T> list, object value, Func<T, bool> predicate)
         {

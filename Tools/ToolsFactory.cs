@@ -68,14 +68,16 @@ namespace SP.StudioCore.Tools
                 {
                     path += "/Index";
                 }
-                Regex regex = new(@"^/(?<Controller>\w+)/(?<Method>[\w\.]+)$", RegexOptions.IgnoreCase);
+                Regex regex = new(@"^/(?<Controller>[\w\.]+)/(?<Method>[\w\.]+)$", RegexOptions.IgnoreCase);
                 if (!regex.IsMatch(path))
                 {
                     return context.ShowError(HttpStatusCode.MethodNotAllowed, path);
                 }
                 string controller = regex.Match(path).Groups["Controller"].Value,
-                    methodName = regex.Match(path).Groups["Method"].Value,
-                    assemblyName = $"Tools.{controller}".ToLower();
+                    methodName = regex.Match(path).Groups["Method"].Value;
+
+                string assemblyName = $"Tools.{controller}".ToLower();
+                if (controller.Contains('.')) assemblyName = controller.ToLower();
 
                 if (!_assembly.TryGetValue(assemblyName, out Assembly? assembly))
                 {

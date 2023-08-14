@@ -375,14 +375,26 @@ namespace SP.StudioCore.Net
 
         private static HttpClient? _httpClient;
 
+        private static IWebProxy? _proxy;
+
         /// <summary>
         /// 创建一个HttpClient对象
         /// </summary>
         /// <returns></returns>
-        private static HttpClient CreateHttpClient()
+        private static HttpClient CreateHttpClient(IWebProxy? proxy)
         {
-            _httpClient ??= new HttpClient();
-            return _httpClient;
+            if (_httpClient != null)
+            {
+                // 判断代理是否一致
+                if (_proxy == proxy) return _httpClient;
+            }
+
+            HttpClientHandler? handler = new HttpClientHandler()
+            {
+                Proxy = proxy,
+                UseProxy = proxy != null
+            };
+            return _httpClient = new HttpClient(handler);
         }
 
         /// <summary>
@@ -421,13 +433,9 @@ namespace SP.StudioCore.Net
         /// </summary>
         public static async Task<HttpResult> SendAsync(string url, byte[]? data, HttpMethod method, Encoding? encoding, HttpClientOption? options = null)
         {
-            HttpClient httpClient = CreateHttpClient();
-            if (options?.Proxy != null)
-            {
-                HttpClient.DefaultProxy = options?.Proxy;
-            }
+            HttpClient httpClient = CreateHttpClient(options?.Proxy);
 
-            if (options?.Timeout != null) httpClient.Timeout = options.Timeout.Value;
+            if (options?.Timeout != null && httpClient.Timeout != options.Timeout.Value) httpClient.Timeout = options.Timeout.Value;
 
             encoding ??= Encoding.UTF8;
             options ??= new HttpClientOption();
@@ -446,8 +454,6 @@ namespace SP.StudioCore.Net
                         request.Content = content;
                     }
                     request.Headers.AddDefaultHeader(options.Headers);
-                    //request.Headers.AddDefaultHeader(header);
-
 
                     HttpResponseMessage response = await httpClient.SendAsync(request);
                     byte[] resultData = await response.Content.ReadAsByteArrayAsync();

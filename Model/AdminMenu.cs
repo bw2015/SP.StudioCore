@@ -1,4 +1,5 @@
-﻿using SP.StudioCore.Enums;
+﻿using Aliyun.OSS;
+using SP.StudioCore.Enums;
 using SP.StudioCore.Xml;
 using System;
 using System.Collections.Generic;
@@ -14,9 +15,35 @@ namespace SP.StudioCore.Model
     /// </summary>
     public class AdminMenu
     {
+        public AdminMenu() { }
+
         public AdminMenu(XElement root, bool menuOnly, params string[] permission) : this(root, menuOnly, null, permission)
         {
 
+        }
+
+        /// <summary>
+        /// 自带选中效果的输出全部权限菜单，一般用于权限编辑页面
+        /// </summary>
+        public AdminMenu(XElement root, string[] permissions, Func<string, string>? getMenuName = null)
+        {
+            this.ID = root.GetAttributeValue("ID");
+            this.Href = root.GetAttributeValue("href");
+            this.Icon = root.GetAttributeValue("icon");
+            string? name = root.GetAttributeValue("name");
+            if (getMenuName != null)
+            {
+                name = getMenuName(this.ID ?? string.Empty);
+                if (string.IsNullOrEmpty(name)) name = root.GetAttributeValue("name");
+            }
+            this.Name = name;
+            this.IsChecked = permissions.Contains(this.ID);
+
+            this.menu = new List<AdminMenu>();
+            foreach (XElement item in root.Elements())
+            {
+                this.menu.Add(new AdminMenu(item, permissions, getMenuName));
+            }
         }
 
         public AdminMenu(XElement root, bool menuOnly, Func<string, string>? getMenuName, params string[] permission)
@@ -146,7 +173,7 @@ namespace SP.StudioCore.Model
             foreach (XElement item in root.Elements())
             {
                 string? id = item.GetAttributeValue("ID");
-                if(string.IsNullOrEmpty(id)) continue;
+                if (string.IsNullOrEmpty(id)) continue;
                 if (!filter(item)) continue;
                 if (!string.IsNullOrEmpty(id)) yield return id;
                 foreach (string itemId in GetPermissions(item, filter))

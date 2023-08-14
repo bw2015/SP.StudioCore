@@ -4,9 +4,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Policy;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Ubiety.Dns.Core;
 
@@ -59,7 +61,7 @@ namespace SP.StudioCore.Net
         /// <summary>
         /// 使用代理
         /// </summary>
-        public IWebProxy? Proxy { get; set; }
+        public IWebProxy Proxy { get; set; }
 
         public static implicit operator HttpClientOption(Dictionary<string, string> headers)
         {
@@ -70,6 +72,34 @@ namespace SP.StudioCore.Net
                 ContentType = headers.Get("Content-Type", "application/x-www-form-urlencoded")
             };
             return option;
+        }
+    }
+
+    /// <summary>
+    /// 动态代理的处理方法
+    /// </summary>
+    public class ProxyHttpHandler : HttpClientHandler
+    {
+        private Func<IWebProxy> _proxy;
+        public ProxyHttpHandler(Func<IWebProxy> proxy)
+        {
+            this._proxy = proxy;
+        }
+
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            IWebProxy? proxy = this._proxy?.Invoke();
+            if (proxy != null)
+            {
+                this.Proxy = proxy;
+                this.UseProxy = true;
+            }
+            else
+            {
+                this.UseProxy = false;
+            }
+
+            return base.SendAsync(request, cancellationToken);
         }
     }
 }

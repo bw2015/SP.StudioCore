@@ -18,6 +18,7 @@ using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Resources;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -265,6 +266,16 @@ namespace SP.StudioCore.Tools
             if (ws == null) return null;
             WebSocketHandlerCache.Add(assemblyName, ws);
             return ws;
+        }
+
+        /// <summary>
+        /// 获取当前运行的应用有包含IToolStart实现的类库
+        /// </summary>
+        /// <returns></returns>
+        public static IEnumerable<string> GetToolStartAssemblies()
+        {
+            //#1 得到所有的类库
+            throw new NotImplementedException();
         }
     }
 }

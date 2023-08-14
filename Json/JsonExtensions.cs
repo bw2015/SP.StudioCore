@@ -34,7 +34,14 @@ namespace SP.StudioCore.Json
         {
             if (string.IsNullOrEmpty(json)) return default;
             if (!json.StartsWith("{") && !json.StartsWith("[")) return default;
-            return JsonConvert.DeserializeObject<T>(json);
+            try
+            {
+                return JsonConvert.DeserializeObject<T>(json);
+            }
+            catch
+            {
+                return default;
+            }
         }
 
         /// <summary>

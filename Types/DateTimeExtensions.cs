@@ -56,5 +56,20 @@ namespace SP.StudioCore.Types
             result.Add(time.ToString(@"mm\:ss"));
             return string.Join(":", result);
         }
+
+        /// <summary>
+        /// 获取时区
+        /// </summary>
+        /// <param name="datetime"></param>
+        /// <param name="timezone"></param>
+        /// <returns></returns>
+        public static DateTime GetTimeZone(this DateTime datetime, int timezone)
+        {
+            //#1 得到UTC-0 的时间
+            DateTime utcTime = TimeZoneInfo.ConvertTimeToUtc(datetime);
+
+            //#2 得到偏差值
+            return utcTime.AddHours(timezone);
+        }
     }
 }

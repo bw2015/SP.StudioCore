@@ -389,11 +389,12 @@ namespace SP.StudioCore.Net
                 if (_proxy == proxy) return _httpClient;
             }
 
-            HttpClientHandler? handler = new HttpClientHandler()
+            HttpClientHandler handler = new HttpClientHandler()
             {
                 Proxy = proxy,
                 UseProxy = proxy != null
             };
+            handler.ServerCertificateCustomValidationCallback = (message, cert, chain, error) => true;
             return _httpClient = new HttpClient(handler);
         }
 
@@ -407,7 +408,7 @@ namespace SP.StudioCore.Net
             if (!header.ContainsStringKey("User-Agent")) header.Add("User-Agent", USER_AGENT);
             foreach (KeyValuePair<string, string> item in header)
             {
-                if (new[] { "Content-Type" }.Contains(item.Key)) continue;
+                if (new[] { "Content-Type", "Content-Length", "Host" }.Contains(item.Key)) continue;
                 headers.Add(item.Key, item.Value);
             }
         }

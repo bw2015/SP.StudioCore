@@ -534,9 +534,9 @@ namespace SP.StudioCore.Web
             return (time.ToUniversalTime().Ticks - 621355968000000000) / 10000;
         }
 
-        public static long GetTimestamps(this DateTime? time)
+        public static long? GetTimestamps(this DateTime? time)
         {
-            if (time == null) return 0;
+            if (time == null) return null;
             return time.Value.GetTimestamps();
         }
 

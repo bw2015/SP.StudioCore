@@ -46,3 +46,5 @@ if %size% equ 0 (
 )
 
 :end
+
+pause

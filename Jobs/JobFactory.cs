@@ -62,7 +62,7 @@ namespace SP.StudioCore.Jobs
                         JobResult? result = null;
                         try
                         {
-                            if (job.IsTheard || (JobDelegate != null && JobDelegate.LockJob(jobName, job.Interval)))
+                            if (job.IsTheard || JobDelegate?.LockJob(jobName,job.Interval) == true)
                             {
                                 result = job.Execute();
                                 JobDelegate?.ServiceLog(result.JobName, result, sw.ElapsedMilliseconds);
@@ -90,7 +90,10 @@ namespace SP.StudioCore.Jobs
                                 JobDelegate?.UnlockJob(jobName);
                             }
                         }
-                        if (job.Interval != 0) Thread.Sleep(job.Interval);
+                        if (job.Interval != 0)
+                        {
+                            Task.Delay(job.Interval).Wait();
+                        }
                     }
                 }
             });

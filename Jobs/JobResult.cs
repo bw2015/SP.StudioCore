@@ -33,6 +33,13 @@ namespace SP.StudioCore.Jobs
             this.logs.Add(log);
         }
 
+        public int Length => this.logs?.Count ?? 0;
+
+        public void Clear()
+        {
+            this.logs?.Clear();
+        }
+
         /// <summary>
         /// 输出日志
         /// </summary>

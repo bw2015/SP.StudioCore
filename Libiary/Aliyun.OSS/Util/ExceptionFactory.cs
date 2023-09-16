@@ -5,8 +5,8 @@
  */
 
 using System;
-using Aliyun.OSS.Properties;
 using Aliyun.OSS.Common;
+using SP.StudioCore.Libiary.Aliyun.OSS.Properties;
 
 namespace Aliyun.OSS.Util
 {

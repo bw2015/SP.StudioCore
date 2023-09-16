@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using Aliyun.OSS.Util;
 using Aliyun.OSS.Common.Handlers;
-using Aliyun.OSS.Properties;
+using SP.StudioCore.Libiary.Aliyun.OSS.Properties;
 
 namespace Aliyun.OSS.Common.Communication
 {

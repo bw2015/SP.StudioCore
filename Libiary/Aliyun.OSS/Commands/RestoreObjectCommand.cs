@@ -9,7 +9,6 @@ using System.Collections.Generic;
 using Aliyun.OSS.Common.Communication;
 using Aliyun.OSS.Util;
 using Aliyun.OSS.Transform;
-using Aliyun.OSS.Properties;
 using Aliyun.OSS.Model;
 using System.IO;
 

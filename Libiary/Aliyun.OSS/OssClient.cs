@@ -20,10 +20,10 @@ using Aliyun.OSS.Common.Communication;
 using Aliyun.OSS.Common.Handlers;
 using Aliyun.OSS.Common.Internal;
 using Aliyun.OSS.Model;
-using Aliyun.OSS.Properties;
 using Aliyun.OSS.Transform;
 using ExecutionContext = Aliyun.OSS.Common.Communication.ExecutionContext;
 using ICredentials = Aliyun.OSS.Common.Authentication.ICredentials;
+using SP.StudioCore.Libiary.Aliyun.OSS.Properties;
 
 namespace Aliyun.OSS
 {

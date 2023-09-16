@@ -11,7 +11,7 @@ using Aliyun.OSS.Transform;
 using Aliyun.OSS.Common.Communication;
 using Aliyun.OSS.Common.Handlers;
 using Aliyun.OSS.Util;
-using Aliyun.OSS.Properties;
+using SP.StudioCore.Libiary.Aliyun.OSS.Properties;
 
 namespace Aliyun.OSS.Commands
 {

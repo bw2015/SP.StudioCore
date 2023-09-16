@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Aliyun.OSS.Properties {
+namespace SP.StudioCore.Libiary.Aliyun.OSS.Properties {
     using System;
     
     

@@ -15,8 +15,8 @@ using Aliyun.OSS.Common;
 using Aliyun.OSS.Common.Communication;
 using Aliyun.OSS.Commands;
 using Aliyun.OSS.Domain;
-using Aliyun.OSS.Properties;
 using Aliyun.OSS.Common.Internal;
+using SP.StudioCore.Libiary.Aliyun.OSS.Properties;
 
 namespace Aliyun.OSS.Util
 {

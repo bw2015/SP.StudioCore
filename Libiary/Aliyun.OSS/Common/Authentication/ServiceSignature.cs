@@ -5,7 +5,7 @@
  */
 
 using System;
-using Aliyun.OSS.Properties;
+using SP.StudioCore.Libiary.Aliyun.OSS.Properties;
 
 namespace Aliyun.OSS.Common.Authentication
 {

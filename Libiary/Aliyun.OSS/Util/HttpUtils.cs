@@ -26,7 +26,7 @@ namespace Aliyun.OSS.Util
         {
             char[] delimiterChars = { ' ', '\t'};
 
-            var mimeLines = Properties.Resources.MimeData.ToString().Split('\n');
+            var mimeLines = SP.StudioCore.Libiary.Aliyun.OSS.Properties.Resources.MimeData.ToString().Split('\n');
             foreach (var mimeLine in mimeLines)
             {
                 var mimeParts = mimeLine.Split(delimiterChars, StringSplitOptions.RemoveEmptyEntries);

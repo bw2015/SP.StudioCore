@@ -152,14 +152,20 @@ namespace SP.StudioCore.Web
         /// 判断用户名是否符合规则
         /// 只允许数字、字母、下划线
         /// </summary>
-        /// <param name="username"></param>
-        /// <param name="min"></param>
-        /// <param name="max"></param>
-        /// <returns></returns>
         public static bool IsUserName(string username, int min = 5, int max = 16)
         {
             if (string.IsNullOrEmpty(username)) return false;
             Regex regex = new Regex(@$"^[a-zA-Z0-9_\-]{{{min},{max}}}$");
+            return regex.IsMatch(username);
+        }
+
+        /// <summary>
+        /// 自定义正则表达式的用户名
+        /// </summary>
+        public static bool IsUserName(string username, string pattern)
+        {
+            if (string.IsNullOrEmpty(username)) return false;
+            Regex regex = new Regex(pattern);
             return regex.IsMatch(username);
         }
 

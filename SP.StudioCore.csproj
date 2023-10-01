@@ -72,7 +72,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="BouncyCastle.NetCore" Version="1.9.0" />
         <PackageReference Include="Dapper" Version="2.0.123" />
         <PackageReference Include="Google.Protobuf" Version="3.21.5" />
         <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />

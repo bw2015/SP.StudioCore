@@ -201,7 +201,7 @@ namespace SP.StudioCore.Http
         /// <returns></returns>
         public static string GetLog(this HttpContext context)
         {
-            if (context == null) return null;
+            if (context == null) return string.Empty;
             Dictionary<string, object> data = new Dictionary<string, object>
             {
                 { "URL", context.Request.Host + context.Request.Path.ToString() },

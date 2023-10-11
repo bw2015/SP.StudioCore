@@ -31,6 +31,8 @@ namespace SP.StudioCore.Data
         public bool Exists<T>(Expression<Func<T, bool>> condition) where T : class, new() =>
             provider.Exists(condition);
 
+        public bool Exists<T>(string condition) where T : class, new() =>
+            provider.Exists<T>(condition);
 
         public bool Exists<T>() where T : class, new() =>
             provider.Exists<T>();

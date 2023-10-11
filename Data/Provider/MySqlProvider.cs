@@ -485,5 +485,10 @@ namespace SP.StudioCore.Data.Provider
         {
             throw new NotImplementedException();
         }
+
+        public bool Exists<T>(string condition) where T : class, new()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -144,10 +144,12 @@ namespace SP.StudioCore.Data.Repository
         /// <summary>
         /// 根据主键判断是否存在
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="entity"></param>
-        /// <returns></returns>
         bool Exists<T>(T entity) where T : class, new();
+
+        /// <summary>
+        /// SQL判断是否数据
+        /// </summary>
+        bool Exists<T>(string condition) where T : class, new();
 
         #endregion
 

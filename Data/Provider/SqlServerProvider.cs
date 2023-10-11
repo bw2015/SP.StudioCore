@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using Google.Protobuf.WellKnownTypes;
 using Microsoft.Data.SqlClient;
 using SP.StudioCore.Data.Expressions;
 using SP.StudioCore.Data.Extension;
@@ -101,6 +102,13 @@ namespace SP.StudioCore.Data.Provider
                 parameters.Add($"@{column.Name}", column.Property.GetValue(entity));
             }
             object value = db.ExecuteScalar(CommandType.Text, sql, parameters);
+            return value != null;
+        }
+
+        public bool Exists<T>(string condition) where T : class, new()
+        {
+            string sql = $"SELECT 0 WHERE EXISTS(SELECT 0 FROM [{typeof(T).GetTableName()}] WHERE {condition})";
+            object value = db.ExecuteScalar(CommandType.Text, sql);
             return value != null;
         }
 
@@ -665,6 +673,6 @@ namespace SP.StudioCore.Data.Provider
             return new DapperQueryable<TEntity>(new SqlServerQueryProvider(db));
         }
 
-
+       
     }
 }

@@ -114,6 +114,11 @@ namespace SP.StudioCore.Data.Provider
             return value != null;
         }
 
+        public bool Exists<T>(string condition) where T : class, new()
+        {
+            throw new NotImplementedException();
+        }
+
         public DataSet GetDataSet<T>(T obj) where T : IProcedureModel
         {
             DataSet ds = db.GetDataSet(CommandType.StoredProcedure, typeof(T).GetTableName(),

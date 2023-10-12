@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
@@ -98,13 +99,15 @@ namespace SP.StudioCore.Gateway.Push
             }
             return isSend;
         }
+
+
         /// <summary>
         /// 发送文本信息
         /// </summary>
         /// <param name="message"></param>
         /// <param name="channel"></param>
         /// <returns></returns>
-        public Task SendMessageAsync(string message, params string[] channel)
+        public void SendMessageAsync(string message, params string[] channel)
         {
             string url = $"{this.Url}bot{this.Token}/sendMessage";
             var lstTask = new List<Task>();
@@ -113,8 +116,7 @@ namespace SP.StudioCore.Gateway.Push
                 string data = $"chat_id={id}&text={HttpUtility.UrlEncode(message)}&parse_mode=HTML";
                 lstTask.Add(HttpAgent.PostAsync(url, data, Encoding.UTF8));
             }
-
-            return Task.WhenAll(lstTask);
+            Task.WaitAny(lstTask.ToArray());
         }
 
         /// <summary>

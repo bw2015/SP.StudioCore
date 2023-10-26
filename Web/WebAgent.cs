@@ -680,7 +680,7 @@ namespace SP.StudioCore.Web
 
         #endregion
 
-        #region ========  银行卡处理  ========
+        #region ========  银行卡/支付宝 处理  ========
 
         /// <summary>
         /// 判断银行卡号是否正确
@@ -710,6 +710,14 @@ namespace SP.StudioCore.Web
             return sum % 10 == 0;
         }
 
+        public static bool IsBankAccount(string input, BankType type)
+        {
+            if (!IsBankAccount(input)) return false;
+            BankType? bank = GetBankType(input);
+            if (bank != null && bank != type) return false;
+            return true;
+        }
+
         private static Dictionary<string, BankType> _bankType;
 
         /// <summary>
@@ -717,7 +725,7 @@ namespace SP.StudioCore.Web
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public static BankType GetBankType(string input)
+        public static BankType? GetBankType(string input)
         {
             if (!Regex.IsMatch(input, @"^\d{6,}$")) return 0;
             input = input[..6];
@@ -734,9 +742,35 @@ namespace SP.StudioCore.Web
                 }
             }
             if (_bankType.ContainsKey(input)) return _bankType[input];
-            return 0;
+            return null;
         }
 
+        /// <summary>
+        /// 判断是否是支付宝的格式
+        /// </summary>
+        /// <param name="account"></param>
+        /// <returns></returns>
+        public static bool IsAlipay(string account)
+        {
+            return IsEMail(account) || IsMobile(account);
+        }
+
+        #endregion
+
+        #region ========  数字货币  ========
+
+        /// <summary>
+        /// 判断数字钱包地址是否符合格式
+        /// </summary>
+        public static bool IsChainAccount(string account, ChainType type)
+        {
+            Regex regex = new Regex(type switch
+            {
+                ChainType.TRC => @"^T[0-9a-zA-Z]{33}$",
+                _ => @"^0x[0-9a-f]{40}$"
+            });
+            return regex.IsMatch(account);
+        }
 
         #endregion
 

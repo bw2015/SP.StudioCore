@@ -57,7 +57,7 @@ namespace SP.StudioCore.Web
         {
             get
             {
-                return Context.Current?.GetIP() ?? NO_IP;
+                return HttpContextService.Current?.GetIP() ?? NO_IP;
             }
         }
 

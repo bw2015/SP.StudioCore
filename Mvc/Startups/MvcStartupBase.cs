@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using SP.StudioCore.Model;
+using SP.StudioCore.Ioc;
 using SP.StudioCore.Web;
 using System;
 

@@ -72,11 +72,11 @@ namespace SP.StudioCore.Data
         /// <summary>
         /// 当前的httpContext对象（如果非web程序则为null）
         /// </summary>
-        protected virtual HttpContext context
+        protected virtual HttpContext? context
         {
             get
             {
-                return Context.Current;
+                return HttpContextService.Current;
             }
         }
         protected Language Language

@@ -3,6 +3,7 @@ using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
 using SP.StudioCore.Cache.Memory;
 using SP.StudioCore.Enums;
+using SP.StudioCore.Ioc;
 using SP.StudioCore.Model;
 using SP.StudioCore.Properties;
 using SP.StudioCore.Security;
@@ -32,11 +33,12 @@ namespace SP.StudioCore.Web
         /// <param name="text"></param>
         /// <param name="start"></param>
         /// <returns></returns>
-        public static string Hidden(string text)
+        public static string Hidden(string text, char code = '*')
         {
             if (string.IsNullOrEmpty(text)) return text;
-            if (text.Length < 3) return "*".PadLeft(text.Length, '*');
-            return string.Concat(text.First(), "*".PadLeft(text.Length - 2, '*'), text.Last());
+            if (text.Length == 1) return code.ToString();
+            if (text.Length < 3) return string.Concat(text.First(), "".PadLeft(text.Length - 1, code));
+            return string.Concat(text.First(), string.Empty.PadLeft(text.Length - 2, '*'), text.Last());
         }
 
         /// <summary>
@@ -222,8 +224,7 @@ namespace SP.StudioCore.Web
         /// <returns></returns>
         public static bool IsMobile()
         {
-            if (Context.Current == null) return false;
-            string userAgent = Context.Current.Request.Headers[HeaderNames.UserAgent];
+            string? userAgent = HttpContextService.Current?.Request.Headers[HeaderNames.UserAgent];
             if (string.IsNullOrEmpty(userAgent)) return false;
             return Regex.IsMatch(userAgent, "Mobile|iPad|iPhone|Android", RegexOptions.IgnoreCase);
         }
@@ -315,7 +316,7 @@ namespace SP.StudioCore.Web
         /// <returns></returns>
         public static bool IsChineseName(string name)
         {
-            return Regex.IsMatch(name, @"^[\u4E00-\u9FA5]{2,4}$");
+            return Regex.IsMatch(name, @"^[\u4E00-\u9FA5]{2,8}$");
         }
 
         /// <summary>
@@ -738,7 +739,7 @@ namespace SP.StudioCore.Web
                     string? code = item.GetAttributeValue("code");
                     string? bank = item.GetAttributeValue("bank");
                     if (string.IsNullOrEmpty(code) || string.IsNullOrEmpty(bank) || _bankType.ContainsKey(code)) continue;
-                    _bankType.Add(code, code.ToEnum<BankType>());
+                    _bankType.Add(code, bank.ToEnum<BankType>());
                 }
             }
             if (_bankType.ContainsKey(input)) return _bankType[input];

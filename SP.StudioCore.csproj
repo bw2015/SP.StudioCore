@@ -88,7 +88,6 @@
         <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
         <PackageReference Include="RabbitMQ.Client" Version="6.4.0" />
         <PackageReference Include="SkiaSharp" Version="2.88.3" />
-        <PackageReference Include="SP.StudioCore.Ioc" Version="1.0.0" />
         <!--<PackageReference Include="Simple.Elasticsearch" Version="1.0.2" />-->
         <PackageReference Include="StackExchange.Redis" Version="2.6.48" />
         <PackageReference Include="System.Composition" Version="6.0.0" />
@@ -134,6 +133,10 @@
         <Folder Include="Libiary\ThoughtWorks.QRCode.Codec\" />
         <Folder Include="Libiary\PusherServer\" />
         <Folder Include="MQ\RabbitMQ\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\SP.Studio\SP.StudioCore.Ioc\SP.StudioCore.Ioc.csproj" />
     </ItemGroup>
 
     <!--<Target Name="PostBuild" AfterTargets="PostBuildEvent">

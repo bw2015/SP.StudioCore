@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.DependencyInjection;
 using SP.StudioCore.Web;
+using SP.StudioCore.Ioc;
 using System;
 using System.Collections.Generic;
 using System.Linq;

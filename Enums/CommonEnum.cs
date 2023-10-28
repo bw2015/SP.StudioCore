@@ -831,17 +831,17 @@ namespace SP.StudioCore.Enums
         /// <summary>
         /// 波场
         /// </summary>
-        [Description("波场 TRC20")]
+        [Description("TRC20")]
         TRC = 1,
         /// <summary>
         /// 以太坊
         /// </summary>
-        [Description("以太坊 ERC")]
+        [Description("ERC")]
         ERC = 2,
         /// <summary>
         /// 币安
         /// </summary>
-        [Description("币安 BSC")]
+        [Description("BSC")]
         BSC = 3,
     }
 

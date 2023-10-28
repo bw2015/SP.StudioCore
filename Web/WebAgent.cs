@@ -93,6 +93,16 @@ namespace SP.StudioCore.Web
             }
         }
 
+        /// <summary>
+        /// 隐藏手机号码
+        /// </summary>
+        public static string HiddenMobile(string mobile)
+        {
+            if (string.IsNullOrEmpty(mobile)) return string.Empty;
+            if (!WebAgent.IsMobile(mobile)) return Hidden(mobile);
+            return Hidden(mobile, 3, 4);
+        }
+
 
         /// <summary>
         /// 隐藏邮箱

@@ -314,5 +314,13 @@ namespace SP.StudioCore.Data.Provider
         {
             throw new NotImplementedException();
         }
+
+        public int UpdatePlus<T, TValue1, TValue2>(Expression<Func<T, TValue1>> field1, TValue1 value1, Expression<Func<T, TValue2>> field2, TValue2 value2, Expression<Func<T, bool>> updateCondition, Expression<Func<T, bool>>? condition = null)
+            where T : class, new()
+            where TValue1 : struct
+            where TValue2 : struct
+        {
+            throw new NotImplementedException();
+        }
     }
 }

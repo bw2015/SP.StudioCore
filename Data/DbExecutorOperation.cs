@@ -120,6 +120,12 @@ namespace SP.StudioCore.Data
         public TValue? UpdatePlus<T, TValue>(Expression<Func<T, TValue>> field, TValue value, Expression<Func<T, bool>> updateCondition, Expression<Func<T, bool>>? condition = null) where T : class, new() where TValue : struct =>
             provider.UpdatePlus(field, value, updateCondition, condition);
 
+        public int UpdatePlus<T, TValue1, TValue2>(Expression<Func<T, TValue1>> field1, TValue1 value1, Expression<Func<T, TValue2>> field2, TValue2 value2,
+            Expression<Func<T, bool>> updateCondition,
+            Expression<Func<T, bool>>? condition = null) 
+            where T : class, new() where TValue1 : struct where TValue2 : struct =>
+            provider.UpdatePlus(field1, value1, field2, value2, updateCondition, condition);
+
         public int UpdateIn<T, TValue, TKey>(Expression<Func<T, TValue>> field, TValue value, Expression<Func<T, TKey>> condition, TKey[] keys)
           where T : class, new()
           where TValue : struct => provider.UpdateIn(field, value, condition, keys);

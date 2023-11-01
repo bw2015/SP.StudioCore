@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using Google.Protobuf.WellKnownTypes;
 using Microsoft.Data.SqlClient;
+using Newtonsoft.Json.Linq;
 using SP.StudioCore.Data.Expressions;
 using SP.StudioCore.Data.Extension;
 using SP.StudioCore.Data.Repository;
@@ -45,7 +46,7 @@ namespace SP.StudioCore.Data.Provider
             Dictionary<ColumnProperty, object> condition = obj.GetCondition(precate);
             string tableName = obj.GetTableName();
             IEnumerable<ColumnProperty> fields = SchemaCache.GetColumns<T>();
-            string sql = $"SELECT TOP 1 { string.Join(",", fields.Select(t => string.Format("[{0}]", t.Name))) } FROM [{tableName}] WHERE { string.Join(" AND ", condition.Select(t => $"[{t.Key.Name}] = @{t.Key.Property.Name}")) }";
+            string sql = $"SELECT TOP 1 {string.Join(",", fields.Select(t => string.Format("[{0}]", t.Name)))} FROM [{tableName}] WHERE {string.Join(" AND ", condition.Select(t => $"[{t.Key.Name}] = @{t.Key.Property.Name}"))}";
             DbParameter[] parameters = condition.Select(t => new SqlParameter($"@{t.Key.Property.Name}", t.Value)).ToArray();
             return new SQLResult()
             {
@@ -66,7 +67,7 @@ namespace SP.StudioCore.Data.Provider
         {
             using (IExpressionCondition expression = db.GetExpressionCondition(condition))
             {
-                string sql = $"SELECT 0 WHERE EXISTS(SELECT 0 FROM [{typeof(T).GetTableName()}] { expression.ToCondition(out DynamicParameters parameters)} )";
+                string sql = $"SELECT 0 WHERE EXISTS(SELECT 0 FROM [{typeof(T).GetTableName()}] {expression.ToCondition(out DynamicParameters parameters)} )";
                 object value = db.ExecuteScalar(CommandType.Text, sql, parameters);
                 return value != null;
             }
@@ -94,8 +95,8 @@ namespace SP.StudioCore.Data.Provider
         public bool Exists<T>(T entity) where T : class, new()
         {
             IEnumerable<ColumnProperty> fields = SchemaCache.GetColumns<T>(t => t.IsKey);
-            if (!fields.Any()) throw new Exception($"{ typeof(T).GetTableName() } No primary key");
-            string sql = $"SELECT 0 WHERE EXISTS(SELECT 0 FROM [{typeof(T).GetTableName()}] WHERE { string.Join(" AND ", fields.Select(t => $"[{t.Name}]=@{t.Name}")) })";
+            if (!fields.Any()) throw new Exception($"{typeof(T).GetTableName()} No primary key");
+            string sql = $"SELECT 0 WHERE EXISTS(SELECT 0 FROM [{typeof(T).GetTableName()}] WHERE {string.Join(" AND ", fields.Select(t => $"[{t.Name}]=@{t.Name}"))})";
             DynamicParameters parameters = new DynamicParameters();
             foreach (ColumnProperty column in fields)
             {
@@ -116,7 +117,7 @@ namespace SP.StudioCore.Data.Provider
         {
             using (IExpressionCondition expression = db.GetExpressionCondition(condition))
             {
-                string sql = $"SELECT COUNT(0) FROM [{typeof(T).GetTableName()}] { expression.ToCondition(out DynamicParameters parameters)} ";
+                string sql = $"SELECT COUNT(0) FROM [{typeof(T).GetTableName()}] {expression.ToCondition(out DynamicParameters parameters)} ";
                 object value = db.ExecuteScalar(CommandType.Text, sql, parameters);
                 return value == null ? 0 : (int)value;
             }
@@ -192,7 +193,7 @@ namespace SP.StudioCore.Data.Provider
             string? fieldName = SchemaCache.GetColumnProperty(field).Name;
             List<TValue> list = new List<TValue>();
             if (string.IsNullOrEmpty(fieldName)) return list;
-                using (IExpressionCondition expression = db.GetExpressionCondition(condition))
+            using (IExpressionCondition expression = db.GetExpressionCondition(condition))
             {
                 string conditionSql = expression.ToCondition(out DynamicParameters parameters);
                 string sql = $"SELECT [{fieldName}] FROM [{typeof(T).GetTableName()}] {conditionSql}";
@@ -214,7 +215,7 @@ namespace SP.StudioCore.Data.Provider
             using (IExpressionCondition expression = db.GetExpressionCondition(condition))
             {
                 string conditionSql = expression.ToCondition(out DynamicParameters parameters);
-                string sql = $"SELECT TOP 1 { SchemaCache.GetColumnProperty(field).Name } FROM [{typeof(T).GetTableName()}] {conditionSql}";
+                string sql = $"SELECT TOP 1 {SchemaCache.GetColumnProperty(field).Name} FROM [{typeof(T).GetTableName()}] {conditionSql}";
                 object value = db.ExecuteScalar(CommandType.Text, sql, parameters);
                 if (value == null) return default;
                 return (TValue)value;
@@ -362,7 +363,7 @@ namespace SP.StudioCore.Data.Provider
         {
             using (IExpressionCondition expression = db.GetExpressionCondition(condition))
             {
-                string sql = $"DELETE FROM [{typeof(T).GetTableName()}] { expression.ToCondition(out DynamicParameters parameters) }";
+                string sql = $"DELETE FROM [{typeof(T).GetTableName()}] {expression.ToCondition(out DynamicParameters parameters)}";
                 return db.ExecuteNonQuery(CommandType.Text, sql, parameters);
             }
         }
@@ -376,7 +377,7 @@ namespace SP.StudioCore.Data.Provider
                 conditionFields.Push($"[{column.Name}] = @{column.Name}");
                 parameters.Add($"@{column.Name}", column.Property.GetValue(entity));
             }
-            string sql = $"DELETE FROM [{typeof(T).GetTableName()}] WHERE { string.Join(" AND ", conditionFields) }";
+            string sql = $"DELETE FROM [{typeof(T).GetTableName()}] WHERE {string.Join(" AND ", conditionFields)}";
             return db.ExecuteNonQuery(CommandType.Text, sql, parameters) > 0;
         }
 
@@ -492,7 +493,7 @@ namespace SP.StudioCore.Data.Provider
                 conditionFields.Push(column.Name);
                 parameters.Add($"@{column.Name}", column.Property.GetValue(entity).GetSafeValue(column.Property.PropertyType));
             }
-            string sql = $"UPDATE [{typeof(T).GetTableName()}] SET {string.Join(",", updateFields.Select(t => $"[{t}] = @{t}"))} WHERE { string.Join(" AND ", conditionFields.Select(t => $"[{t}] = @{t}")) }";
+            string sql = $"UPDATE [{typeof(T).GetTableName()}] SET {string.Join(",", updateFields.Select(t => $"[{t}] = @{t}"))} WHERE {string.Join(" AND ", conditionFields.Select(t => $"[{t}] = @{t}"))}";
             return db.ExecuteNonQuery(CommandType.Text, sql, parameters);
         }
 
@@ -551,6 +552,25 @@ namespace SP.StudioCore.Data.Provider
                 string sql = $"UPDATE [{tableName}] SET [{fieldName}] = [{fieldName}] + @Value {whereSql};SELECT [{fieldName}] FROM [{tableName}] {whereSql}";
                 object result = db.ExecuteScalar(CommandType.Text, sql, parameters);
                 return (TValue?)result;
+            }
+        }
+
+        public int UpdatePlus<T, TValue1, TValue2>(Expression<Func<T, TValue1>> field1, TValue1 value1, Expression<Func<T, TValue2>> field2, TValue2 value2, Expression<Func<T, bool>> updateCondition, Expression<Func<T, bool>>? condition = null)
+          where T : class, new()
+          where TValue1 : struct
+          where TValue2 : struct
+        {
+            using (IExpressionCondition expression = db.GetExpressionCondition(updateCondition))
+            {
+                string whereSql = expression.ToCondition(out DynamicParameters parameters);
+                string? fieldName1 = SchemaCache.GetColumnProperty(field1).Name;
+                string? fieldName2 = SchemaCache.GetColumnProperty(field2).Name;
+                string? tableName = typeof(T).GetTableName();
+
+                parameters.Add("@Value1", value1);
+                parameters.Add("@Value2", value2);
+                string sql = $"UPDATE [{tableName}] SET [{fieldName1}] = [{fieldName1}] + @Value1,[{fieldName2}] = [{fieldName2}] + @Value2 {whereSql}";
+                return db.ExecuteNonQuery(CommandType.Text, sql, parameters);
             }
         }
 
@@ -627,7 +647,7 @@ namespace SP.StudioCore.Data.Provider
         public bool Insert<T>(T entity) where T : class, new()
         {
             IEnumerable<ColumnProperty> fields = SchemaCache.GetColumns<T>().Where(t => !t.Identity);
-            string sql = $"INSERT INTO [{typeof(T).GetTableName()}]({ string.Join(",", fields.Select(t => $"[{t.Name}]")) }) VALUES({ string.Join(",", fields.Select(t => $"@{t.Name}")) });";
+            string sql = $"INSERT INTO [{typeof(T).GetTableName()}]({string.Join(",", fields.Select(t => $"[{t.Name}]"))}) VALUES({string.Join(",", fields.Select(t => $"@{t.Name}"))});";
             DynamicParameters parameters = new DynamicParameters();
             foreach (ColumnProperty field in fields)
             {
@@ -641,7 +661,7 @@ namespace SP.StudioCore.Data.Provider
             ColumnProperty identity = SchemaCache.GetColumns<T>().FirstOrDefault(t => t.Identity);
             if (!identity) throw new InvalidOperationException();
             IEnumerable<ColumnProperty> fields = SchemaCache.GetColumns<T>().Where(t => !t.Identity);
-            string sql = $"INSERT INTO [{typeof(T).GetTableName()}]({ string.Join(",", fields.Select(t => $"[{t.Name}]")) }) VALUES({ string.Join(",", fields.Select(t => $"@{t.Name}")) });SELECT SCOPE_IDENTITY();";
+            string sql = $"INSERT INTO [{typeof(T).GetTableName()}]({string.Join(",", fields.Select(t => $"[{t.Name}]"))}) VALUES({string.Join(",", fields.Select(t => $"@{t.Name}"))});SELECT SCOPE_IDENTITY();";
             DynamicParameters parameters = new DynamicParameters();
             foreach (ColumnProperty field in fields)
             {
@@ -658,7 +678,7 @@ namespace SP.StudioCore.Data.Provider
             IEnumerable<ColumnProperty> fields = SchemaCache.GetColumns<T>();
             StringBuilder sb = new StringBuilder()
                 .Append($"SET IDENTITY_INSERT [{typeof(T).GetTableName()}] ON;")
-                .Append($"INSERT INTO [{typeof(T).GetTableName()}]({ string.Join(",", fields.Select(t => $"[{t.Name}]")) }) VALUES({ string.Join(",", fields.Select(t => $"@{t.Name}")) });")
+                .Append($"INSERT INTO [{typeof(T).GetTableName()}]({string.Join(",", fields.Select(t => $"[{t.Name}]"))}) VALUES({string.Join(",", fields.Select(t => $"@{t.Name}"))});")
                 .Append($"SET IDENTITY_INSERT [{typeof(T).GetTableName()}] OFF;");
             DynamicParameters parameters = new DynamicParameters();
             foreach (ColumnProperty field in fields)
@@ -673,6 +693,6 @@ namespace SP.StudioCore.Data.Provider
             return new DapperQueryable<TEntity>(new SqlServerQueryProvider(db));
         }
 
-       
+
     }
 }

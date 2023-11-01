@@ -90,6 +90,21 @@ namespace SP.StudioCore.Data.Repository
         TValue? UpdatePlus<T, TValue>(Expression<Func<T, TValue>> field, TValue value, Expression<Func<T, bool>> updateCondition, Expression<Func<T, bool>>? condition = null) where T : class, new() where TValue : struct;
 
         /// <summary>
+        /// 执行两个字段的自加
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="TValue1"></typeparam>
+        /// <typeparam name="TValue2"></typeparam>
+        /// <param name="field1"></param>
+        /// <param name="value1"></param>
+        /// <param name="field2"></param>
+        /// <param name="value2"></param>
+        /// <param name="updateCondition"></param>
+        /// <param name="condition"></param>
+        /// <returns>返回受影响的行</returns>
+        int UpdatePlus<T, TValue1, TValue2>(Expression<Func<T, TValue1>> field1, TValue1 value1, Expression<Func<T, TValue2>> field2, TValue2 value2, Expression<Func<T, bool>> updateCondition, Expression<Func<T, bool>>? condition = null) where T : class, new() where TValue1 : struct where TValue2 : struct;
+
+        /// <summary>
         /// 批量修改 IN 方式
         /// </summary>
         /// <typeparam name="T"></typeparam>

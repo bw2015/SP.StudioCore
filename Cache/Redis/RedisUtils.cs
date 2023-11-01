@@ -256,6 +256,11 @@ namespace SP.StudioCore.Cache.Redis
             return (long)(money * 10000M);
         }
 
+        public static long ToRedisValue(this double money)
+        {
+            return (long)(money * 10000D);
+        }
+
         /// <summary>
         /// 整形转为MONEY（保留四位小数）
         /// </summary>
@@ -263,7 +268,7 @@ namespace SP.StudioCore.Cache.Redis
         /// <returns></returns>
         public static decimal ToRedisValue(this long value)
         {
-            return (decimal)value / 10000M;
+            return value / 10000M;
         }
 
         /// <summary>

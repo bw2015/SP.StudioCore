@@ -35,7 +35,7 @@ namespace SP.StudioCore.Mvc
 
 
 
-        private Stopwatch Stopwatch { get; }
+        protected Stopwatch Stopwatch { get; }
 
         public MvcControllerBase()
         {

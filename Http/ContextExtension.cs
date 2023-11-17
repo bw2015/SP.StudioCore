@@ -201,6 +201,15 @@ namespace SP.StudioCore.Http
         /// <returns></returns>
         public static string GetLog(this HttpContext context)
         {
+            return context.GetLog(null);
+        }
+
+        /// <summary>
+        /// 需要扩展的数据
+        /// </summary>
+        public static string GetLog(this HttpContext context, object? log)
+        {
+
             if (context == null) return string.Empty;
             Dictionary<string, object> data = new Dictionary<string, object>
             {
@@ -214,6 +223,10 @@ namespace SP.StudioCore.Http
             else
             {
                 data.Add("Data", context.GetString() ?? string.Empty);
+            }
+            if (log != null)
+            {
+                data.Add("log", log);
             }
 
             return data.ToJson();

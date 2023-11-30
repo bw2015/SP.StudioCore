@@ -521,6 +521,20 @@ namespace SP.StudioCore.Web
         {
             return (GetTimestamp(startAt) - GetTimestamp(endAt)) / 86400;
         }
+        public static long GetDate(this DateTime time)
+        {
+            return time.Year * 10000 + time.Month * 100 + time.Day;
+        }
+
+        public static DateTime GetDate(this long date)
+        {
+            int year = (int)(date / 10000);
+            date -= year * 10000;
+            int month = (int)(date / 100);
+            int day = (int)(date % 100);
+            return new DateTime(year, month, day);  
+        }
+
         /// <summary>
         /// 获取时间戳(秒）
         /// </summary>

@@ -176,7 +176,7 @@ namespace SP.StudioCore.Data
         /// <param name="cmdText"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public IDataReader ReadData(CommandType cmdType, string cmdText, object parameters = null)
+        public IDataReader ReadData(CommandType cmdType, string cmdText, object? parameters = null)
         {
             try
             {

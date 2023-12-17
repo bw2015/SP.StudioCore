@@ -67,14 +67,14 @@ namespace SP.StudioCore.Model
             });
         }
 
-        private string? GetTypeName(PropertyInfo property)
+        protected string? GetTypeName(PropertyInfo property)
         {
             if (property.HasAttribute<SettingCustomTypeAttribute>()) return property.GetAttribute<SettingCustomTypeAttribute>();
             if (property.PropertyType.IsGenericType) return "List";
             return property.PropertyType.FullName;
         }
 
-        private object? GetList(PropertyInfo property, string type)
+        protected object? GetList(PropertyInfo property, string type)
         {
             object? result = null;
             if (type == "List")

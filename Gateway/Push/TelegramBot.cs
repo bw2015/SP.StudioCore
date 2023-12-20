@@ -88,12 +88,12 @@ namespace SP.StudioCore.Gateway.Push
                     isSend = info["ok"]?.Value<bool>() ?? false;
                     if (!isSend)
                     {
-                        ConsoleHelper.WriteLine(result, ConsoleColor.Red);
+                        ConsoleHelper.Error($"{result}", message);
                     }
                 }
                 catch (Exception ex)
                 {
-                    ConsoleHelper.WriteLine($"{ex.Message} - {result}", ConsoleColor.Red);
+                    ConsoleHelper.Error($"{ex.Message} - {result}", message);
                     isSend = false;
                 }
             }

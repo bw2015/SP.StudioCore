@@ -72,6 +72,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="Baidu.AI" Version="4.15.14" />
         <PackageReference Include="Dapper" Version="2.0.123" />
         <PackageReference Include="Google.Protobuf" Version="3.21.5" />
         <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
@@ -137,6 +138,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\SP.Studio\SP.StudioCore.Ioc\SP.StudioCore.Ioc.csproj" />
+      <ProjectReference Include="..\SP.Studio\SP.StudioCore.Net.Http\SP.StudioCore.Net.Http.csproj" />
     </ItemGroup>
 
     <!--<Target Name="PostBuild" AfterTargets="PostBuildEvent">

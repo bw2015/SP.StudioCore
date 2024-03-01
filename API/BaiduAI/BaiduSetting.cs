@@ -18,6 +18,12 @@ namespace SP.StudioCore.API.BaiduAI
         {
         }
 
+        public BaiduSetting(string client_id, string client_secret)
+        {
+            this.client_id = client_id;
+            this.client_secret = client_secret;
+        }
+
         /// <summary>
         /// 必须参数，应用的API Key
         /// </summary>

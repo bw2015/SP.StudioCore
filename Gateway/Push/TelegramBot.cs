@@ -26,6 +26,12 @@ namespace SP.StudioCore.Gateway.Push
         }
 
         /// <summary>
+        /// 密钥
+        /// </summary>
+        [Description("密钥")]
+        public string? Token { get; set; }
+
+        /// <summary>
         /// 网址
         /// </summary>
         [Description("网关")]
@@ -43,11 +49,6 @@ namespace SP.StudioCore.Gateway.Push
             return (getUpdatesResponse[])response;
         }
 
-        /// <summary>
-        /// 密钥
-        /// </summary>
-        [Description("密钥")]
-        public string? Token { get; set; }
 
         /// <summary>
         /// 默认频道配置

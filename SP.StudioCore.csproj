@@ -88,7 +88,6 @@
         <PackageReference Include="MySql.EntityFrameworkCore" Version="6.0.4" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
         <PackageReference Include="RabbitMQ.Client" Version="6.4.0" />
-        <PackageReference Include="SkiaSharp" Version="2.88.3" />
         <!--<PackageReference Include="Simple.Elasticsearch" Version="1.0.2" />-->
         <PackageReference Include="StackExchange.Redis" Version="2.6.48" />
         <PackageReference Include="System.Composition" Version="6.0.0" />
